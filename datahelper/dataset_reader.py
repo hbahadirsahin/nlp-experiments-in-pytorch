@@ -84,7 +84,8 @@ class DatasetLoader(object):
     def create_iterator(self, train, val, test, batch_size):
         self.train_iter, self.val_iter, self.test_iter = data.BucketIterator.splits(datasets=(train, val, test),
                                                                                     batch_sizes=(
-                                                                                    batch_size, batch_size, batch_size),
+                                                                                        batch_size, batch_size,
+                                                                                        batch_size),
                                                                                     sort_key=lambda x: len(x.sentence),
                                                                                     repeat=False)
 

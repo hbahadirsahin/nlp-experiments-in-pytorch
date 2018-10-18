@@ -1,6 +1,5 @@
-import string
 import re
-import unicodedata
+import string
 
 all_letters = string.ascii_letters + ".,;"
 

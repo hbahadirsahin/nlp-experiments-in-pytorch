@@ -1,4 +1,5 @@
 import torch
+
 from utils.utils import calculate_accuracy, load_best_model, load_vocabulary
 
 
@@ -68,4 +69,3 @@ def evaluate_interactive(model_path, sentence_vocab_path, category_vocab_path, p
             else:
                 print("Interactive evaluation ends!")
                 break
-

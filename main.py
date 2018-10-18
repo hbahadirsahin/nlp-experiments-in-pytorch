@@ -1,14 +1,16 @@
 from __future__ import print_function
 
-import os
 import datetime
+import os
+
 import torch
+
 from datahelper.dataset_reader import DatasetLoader
-from datahelper.preprocessor import Preprocessor
 from datahelper.embedding_helper import OOVEmbeddingCreator
+from datahelper.preprocessor import Preprocessor
+from evaluation.evaluate import evaluate_interactive
 from models.CNN import TextCnn
 from training.train import train_iters
-from evaluation.evaluate import evaluate_interactive
 from utils.utils import save_vocabulary
 
 dataset_properties = {"stop_word_path": "D:/Anaconda3/nltk_data/corpora/stopwords/turkish",

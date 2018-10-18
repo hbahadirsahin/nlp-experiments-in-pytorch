@@ -36,4 +36,3 @@ class OOVEmbeddingCreator(object):
             except KeyError:
                 res = torch.randn(vector.size())
             return res
-

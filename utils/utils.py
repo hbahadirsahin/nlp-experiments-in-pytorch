@@ -1,8 +1,9 @@
 import math
-import time
-import torch
 import os
 import pickle
+import time
+
+import torch
 
 
 def save_vocabulary(vocab, path):

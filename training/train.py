@@ -1,12 +1,14 @@
+import os
+import time
+
 import torch
 import torch.nn as nn
+import torch.nn.utils as utils
 import torch.optim as optim
 import torch.optim.lr_scheduler as lr_scheduler
-import torch.nn.utils as utils
-import time
-import os
-from utils.utils import time_since, calculate_accuracy, save_best_model
+
 from evaluation.evaluate import evaluate_iter
+from utils.utils import time_since, calculate_accuracy, save_best_model
 
 
 def init_optimizer(optimizer_type, model, learning_rate, weight_decay, momentum):
