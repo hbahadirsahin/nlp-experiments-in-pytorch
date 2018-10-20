@@ -3,7 +3,6 @@ import time
 
 import torch
 import torch.nn as nn
-import torch.nn.utils as utils
 import torch.optim as optim
 import torch.optim.lr_scheduler as lr_scheduler
 
@@ -40,9 +39,10 @@ def train(model, train_iter, optimizer, scheduler, criterion, norm_ratio, device
 
         loss.backward()
 
-        utils.clip_grad_norm_(model.parameters(), max_norm=norm_ratio)
+        # utils.clip_grad_norm_(model.parameters(), max_norm=norm_ratio)
 
         optimizer.step()
+
         if scheduler is not None and step % 500 == 0:
             scheduler.step(step)
 
@@ -61,7 +61,7 @@ def train(model, train_iter, optimizer, scheduler, criterion, norm_ratio, device
     return epoch_total_loss / len(train_iter), epoch_total_acc / len(train_iter)
 
 
-def train_iters(model, train_iter, dev_iter, test_iter, device, training_properties):
+def train_iters(model, train_iter, dev_iter, test_iter, device, training_properties, checkpoint=None):
     optimizer_type = training_properties["optimizer"]
     learning_rate = training_properties["learning_rate"]
     weight_decay = training_properties["weight_decay"]
@@ -82,19 +82,26 @@ def train_iters(model, train_iter, dev_iter, test_iter, device, training_propert
     start = time.time()
     old_path = None
     best_vali_acc = -1
+    start_epoch = 1
+
+    if checkpoint is not None:
+        model.load_state_dict(checkpoint["model_state_dict"])
+        optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+        start_epoch = checkpoint["epoch"]
+        best_vali_acc = checkpoint["best_vali_acc"]
 
     print("Training...")
-    for e in range(1, epoch + 1):
+    for e in range(start_epoch, epoch + 1):
         loss, accuracy = train(model=model,
                                train_iter=train_iter,
                                optimizer=optimizer,
-                               scheduler=scheduler,
+                               scheduler=None,
                                criterion=criterion,
                                norm_ratio=norm_ratio,
                                device=device,
                                print_every=print_every)
 
-        print("{} - Epoch {}/{} - Loss: {:.4f} - Accuracy: {:.4f}".format(time_since(start, e / (len(train_iter))),
+        print("{} - Epoch {}/{} - Loss: {:.4f} - Accuracy: {:.4f}".format(time_since(start, e / epoch),
                                                                           e,
                                                                           epoch,
                                                                           loss,
@@ -107,6 +114,7 @@ def train_iters(model, train_iter, dev_iter, test_iter, device, training_propert
                 os.remove(old_path)
             torch.save({
                 "epoch": epoch,
+                "best_vali_acc": best_vali_acc,
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
             }, out_path)

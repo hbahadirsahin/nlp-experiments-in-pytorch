@@ -18,8 +18,9 @@ dataset_properties = {"stop_word_path": "D:/Anaconda3/nltk_data/corpora/stopword
                       "embedding_vector": "fasttext.tr.300d",
                       "vector_cache": "D:/PyTorchNLP/data/fasttext",
                       "pretrained_embedding_path": "D:/PyTorchNLP/data/fasttext/wiki.tr",
+                      "checkpoint_path": "D:/PyTorchNLP/saved/2018-10-20/",
                       "oov_embedding_type": "uniform",
-                      "batch_size": 256
+                      "batch_size": 128
                       }
 
 model_properties = {"use_pretrained_embed": True,
@@ -31,7 +32,8 @@ model_properties = {"use_pretrained_embed": True,
                     "batch_norm_affine": False,
                     "filter_count": 128,
                     "filter_sizes": [3, 4, 5],
-                    "run_mode": "train"
+                    "run_mode": "train",
+                    "train_mode": "scratch"
                     }
 
 training_properties = {"optimizer": "SGD",
@@ -39,15 +41,15 @@ training_properties = {"optimizer": "SGD",
                        "weight_decay": 0,
                        "momentum": 0.9,
                        "norm_ratio": 10,
-                       "epoch": 30,
-                       "print_every_batch_step": 250,
+                       "epoch": 40,
+                       "print_every_batch_step": 500,
                        "save_every_epoch": 1,
                        "eval_every": 1,
                        }
 
-evaluation_properties = {"model_path": "D:/PyTorchNLP/saved/2018-10-18/",
-                         "sentence_vocab": "D:/PyTorchNLP/saved/2018-10-18/sentence_vocab.dat",
-                         "category_vocab": "D:/PyTorchNLP/saved/2018-10-18/category_vocab.dat"
+evaluation_properties = {"model_path": "D:/PyTorchNLP/saved/2018-10-20/",
+                         "sentence_vocab": "D:/PyTorchNLP/saved/2018-10-20/sentence_vocab.dat",
+                         "category_vocab": "D:/PyTorchNLP/saved/2018-10-20/category_vocab.dat"
                          }
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -111,18 +113,26 @@ if __name__ == '__main__':
         print("Saving vocabulary files")
         save_vocabulary(sentence_vocab, os.path.abspath(os.path.join(save_dir, "sentence_vocab.dat")))
         save_vocabulary(category_vocab, os.path.abspath(os.path.join(save_dir, "category_vocab.dat")))
-
         print("Initialize model")
         model = TextCnn(model_properties).to(device)
         print("Train process is starting")
-
-        train_iters(model=model,
-                    train_iter=datasetloader.train_iter,
-                    dev_iter=datasetloader.val_iter,
-                    test_iter=datasetloader.test_iter,
-                    device=device,
-                    training_properties=training_properties)
-    else:
+        if dataset_properties["checkpoint_path"] is None or dataset_properties["checkpoint_path"] == "":
+            train_iters(model=model,
+                        train_iter=datasetloader.train_iter,
+                        dev_iter=datasetloader.val_iter,
+                        test_iter=datasetloader.test_iter,
+                        device=device,
+                        training_properties=training_properties)
+        else:
+            checkpoint = torch.load(dataset_properties["checkpoint_path"])
+            train_iters(model=model,
+                        train_iter=datasetloader.train_iter,
+                        dev_iter=datasetloader.val_iter,
+                        test_iter=datasetloader.test_iter,
+                        device=device,
+                        training_properties=training_properties,
+                        checkpoint=checkpoint)
+    elif model_properties["run_mode"] == "eval_interactive":
         model_path = evaluation_properties["model_path"]
         sentence_vocab_path = evaluation_properties["sentence_vocab"]
         category_vocab_path = evaluation_properties["category_vocab"]

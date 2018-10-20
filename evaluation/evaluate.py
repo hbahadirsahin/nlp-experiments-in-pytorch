@@ -52,7 +52,7 @@ def evaluate_interactive(model_path, sentence_vocab_path, category_vocab_path, p
                 continue
 
             if sentence.lower() != "q" and sentence.lower() != "quit":
-                preprocessed_sentence = preprocessor.preprocess(sentence.split())
+                preprocessed_sentence = preprocessor(sentence.split())
                 indexed_test_sentence = [sentence_vocab.stoi[token] for token in preprocessed_sentence]
 
                 tensored_test_sentence = torch.LongTensor(indexed_test_sentence).to(device)
