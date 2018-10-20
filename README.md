@@ -36,6 +36,8 @@ Before diving into details, the python and library versions are as follows:
 
 ## How-to-run
 
+**Important Note**: You need to change the torchtext backend to succesfully run this code, if you want to (1) work with Turkish Fasttext embeddings and (2) apply Fasttext-based OOV embedding generation. Changes can be found in "changes in torchtext.txt" file. 
+
 After editing the hard coded paths in "main.py", it should not be a problem to start your own training process. 
 If you succesfully train and save a model, you can evaluate the saved model interactively by changing the "run_mode" parameter from "train" to "evaluate_interactive". 
 (I will edit here with more details later)
