@@ -7,7 +7,7 @@ import torch.optim as optim
 import torch.optim.lr_scheduler as lr_scheduler
 
 from evaluation.evaluate import evaluate_iter
-from utils.utils import time_since, calculate_accuracy, save_best_model
+from utils.utils import time_since, calculate_accuracy, calculate_topk_accuracy, save_best_model
 
 
 def init_optimizer(optimizer_type, model, learning_rate, weight_decay, momentum):
@@ -21,9 +21,10 @@ def init_optimizer(optimizer_type, model, learning_rate, weight_decay, momentum)
         raise KeyError("Invalid optimizer type! Choose Adam or SGD!")
 
 
-def train(model, train_iter, optimizer, scheduler, criterion, norm_ratio, device, print_every=500):
+def train(model, train_iter, optimizer, scheduler, criterion, norm_ratio, device, topk=(5,), print_every=500):
     epoch_total_loss = 0
     epoch_total_acc = 0
+    epoch_total_acc_topk = 0
     step = 1
     model.train()
     for batch in train_iter:
@@ -36,6 +37,7 @@ def train(model, train_iter, optimizer, scheduler, criterion, norm_ratio, device
 
         loss = criterion(predictions, batch_y)
         accuracy = calculate_accuracy(predictions, batch_y)
+        accuracy_topk = calculate_topk_accuracy(predictions, batch_y, topk=topk)
 
         loss.backward()
 
@@ -50,15 +52,20 @@ def train(model, train_iter, optimizer, scheduler, criterion, norm_ratio, device
 
         epoch_total_loss += loss.item()
         epoch_total_acc += accuracy
+        epoch_total_acc_topk += accuracy_topk[0].item()
 
         if step % print_every == 0:
-            print("Batch {}/{} - Batch Loss: {:.4f} - Batch Accuracy: {:.4f}".format(step,
-                                                                                     len(train_iter),
-                                                                                     loss,
-                                                                                     accuracy))
+            print("Batch {}/{} - "
+                  "Batch Loss: {:.4f} - "
+                  "Batch Accuracy: {:.4f} - "
+                  "Batch Accuracy Topk {:.4f}".format(step,
+                                                      len(train_iter),
+                                                      loss,
+                                                      accuracy,
+                                                      accuracy_topk[0].item()))
         torch.cuda.empty_cache()
 
-    return epoch_total_loss / len(train_iter), epoch_total_acc / len(train_iter)
+    return epoch_total_loss / len(train_iter), epoch_total_acc / len(train_iter), epoch_total_acc_topk / len(train_iter)
 
 
 def train_iters(model, train_iter, dev_iter, test_iter, device, training_properties, checkpoint=None):
@@ -92,14 +99,14 @@ def train_iters(model, train_iter, dev_iter, test_iter, device, training_propert
 
     print("Training...")
     for e in range(start_epoch, epoch + 1):
-        loss, accuracy = train(model=model,
-                               train_iter=train_iter,
-                               optimizer=optimizer,
-                               scheduler=None,
-                               criterion=criterion,
-                               norm_ratio=norm_ratio,
-                               device=device,
-                               print_every=print_every)
+        loss, accuracy, accuracy_topk = train(model=model,
+                                              train_iter=train_iter,
+                                              optimizer=optimizer,
+                                              scheduler=None,
+                                              criterion=criterion,
+                                              norm_ratio=norm_ratio,
+                                              device=device,
+                                              print_every=print_every)
 
         print("{} - Epoch {}/{} - Loss: {:.4f} - Accuracy: {:.4f}".format(time_since(start, e / epoch),
                                                                           e,
@@ -121,27 +128,35 @@ def train_iters(model, train_iter, dev_iter, test_iter, device, training_propert
             old_path = out_path
 
         if e % eval_every == 0:
-            vali_loss, vali_accuracy = evaluate_iter(model=model,
-                                                     input=dev_iter,
-                                                     criterion=criterion,
-                                                     device=device,
-                                                     save_path=save_path,
-                                                     is_vali=True)
+            vali_loss, vali_accuracy, vali_accuracy_topk = evaluate_iter(model=model,
+                                                                         input=dev_iter,
+                                                                         criterion=criterion,
+                                                                         device=device,
+                                                                         save_path=save_path,
+                                                                         is_vali=True)
             if best_vali_acc < vali_accuracy:
                 best_vali_loss = vali_loss
                 best_vali_acc = vali_accuracy
+                best_vali_acc_topk = vali_accuracy_topk
                 save_best_model(model, save_path)
             print(
-                "Validation Loss: {:.4f} (Best: {:.4f}) - Validation Accuracy: {:.4f} (Best: {:.4f})".format(vali_loss,
-                                                                                                             best_vali_loss,
-                                                                                                             vali_accuracy,
-                                                                                                             best_vali_acc))
+                "Validation Loss: {:.4f} (Best: {:.4f}) - "
+                "Validation Accuracy: {:.4f} (Best: {:.4f}) -"
+                "Validation Accuracy Topk: {:.4f} (Best: {:.4f})".format(vali_loss,
+                                                                         best_vali_loss,
+                                                                         vali_accuracy,
+                                                                         best_vali_acc,
+                                                                         vali_accuracy_topk,
+                                                                         best_vali_acc_topk))
 
-    test_loss, test_accuracy = evaluate_iter(model=model,
-                                             input=test_iter,
-                                             criterion=criterion,
-                                             device=device,
-                                             save_path=save_path,
-                                             is_vali=False)
-    print("Test Loss: {:.4f} - Test Accuracy: {:.4f}".format(test_loss,
-                                                             test_accuracy))
+    test_loss, test_accuracy, test_accuracy_topk = evaluate_iter(model=model,
+                                                                 input=test_iter,
+                                                                 criterion=criterion,
+                                                                 device=device,
+                                                                 save_path=save_path,
+                                                                 is_vali=False)
+    print("Test Loss: {:.4f} - "
+          "Test Accuracy: {:.4f} -"
+          "Test Accuracy Topk: {:.4f}".format(test_loss,
+                                              test_accuracy,
+                                              test_accuracy_topk))

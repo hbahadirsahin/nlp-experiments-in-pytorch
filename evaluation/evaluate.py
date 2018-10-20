@@ -1,11 +1,12 @@
 import torch
 
-from utils.utils import calculate_accuracy, load_best_model, load_vocabulary
+from utils.utils import calculate_accuracy, calculate_topk_accuracy, load_best_model, load_vocabulary
 
 
-def evaluate_iter(model, input, criterion, device, save_path, is_vali=True):
+def evaluate_iter(model, input, criterion, device, save_path, topk=(5,), is_vali=True):
     total_loss = 0
     total_acc = 0
+    total_acc_topk = 0
 
     if not is_vali:
         print("Test mode!")
@@ -23,16 +24,19 @@ def evaluate_iter(model, input, criterion, device, save_path, is_vali=True):
 
             loss = criterion(predictions, batch_y)
             accuracy = calculate_accuracy(predictions, batch_y)
+            accuracy_topk = calculate_topk_accuracy(predictions, batch_y, topk=topk)
 
             total_loss += loss.item()
             total_acc += accuracy
+            total_acc_topk += accuracy_topk[0].item()
 
             torch.cuda.empty_cache()
 
         current_loss = total_loss / len(input)
         current_acc = total_acc / len(input)
+        current_acc_topk = total_acc_topk / len(input)
 
-        return current_loss, current_acc
+        return current_loss, current_acc, current_acc_topk
 
 
 def evaluate_interactive(model_path, sentence_vocab_path, category_vocab_path, preprocessor, device="cpu"):

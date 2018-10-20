@@ -30,7 +30,27 @@ def load_best_model(path):
 
 def calculate_accuracy(predictions, ground_truths):
     correct = (torch.max(predictions, 1)[1].view(ground_truths.size()).data == ground_truths.data)
-    return float(correct.sum()) / len(correct)
+    return float(correct.sum()) / len(correct) * 100
+
+
+def calculate_topk_accuracy(output, target, topk=(2,)):
+    """
+    Code copied/pasted from PyTorch Imagenet example: https://github.com/pytorch/examples/blob/master/imagenet/main.py
+    Computes the accuracy over the k top predictions for the specified values of k
+    """
+    with torch.no_grad():
+        maxk = max(topk)
+        batch_size = target.size(0)
+
+        _, pred = output.topk(maxk, 1, True, True)
+        pred = pred.t()
+        correct = pred.eq(target.view(1, -1).expand_as(pred))
+
+        res = []
+        for k in topk:
+            correct_k = correct[:k].view(-1).float().sum(0, keepdim=True)
+            res.append(correct_k.mul_(100.0 / batch_size))
+    return res
 
 
 def as_minutes(s):
