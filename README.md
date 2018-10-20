@@ -20,8 +20,8 @@ Before diving into details, the python and library versions are as follows:
 - Initial commit introduces basic Text CNN (from 2014 paper). 
 - Fasttext embeddings are used (by default but it can be changed). Eventually, one can use Torchtext to download the "pre-defined" embedding files. However, since Turkish embeddings were not included in, I manually edit the Torchtext backend codes (please check the "changes in the torchtext.txt" file). Also note that, everytime you update Torchtext, you need to re-add those changes again.
 - Embeddings (whether random or pretrained) can be "static", "nonstatic", or "multichannel".
-- For OOV words, OOVEmbeddingCreator is defined (under datahelper/embedding_helper). There are 5 different basic approaches are defined to create OOV embeddings: (1) zeros vector, (2) ones vector, (3) [0,1) ranged random vector, (4) (r1, r2) ranged uniformly random vector, (5) Fasttext CharNgram based created vectors.
-- Even though I am focusing on Turkish versions of the dataset, I believe "Preprocessor" can work for English dataset too. In future, I may add more language specific methods. 
+- For OOV words, OOVEmbeddingCreator is developed (under datahelper/embedding_helper). There are 5 different basic approaches defined to create OOV embeddings: (1) zeros vector, (2) ones vector, (3) [0,1) ranged random vector, (4) (r1, r2) ranged uniformly random vector, (5) Fasttext CharNgram-based vectors.
+- Even though I am focusing on Turkish versions of the dataset, I believe "Preprocessor" can work for English dataset, too. In future, I may add more language specific methods. 
 - Due to laziness, I defined all my necessary arguments/configs/properties in "main.py". However, I also implemented argparse versions of the same properties (Sorry for hard-coded paths).
 - I tested all training, evaluation, model/vocabulary saving/loading aspects of the code for several epochs without any problem (except out of memory errors =)).
 
