@@ -21,7 +21,7 @@ def init_optimizer(optimizer_type, model, learning_rate, weight_decay, momentum)
         raise KeyError("Invalid optimizer type! Choose Adam or SGD!")
 
 
-def train(model, train_iter, optimizer, scheduler, criterion, norm_ratio, device, topk=(5,), print_every=500):
+def train(model, train_iter, optimizer, scheduler, criterion, norm_ratio, device, topk, print_every=500):
     epoch_total_loss = 0
     epoch_total_acc = 0
     epoch_total_acc_topk = 0
@@ -94,7 +94,7 @@ def train_iters(model, train_iter, dev_iter, test_iter, device, training_propert
     if checkpoint is not None:
         model.load_state_dict(checkpoint["model_state_dict"])
         optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
-        start_epoch = checkpoint["epoch"]
+        start_epoch = checkpoint["epoch"] + 1
         best_vali_acc = checkpoint["best_vali_acc"]
 
     print("Training...")
@@ -106,6 +106,7 @@ def train_iters(model, train_iter, dev_iter, test_iter, device, training_propert
                                               criterion=criterion,
                                               norm_ratio=norm_ratio,
                                               device=device,
+                                              topk=(5,),
                                               print_every=print_every)
 
         print("{} - Epoch {}/{} - Loss: {:.4f} - Accuracy: {:.4f}".format(time_since(start, e / epoch),
@@ -133,6 +134,7 @@ def train_iters(model, train_iter, dev_iter, test_iter, device, training_propert
                                                                          criterion=criterion,
                                                                          device=device,
                                                                          save_path=save_path,
+                                                                         topk=(5,),
                                                                          is_vali=True)
             if best_vali_acc < vali_accuracy:
                 best_vali_loss = vali_loss
@@ -141,7 +143,7 @@ def train_iters(model, train_iter, dev_iter, test_iter, device, training_propert
                 save_best_model(model, save_path)
             print(
                 "Validation Loss: {:.4f} (Best: {:.4f}) - "
-                "Validation Accuracy: {:.4f} (Best: {:.4f}) -"
+                "Validation Accuracy: {:.4f} (Best: {:.4f}) - "
                 "Validation Accuracy Topk: {:.4f} (Best: {:.4f})".format(vali_loss,
                                                                          best_vali_loss,
                                                                          vali_accuracy,
@@ -154,6 +156,7 @@ def train_iters(model, train_iter, dev_iter, test_iter, device, training_propert
                                                                  criterion=criterion,
                                                                  device=device,
                                                                  save_path=save_path,
+                                                                 topk=(5,),
                                                                  is_vali=False)
     print("Test Loss: {:.4f} - "
           "Test Accuracy: {:.4f} -"

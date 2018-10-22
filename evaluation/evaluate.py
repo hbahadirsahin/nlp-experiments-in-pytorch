@@ -1,9 +1,11 @@
+import spacy
 import torch
+import torch.nn.functional as F
 
 from utils.utils import calculate_accuracy, calculate_topk_accuracy, load_best_model, load_vocabulary
 
 
-def evaluate_iter(model, input, criterion, device, save_path, topk=(5,), is_vali=True):
+def evaluate_iter(model, input, criterion, device, save_path, topk, is_vali=True):
     total_loss = 0
     total_acc = 0
     total_acc_topk = 0
@@ -11,8 +13,8 @@ def evaluate_iter(model, input, criterion, device, save_path, topk=(5,), is_vali
     if not is_vali:
         print("Test mode!")
         model = load_best_model(save_path)
-
-    print("Validation mode!")
+    else:
+        print("Validation mode!")
     model.eval()
 
     with torch.no_grad():
@@ -39,7 +41,7 @@ def evaluate_iter(model, input, criterion, device, save_path, topk=(5,), is_vali
         return current_loss, current_acc, current_acc_topk
 
 
-def evaluate_interactive(model_path, sentence_vocab_path, category_vocab_path, preprocessor, device="cpu"):
+def evaluate_interactive(model_path, sentence_vocab_path, category_vocab_path, preprocessor, topk, device="cpu"):
     sentence_vocab = load_vocabulary(sentence_vocab_path)
     category_vocab = load_vocabulary(category_vocab_path)
 
@@ -56,7 +58,21 @@ def evaluate_interactive(model_path, sentence_vocab_path, category_vocab_path, p
                 continue
 
             if sentence.lower() != "q" and sentence.lower() != "quit":
-                preprocessed_sentence = preprocessor(sentence.split())
+                # Below 5 lines of weird looking code is for tokenizing a test input, correctly.
+                # Obviously, sentence.split() does not work if the sentence has punctuations to tokenize.
+                # Example: "a, b c." sentence should be tokenized as "a , b c . ".
+                # That's why I added spacy tokenizer. And, lucky me it works for Turkish, too =)
+                # Note that I added this tokenization to preprocessor; however, it takes too much time to prepare a
+                # whole dataset in training process. Since the dataset I am using is already tokenized as it should be,
+                # I wrote the below code to only evaluation process which is less shorter than my comment to explain
+                # this situation =)
+                nlp_tokenizer = spacy.load("en")
+                doc = nlp_tokenizer(sentence.lower())
+                tokenized_sentence = [token.text for token in doc]
+                preprocessed_sentence = preprocessor(tokenized_sentence)
+                temp = nlp_tokenizer(" ".join(preprocessed_sentence))
+                preprocessed_sentence = [token.text for token in temp]
+
                 indexed_test_sentence = [sentence_vocab.stoi[token] for token in preprocessed_sentence]
 
                 tensored_test_sentence = torch.LongTensor(indexed_test_sentence).to(device)
@@ -64,12 +80,26 @@ def evaluate_interactive(model_path, sentence_vocab_path, category_vocab_path, p
                 tensored_test_sentence = tensored_test_sentence.unsqueeze(1)
 
                 logit = model(tensored_test_sentence)
+                probs = F.softmax(logit, dim=1)
 
-                predicted_category_id = torch.max(logit, 1)[1]
+                predicted_category_probs, predicted_category_ids = probs.topk(topk, 1, True, True)
 
-                predicted_category_label = category_vocab.itos[predicted_category_id]
+                predicted_category_ids = predicted_category_ids.t()
 
-                print("Predicted category is {}".format(predicted_category_label))
+                predicted_labels = []
+                for idx in predicted_category_ids:
+                    predicted_labels.append(category_vocab.itos[idx])
+
+                if topk == 1:
+                    print("Predicted category is {} with probability {}".format(predicted_labels[0],
+                                                                                predicted_category_probs[0][0].item()))
+                else:
+                    print("Top-{} predicted labels are as follows in order:".format(topk))
+                    for idx, label in enumerate(predicted_labels):
+                        print("> {} - Predicted category is {} with probability {:.4f}".format(idx + 1,
+                                                                                               label,
+                                                                                               predicted_category_probs[
+                                                                                                   0][idx].item()))
             else:
                 print("Interactive evaluation ends!")
                 break

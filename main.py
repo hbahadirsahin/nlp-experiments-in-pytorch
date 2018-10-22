@@ -18,8 +18,8 @@ dataset_properties = {"stop_word_path": "D:/Anaconda3/nltk_data/corpora/stopword
                       "embedding_vector": "fasttext.tr.300d",
                       "vector_cache": "D:/PyTorchNLP/data/fasttext",
                       "pretrained_embedding_path": "D:/PyTorchNLP/data/fasttext/wiki.tr",
-                      "checkpoint_path": "",
-                      "oov_embedding_type": "uniform",
+                      "checkpoint_path": "D:/PyTorchNLP/saved/2018-10-22/saved_model_step100.pt",
+                      "oov_embedding_type": "fasttext_oov",
                       "batch_size": 128
                       }
 
@@ -32,21 +32,22 @@ model_properties = {"use_pretrained_embed": True,
                     "batch_norm_affine": False,
                     "filter_count": 128,
                     "filter_sizes": [3, 4, 5],
+                    # "run_mode": "eval_interactive",
                     "run_mode": "train",
                     }
 
-training_properties = {"optimizer": "SGD",
-                       "learning_rate": 0.05,
+training_properties = {"optimizer": "Adam",
+                       "learning_rate": 0.01,
                        "weight_decay": 0,
                        "momentum": 0.9,
                        "norm_ratio": 10,
-                       "epoch": 1,
+                       "epoch": 100,
                        "print_every_batch_step": 500,
                        "save_every_epoch": 1,
                        "eval_every": 1,
                        }
 
-evaluation_properties = {"model_path": "D:/PyTorchNLP/saved/2018-10-20/",
+evaluation_properties = {"model_path": "D:/PyTorchNLP/saved/2018-10-21/",
                          "sentence_vocab": "D:/PyTorchNLP/saved/vocab/sentence_vocab.dat",
                          "category_vocab": "D:/PyTorchNLP/saved/vocab/category_vocab.dat"
                          }
@@ -147,5 +148,6 @@ if __name__ == '__main__':
                              sentence_vocab_path=sentence_vocab_path,
                              category_vocab_path=category_vocab_path,
                              preprocessor=preprocessor.preprocess,
+                             topk=5,
                              device=device)
     print("")

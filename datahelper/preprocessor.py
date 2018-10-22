@@ -10,7 +10,8 @@ class Preprocessor(object):
         self.is_remove_digit = is_remove_digit
         self.is_remove_punctuations = is_remove_punctuations
 
-    def load_stop_words(self, path):
+    @staticmethod
+    def load_stop_words(path):
         return set(line.strip() for line in open(path))
 
     @staticmethod
