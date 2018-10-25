@@ -76,26 +76,26 @@ There are 3 dictionaries defined to hold run arguments.
   - batch_size: Self-explanatory.
   
  - `model_properties` holds model/algorithm-related arguments:
-  - use_pretrained_embed: Can be "True" if you want to use known word embedding models, or "False" if you want to use random vectors.
-  - embed_train_type: Can be "static" if you want non-trainable, "nonstatic" if you want trainable or "multichannel" if you want multichannel embeddings as your inputs.
-  - use_padded_conv: A boolean argument that specifies whether convolution filters apply padding or not.
-  - keep_prob: Dropout probability.
-  - use_batch_norm: A boolean argument to use batch normalization.
-  - batch_norm_momentum: Batch normalization's momentum parameter.
-  - batch_norm_affine: Batch normalization's affine parameter.
-  - filter_count: Number of filters.
-  - filter_sizes: List of convolution filter sizes (Example: [3, 4, 5])
-  - run_mode: Can be "train" to start training process or "eval_interactive" to test your saved model(s) interactively. 
+   - use_pretrained_embed: Can be "True" if you want to use known word embedding models, or "False" if you want to use random vectors.
+   - embed_train_type: Can be "static" if you want non-trainable, "nonstatic" if you want trainable or "multichannel" if you want multichannel embeddings as your inputs.
+   - use_padded_conv: A boolean argument that specifies whether convolution filters apply padding or not.
+   - keep_prob: Dropout probability.
+   - use_batch_norm: A boolean argument to use batch normalization.
+   - batch_norm_momentum: Batch normalization's momentum parameter.
+   - batch_norm_affine: Batch normalization's affine parameter.
+   - filter_count: Number of filters.
+   - filter_sizes: List of convolution filter sizes (Example: [3, 4, 5])
+   - run_mode: Can be "train" to start training process or "eval_interactive" to test your saved model(s) interactively. 
   
  - `training_properties` holds training-related arguments:
-  - optimizer: It can be either "Adam" or "SGD".
-  - learning_rate: Self-explanatory.
-  - weight_decay: L2 normalization term. Note that for my case, any value bigger than 0, literally fucked my performance. 
-  - momentum: Self-explanatory (note that if you use "Adam" it will be ignored, it is only for "SGD").
-  - norm_ratio: Gradient clipping ratio.
-  - print_every_batch_step: Print loss and accuracy at every x step.
-  - save_every_epoch: Save the model at every epoch.
-  - eval_every: Run the trained model for validation set at every epoch.
+   - optimizer: It can be either "Adam" or "SGD".
+   - learning_rate: Self-explanatory.
+   - weight_decay: L2 normalization term. Note that for my case, any value bigger than 0, literally fucked my performance. 
+   - momentum: Self-explanatory (note that if you use "Adam" it will be ignored, it is only for "SGD").
+   - norm_ratio: Gradient clipping ratio.
+   - print_every_batch_step: Print loss and accuracy at every x step.
+   - save_every_epoch: Save the model at every epoch.
+   - eval_every: Run the trained model for validation set at every epoch.
  
   - `evaluation_properties` holds interactive evaluation related arguments:
     - model_path: The path for the model file that you want to evaluate.
