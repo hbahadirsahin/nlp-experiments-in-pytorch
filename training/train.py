@@ -58,17 +58,18 @@ def train(model, train_iter, optimizer, scheduler, criterion, norm_ratio, device
             print("Batch {}/{} - "
                   "Batch Loss: {:.4f} - "
                   "Batch Accuracy: {:.4f} - "
-                  "Batch Accuracy Topk {:.4f}".format(step,
-                                                      len(train_iter),
-                                                      loss,
-                                                      accuracy,
-                                                      accuracy_topk[0].item()))
+                  "Batch Accuracy Top-{} {:.4f}".format(step,
+                                                        len(train_iter),
+                                                        loss,
+                                                        accuracy,
+                                                        topk[0],
+                                                        accuracy_topk[0].item()))
         torch.cuda.empty_cache()
 
     return epoch_total_loss / len(train_iter), epoch_total_acc / len(train_iter), epoch_total_acc_topk / len(train_iter)
 
 
-def train_iters(model, train_iter, dev_iter, test_iter, device, training_properties, checkpoint=None):
+def train_iters(model, train_iter, dev_iter, test_iter, device, topk, training_properties, checkpoint=None):
     optimizer_type = training_properties["optimizer"]
     learning_rate = training_properties["learning_rate"]
     weight_decay = training_properties["weight_decay"]
@@ -106,14 +107,16 @@ def train_iters(model, train_iter, dev_iter, test_iter, device, training_propert
                                               criterion=criterion,
                                               norm_ratio=norm_ratio,
                                               device=device,
-                                              topk=(5,),
+                                              topk=topk,
                                               print_every=print_every)
 
-        print("{} - Epoch {}/{} - Loss: {:.4f} - Accuracy: {:.4f}".format(time_since(start, e / epoch),
-                                                                          e,
-                                                                          epoch,
-                                                                          loss,
-                                                                          accuracy))
+        print(
+            "{} - Epoch {}/{} - Loss: {:.4f} - Accuracy: {:.4f} - Accuracy Top-{}".format(time_since(start, e / epoch),
+                                                                                          e,
+                                                                                          epoch,
+                                                                                          loss,
+                                                                                          accuracy,
+                                                                                          accuracy_topk))
 
         if e % save_every == 0:
             filename = "saved_model_step{}.pt".format(e)
@@ -134,7 +137,7 @@ def train_iters(model, train_iter, dev_iter, test_iter, device, training_propert
                                                                          criterion=criterion,
                                                                          device=device,
                                                                          save_path=save_path,
-                                                                         topk=(5,),
+                                                                         topk=topk,
                                                                          is_vali=True)
             if best_vali_acc < vali_accuracy:
                 best_vali_loss = vali_loss
@@ -144,22 +147,24 @@ def train_iters(model, train_iter, dev_iter, test_iter, device, training_propert
             print(
                 "Validation Loss: {:.4f} (Best: {:.4f}) - "
                 "Validation Accuracy: {:.4f} (Best: {:.4f}) - "
-                "Validation Accuracy Topk: {:.4f} (Best: {:.4f})".format(vali_loss,
-                                                                         best_vali_loss,
-                                                                         vali_accuracy,
-                                                                         best_vali_acc,
-                                                                         vali_accuracy_topk,
-                                                                         best_vali_acc_topk))
+                "Validation Accuracy Top-{}: {:.4f} (Best: {:.4f})".format(vali_loss,
+                                                                           best_vali_loss,
+                                                                           vali_accuracy,
+                                                                           best_vali_acc,
+                                                                           topk[0],
+                                                                           vali_accuracy_topk,
+                                                                           best_vali_acc_topk))
 
     test_loss, test_accuracy, test_accuracy_topk = evaluate_iter(model=model,
                                                                  input=test_iter,
                                                                  criterion=criterion,
                                                                  device=device,
                                                                  save_path=save_path,
-                                                                 topk=(5,),
+                                                                 topk=topk,
                                                                  is_vali=False)
     print("Test Loss: {:.4f} - "
           "Test Accuracy: {:.4f} -"
-          "Test Accuracy Topk: {:.4f}".format(test_loss,
-                                              test_accuracy,
-                                              test_accuracy_topk))
+          "Test Accuracy Top-{}: {:.4f}".format(test_loss,
+                                                test_accuracy,
+                                                topk[0],
+                                                test_accuracy_topk))

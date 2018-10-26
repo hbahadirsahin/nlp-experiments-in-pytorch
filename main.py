@@ -13,37 +13,39 @@ from models.CNN import TextCnn
 from training.train import train_iters
 from utils.utils import save_vocabulary
 
-dataset_properties = {"stop_word_path": "D:/Anaconda3/nltk_data/corpora/stopwords/turkish",
-                      "data_path": "D:/PyTorchNLP/data/TWNERTC_TC_Coarse Grained NER_No_NoiseReduction.DUMP",
+dataset_properties = {"stop_word_path": "D:/nlpdata/stopwords/turkish",
+                      # "stop_word_path": "D:/Anaconda3/nltk_data/corpora/stopwords/turkish",
+                      "data_path": "D:/nlpdata/TWNERTC_TC_Coarse Grained NER_No_NoiseReduction.DUMP",
                       "embedding_vector": "fasttext.tr.300d",
-                      "vector_cache": "D:/PyTorchNLP/data/fasttext",
-                      "pretrained_embedding_path": "D:/PyTorchNLP/data/fasttext/wiki.tr",
-                      "checkpoint_path": "D:/PyTorchNLP/saved/2018-10-22/saved_model_step100.pt",
-                      "oov_embedding_type": "fasttext_oov",
-                      "batch_size": 128
+                      "vector_cache": "D:/nlpdata/fasttext",
+                      "pretrained_embedding_path": "D:/nlpdata/fasttext/wiki.tr",
+                      "checkpoint_path": "",
+                      "oov_embedding_type": "zeros",
+                      "batch_size": 64
                       }
 
 model_properties = {"use_pretrained_embed": True,
-                    "embed_train_type": "static",
+                    "embed_train_type": "nonstatic",
                     "use_padded_conv": True,
                     "keep_prob": 0.5,
                     "use_batch_norm": True,
                     "batch_norm_momentum": 0.1,
                     "batch_norm_affine": False,
-                    "filter_count": 128,
+                    "filter_count": 64,
                     "filter_sizes": [3, 4, 5],
                     # "run_mode": "eval_interactive",
                     "run_mode": "train",
                     }
 
 training_properties = {"optimizer": "Adam",
-                       "learning_rate": 0.01,
+                       "learning_rate": 0.05,
                        "weight_decay": 0,
                        "momentum": 0.9,
                        "norm_ratio": 10,
                        "epoch": 100,
-                       "print_every_batch_step": 500,
+                       "print_every_batch_step": 250,
                        "save_every_epoch": 1,
+                       "topk": (1, 5),
                        "eval_every": 1,
                        }
 
@@ -126,6 +128,7 @@ if __name__ == '__main__':
                         dev_iter=datasetloader.val_iter,
                         test_iter=datasetloader.test_iter,
                         device=device,
+                        topk=training_properties["topk"],
                         training_properties=training_properties)
         else:
             checkpoint = torch.load(dataset_properties["checkpoint_path"])
@@ -135,6 +138,7 @@ if __name__ == '__main__':
                         dev_iter=datasetloader.val_iter,
                         test_iter=datasetloader.test_iter,
                         device=device,
+                        topk=training_properties["topk"],
                         training_properties=training_properties,
                         checkpoint=checkpoint)
     elif model_properties["run_mode"] == "eval_interactive":
@@ -148,6 +152,6 @@ if __name__ == '__main__':
                              sentence_vocab_path=sentence_vocab_path,
                              category_vocab_path=category_vocab_path,
                              preprocessor=preprocessor.preprocess,
-                             topk=5,
+                             topk=training_properties["topk"],
                              device=device)
     print("")
