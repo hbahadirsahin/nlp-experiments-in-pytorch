@@ -93,6 +93,7 @@ There are 3 dictionaries defined to hold run arguments.
    - weight_decay: L2 normalization term. Note that for my case, any value bigger than 0, literally fucked my performance. 
    - momentum: Self-explanatory (note that if you use "Adam" it will be ignored, it is only for "SGD").
    - norm_ratio: Gradient clipping ratio.
+   - topk: Tuple value for top-k accuracy calculations (Default: (1, 5)). It is tuple because I c/p related code from Pytorch's imagenet example without modifying it.  
    - print_every_batch_step: Print loss and accuracy at every x step.
    - save_every_epoch: Save the model at every epoch.
    - eval_every: Run the trained model for validation set at every epoch.
