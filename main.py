@@ -45,7 +45,7 @@ training_properties = {"optimizer": "Adam",
                        "epoch": 100,
                        "print_every_batch_step": 250,
                        "save_every_epoch": 1,
-                       "topk": (1, 5),
+                       "topk": (5, 1),
                        "eval_every": 1,
                        }
 

@@ -124,7 +124,7 @@ def train_iters(model, train_iter, dev_iter, test_iter, device, topk, training_p
             if old_path is not None:
                 os.remove(old_path)
             torch.save({
-                "epoch": epoch,
+                "epoch": e,
                 "best_vali_acc": best_vali_acc,
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
@@ -163,7 +163,7 @@ def train_iters(model, train_iter, dev_iter, test_iter, device, topk, training_p
                                                                  topk=topk,
                                                                  is_vali=False)
     print("Test Loss: {:.4f} - "
-          "Test Accuracy: {:.4f} -"
+          "Test Accuracy: {:.4f} - "
           "Test Accuracy Top-{}: {:.4f}".format(test_loss,
                                                 test_accuracy,
                                                 topk[0],
