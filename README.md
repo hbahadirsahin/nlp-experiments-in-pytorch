@@ -122,7 +122,7 @@ This section presents the Top-1 and Top-5 Test accuracies of my experiments. Due
 ### Test Results of 1-Layer CNN + FC (TextCNN)
 
 | Language | # Of Categories | Pre-trained Embedding | OOV Embedding | Embedding Training | Top-1 Test Accuracy | Top-5 Test Accuracy |   
-|----------|-------------------------------|-----------------------|---------------|--------------------|:-------------------:|:-------------------:|
+|----------|:-----------------------------:|-----------------------|---------------|--------------------|:-------------------:|:-------------------:|
 |Turkish| 25 | Fasttext | zeros | static	| NaN (Training process) | NaN (Training process) |
 |Turkish| 25  | Fasttext | zeros | nonstatic	| 62.6054 | 86.3384 |
 |Turkish|25| Fasttext | Fasttext | static	|  NaN (TBA)  | NaN (TBA) |
