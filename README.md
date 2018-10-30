@@ -14,7 +14,7 @@ Before diving into details, the python and library versions are as follows:
 - python 3.6 (works well with 3.7, too)
 - pytorch 0.4.1 (no 1.0 preview for windows =))
 - torchtext 0.3.1
-- gensim 3.6.0 (for fasttext embeddings, as well as OOV Embedding generation. More details below)
+- gensim 3.4.0 (for fasttext embeddings, as well as OOV Embedding generation. Downgraded from 3.6.0 to 3.4.0(Conda version))
 
 ## Code Details
 
