@@ -20,7 +20,7 @@ dataset_properties = {"stop_word_path": "D:/nlpdata/stopwords/turkish",
                       "vector_cache": "D:/nlpdata/fasttext",
                       "pretrained_embedding_path": "D:/nlpdata/fasttext/wiki.tr",
                       "checkpoint_path": "",
-                      "oov_embedding_type": "fasttext",
+                      "oov_embedding_type": "fasttext_oov",
                       "batch_size": 64
                       }
 

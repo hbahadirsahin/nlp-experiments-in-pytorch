@@ -100,13 +100,13 @@ class TextCnn(nn.Module):
 
         if dropout_type == "bernoulli" or dropout_type == "gaussian":
             print("> Dropout - ", dropout_type)
-            self.dropout = Dropout(keep_prob=keep_prob, dimension=None, dropout_type=dropout_type)
+            self.dropout = Dropout(keep_prob=keep_prob, dimension=None, dropout_type=dropout_type).dropout
         elif dropout_type == "variational":
             print("> Dropout - Bernoulli (Variational Dropout is out-of-order for now)")
-            self.dropout = Dropout(keep_prob=keep_prob, dimension=None, dropout_type="bernoulli")
+            self.dropout = Dropout(keep_prob=keep_prob, dimension=None, dropout_type="bernoulli").dropout
         else:
             print("> Dropout - Bernoulli (You provide undefined dropout type!)")
-            self.dropout = Dropout(keep_prob=keep_prob, dimension=None, dropout_type="bernoulli")
+            self.dropout = Dropout(keep_prob=keep_prob, dimension=None, dropout_type="bernoulli").dropout
         # self.dropout = nn.Dropout(keep_prob)
 
         num_flatten_feature = len(filter_sizes) * filter_count
