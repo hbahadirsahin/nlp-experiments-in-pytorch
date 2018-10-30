@@ -11,7 +11,7 @@ Eventually, I won't update the other text_categorization repository, but I will 
 
 Before diving into details, the python and library versions are as follows: 
 
-- python 3.6
+- python 3.6 (works well with 3.7, too)
 - pytorch 0.4.1 (no 1.0 preview for windows =))
 - torchtext 0.3.1
 - gensim 3.6.0 (for fasttext embeddings, as well as OOV Embedding generation. More details below)
@@ -29,12 +29,16 @@ Before diving into details, the python and library versions are as follows:
 
 ## To-do 
 
-- Run the current piece of code for the aforementioned datasets and define a text categorization baseline (for both Turkish and English).
-- Attention and variational dropout will be added (to TextCNN).
-- Different learning algorithms (DeepCNN, LSTM, GRU, any-kind-of-hybrid versions of those algorithms, transformers).
-- CRF layer to be able to do NER experiments.
-- For Turkish, I plan to add morphological disambiguation (https://github.com/erayyildiz/Neural-Morphological-Disambiguation-for-Turkish). 
-- Different language models.
+- [x] Variational Dropout. Update: Variational and Gaussian dropout methods are added. Reference: [Variational Dropout and
+the Local Reparameterization Trick](https://arxiv.org/pdf/1506.02557.pdf)
+- [ ] Extending main flow and learning models with respect to new dropout models.
+- [ ] Run the current piece of code for the aforementioned datasets and define a text categorization baseline (for both Turkish and English). Update (30-10-2018): Due to lack of proper computer, experiments are being executed in a CPU machine
+- [ ] Attention.
+- [ ] Different learning algorithms (DeepCNN, LSTM, GRU, any-kind-of-hybrid versions of those algorithms, transformers).
+- [ ] CRF layer to be able to do NER experiments.
+- [ ] For Turkish, I plan to add morphological disambiguation (https://github.com/erayyildiz/Neural-Morphological-Disambiguation-for-Turkish). 
+- [ ] Different language models.
+- [ ] Document length categorization/NER tasks (Current project guarantess the results for sentences)
 
 ## Project Skeleton
 
@@ -45,6 +49,9 @@ I try to keep every part of the project clean and easy to follow. Even though th
 - `./datahelper/dataset_reader.py` contains the "DatasetLoader" object that reads a text dataset, splits it into 3 subsets (train/vali/test), creates vocabulary and iterators. It is a little bit hard-coded for the dataset I am using now. However, it is easy to make changes to use it for your own dataset.
 - `./datahelper/embedding_helper.py` is a helper class to generate OOV word embeddings. To use Fasttext-based OOV embedding generation, it leverages Gensim!
 - `./datahelper/preprocessor.py` contains the "Preprocessor" object and actions to apply on sentences. 
+- `./dropout_models/gaussian_dropout.py` contains the Gaussian Dropout object. 
+- `./dropout_models/variational_dropout.py` contains the Variational Dropout object. 
+- `./dropout_models/dropout.py` contains the Dropout object which you can select your dropout type among Bernoulli (basic), Gaussian and Variational dropout types. 
 - `./evaluation/evaluate.py` contains two methods for evaluation. The first one is evaluating validation and/or test sets while training. The other method is for interactive evaluation. Note that you need "spacy" to tokenize test sentences for interactive evaluation (note that my original dataset is already tokenized, so you do not need to use spacy while training).
 - `./model/xyz.py` is really self explanatory =) For now, it only contains basic TextCNN with several extra properties, however, more models will be implemented.
 - `./training/train.py` contains training specific methods. 
@@ -107,6 +114,32 @@ There are 3 dictionaries defined to hold run arguments.
 
 After you make the necessary changes in "changes_in_torchtext" and edit the hard coded paths in "main.py", it should not be a problem to start your own training/evaluation. 
 If you succesfully train and save a model, you can evaluate the saved model interactively by changing the "run_mode" parameter from "train" to "evaluate_interactive". 
+
+## Results
+
+This section presents the Top-1 and Top-5 Test accuracies of my experiments. Due to computational resource limit, I cannot test every single parameter/hyperparameter. In general, I hold algorithm parameters same for all experiments; however, I change embedding related parameters. I assume the result table is self-explanatory. As a final note, I *won't* share my best models and I *won't* guarantee reproducibility. Dataset splits (training/validation/test) are deterministic for all experiments, but anything else that needs random initialization is non-deterministic.
+
+### Test Results of 1-Layer CNN + FC (TextCNN)
+
+| Language | # Of Categories | Pre-trained Embedding | OOV Embedding | Embedding Training | Top-1 Test Accuracy | Top-5 Test Accuracy |   
+|----------|-------------------------------|-----------------------|---------------|--------------------|:-------------------:|:-------------------:|
+|Turkish| 25 | Fasttext | zeros | static	| NaN (Training process) | NaN (Training process) |
+|Turkish| 25  | Fasttext | zeros | nonstatic	| 62.6054 | 86.3384 |
+|Turkish|25| Fasttext | Fasttext | static	|  NaN (TBA)  | NaN (TBA) |
+|Turkish|25| Fasttext | Fasttext | nonstatic	| NaN (TBA)  | NaN (TBA) |
+|Turkish|49| Fasttext | zeros | static	| NaN (TBA)  | NaN (TBA) |
+|Turkish|49| Fasttext | zeros | nonstatic	| NaN (TBA)  | NaN (TBA) |
+|Turkish|49| Fasttext | Fasttext | static	| NaN (TBA)  | NaN (TBA) |
+|Turkish|49| Fasttext | Fasttext | nonstatic	| NaN (TBA)  | NaN (TBA) |
+|English|25| Fasttext | zeros | static	| NaN (TBA) | NaN (TBA) |
+|English|25| Fasttext | zeros | nonstatic	| NaN (TBA) | NaN (TBA) |
+|English|25| Fasttext | Fasttext | static	|  NaN (TBA)  | NaN (TBA) |
+|English|25| Fasttext | Fasttext | nonstatic	| NaN (TBA)  | NaN (TBA) |
+|English|49| Fasttext | zeros | static	| NaN (TBA)  | NaN (TBA) |
+|English|49| Fasttext | zeros | nonstatic	| NaN (TBA)  | NaN (TBA) |
+|English|49| Fasttext | Fasttext | static	| NaN (TBA)  | NaN (TBA) |
+|English|49| Fasttext | Fasttext | nonstatic	| NaN (TBA)  | NaN (TBA) |
+
 
 ### References for code development: 
 Below two repositories really helped me to write a decent and working code:
