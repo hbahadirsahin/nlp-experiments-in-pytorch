@@ -29,10 +29,10 @@ Before diving into details, the python and library versions are as follows:
 
 ## To-do 
 
-- [x] Variational Dropout. Update: Variational and Gaussian dropout methods are added. Reference: [Variational Dropout and
-the Local Reparameterization Trick](https://arxiv.org/pdf/1506.02557.pdf)
+- [x] ~~Variational Dropout. Update: Variational and Gaussian dropout methods are added. Reference: [Variational Dropout and
+the Local Reparameterization Trick](https://arxiv.org/pdf/1506.02557.pdf)~~
 - [ ] Extending main flow and learning models with respect to new dropout models.
-- [ ] Run the current piece of code for the aforementioned datasets and define a text categorization baseline (for both Turkish and English). Update (30-10-2018): Due to lack of proper computer, experiments are being executed in a CPU machine
+- [ ] Run the current piece of code for the aforementioned datasets and define a text categorization baseline (for both Turkish and English). **Update (30-10-2018): Due to lack of proper computer, experiments are being executed in a CPU machine.**
 - [ ] Attention.
 - [ ] Different learning algorithms (DeepCNN, LSTM, GRU, any-kind-of-hybrid versions of those algorithms, transformers).
 - [ ] CRF layer to be able to do NER experiments.
