@@ -86,6 +86,7 @@ There are 3 dictionaries defined to hold run arguments.
    - use_pretrained_embed: Can be "True" if you want to use known word embedding models, or "False" if you want to use random vectors.
    - embed_train_type: Can be "static" if you want non-trainable, "nonstatic" if you want trainable or "multichannel" if you want multichannel embeddings as your inputs.
    - use_padded_conv: A boolean argument that specifies whether convolution filters apply padding or not.
+   - dropout_type: Dropout type. Can be "bernoulli", "gaussian" or "variational".
    - keep_prob: Dropout probability.
    - use_batch_norm: A boolean argument to use batch normalization.
    - batch_norm_momentum: Batch normalization's momentum parameter.
@@ -123,9 +124,9 @@ This section presents the Top-1 and Top-5 test accuracies for **text categorizat
 
 | Language | # Of Categories | Pre-trained Embedding | OOV Embedding | Embedding Training | Top-1 Test Accuracy | Top-5 Test Accuracy |   
 |----------|:-----------------------------:|-----------------------|---------------|--------------------|:-------------------:|:-------------------:|
-|Turkish| 25 | Fasttext | zeros | static	| NaN (Training process) | NaN (Training process) |
+|Turkish| 25 | Fasttext | zeros | static	| 49.4565 | 76.2760 |
 |Turkish| 25  | Fasttext | zeros | nonstatic	| 62.6054 | 86.3384 |
-|Turkish|25| Fasttext | Fasttext | static	|  NaN (TBA)  | NaN (TBA) |
+|Turkish|25| Fasttext | Fasttext | static	|  NaN (Training)  | NaN (Training) |
 |Turkish|25| Fasttext | Fasttext | nonstatic	| NaN (TBA)  | NaN (TBA) |
 |Turkish|49| Fasttext | zeros | static	| NaN (TBA)  | NaN (TBA) |
 |Turkish|49| Fasttext | zeros | nonstatic	| NaN (TBA)  | NaN (TBA) |
@@ -145,4 +146,7 @@ This section presents the Top-1 and Top-5 test accuracies for **text categorizat
 Below two repositories really helped me to write a decent and working code:
 - https://github.com/bamtercelboo/cnn-lstm-bilstm-deepcnn-clstm-in-pytorch
 - https://github.com/bentrevett/pytorch-sentiment-analysis
+- https://github.com/j-min/Dropouts/blob/master/Gaussian_Variational_Dropout.ipynb
+- https://github.com/felix-laumann/Bayesian_CNN/
+- https://github.com/kefirski/variational_dropout/
 
