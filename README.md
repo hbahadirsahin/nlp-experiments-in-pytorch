@@ -120,7 +120,7 @@ If you succesfully train and save a model, you can evaluate the saved model inte
 
 This section presents the Top-1 and Top-5 test accuracies for **text categorization task** of my experiments. Due to computational resource limit, I cannot test every single parameter/hyperparameter. In general, I hold algorithm parameters same for all experiments; however, I change embedding related parameters. I assume the result table is self-explanatory. As a final note, I *won't* share my best models and I *won't* guarantee reproducibility. Dataset splits (training/validation/test) are deterministic for all experiments, but anything else that needs random initialization is non-deterministic. 
 
-Note: Epoch is set to 20 for all experiments, until further notice. However, if I believe that results may improve, I make the experiment run for 10 more epochs (at most 30 epoch). 
+Note: Epoch is set to 20 for all experiments, until further notice (last update: 31-10-2018). However, if I believe that results may improve, I let the experiment run for 10 more epochs (at most 30 epoch per experiments). 
 
 ### Test Results of 1-Layer CNN + FC (TextCNN)
 
