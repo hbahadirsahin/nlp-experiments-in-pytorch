@@ -33,6 +33,7 @@ Before diving into details, the python and library versions are as follows:
 the Local Reparameterization Trick](https://arxiv.org/pdf/1506.02557.pdf)~~
 - [x] ~~Extending main flow and learning models with respect to new dropout models.~~ 
 - [ ] Run the current piece of code for the aforementioned datasets and define a text categorization baseline (for both Turkish and English). **Update (02-11-2018): I will be able to get my computer in 2 weeks according to service. Hence, slow trainings+slow result announcements for two more weeks**
+- [ ] Variational Dropout related extensions (current version is from 2015 paper but obviously more recent versions are out there for me to implement =)) + bayes by backprop for CNN (a.k.a. Bayesian CNN)
 - [ ] Attention.
 - [ ] Different learning algorithms (DeepCNN, LSTM, GRU, any-kind-of-hybrid versions of those algorithms, transformers).
 - [ ] CRF layer to be able to do NER experiments.
