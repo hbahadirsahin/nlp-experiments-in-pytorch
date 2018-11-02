@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-import torch.distributions as dist
+from torch.autograd import Variable
 
 
 class VariationalDropout(nn.Module):
@@ -8,45 +8,43 @@ class VariationalDropout(nn.Module):
         super(VariationalDropout, self).__init__()
 
         self.dimension = dimension
-        if prob == 1.0:
-            self.alpha = 1.0
-        else:
-            self.alpha = prob / (1 - prob)
 
-        log_alpha = (torch.ones(dimension) * self.alpha).log()
+        alpha = 1.0
+        if prob <= 0.5:
+            alpha = prob / (1 - prob)
+        else:
+            print("Caution! With the current alpha value ({}), you may trapped in local optima!".format(prob))
+            print("It is suggested that probability value should be <= 0.5")
+            alpha = prob / (1 - 0.49)
+        self.max_alpha = alpha
+
+        log_alpha = torch.log(torch.ones(dimension) * alpha)
         self.log_alpha = nn.Parameter(log_alpha)
 
-    def kl_divergence(self):
-        c1 = 1.16145124
-        c2 = -1.50204118
-        c3 = 0.58629921
-        constant = 0.5
+        self.c = [1.16145124, -1.50204118, 0.58629921]
 
-        alpha = self.log_alpha.exp()
+    def kl(self):
+        alpha = torch.exp(self.log_alpha)
 
-        kl = -constant * self.log_alpha + c1 * alpha + c2 * alpha ** 2 + c3 * alpha ** 3
+        kl = -(0.5 * self.log_alpha + self.c[0] * alpha + self.c[1] * alpha ** 2 + self.c[2] * alpha ** 3)
 
-        return kl.mean()
-
-    @staticmethod
-    def clip(tensor, to):
-        return torch.clamp(tensor, -to, to)
+        return torch.mean(kl)
 
     def forward(self, x):
+        self.log_alpha.data = torch.clamp(self.log_alpha.data, max=self.max_alpha)
+        kld = self.kl()
+
         if self.train():
             # Epsilon ~ N(0, 1)
-            normal = dist.Normal(torch.tensor[0.0], torch.tensor[1.0])
-            epsilon = normal.sample(x.size())
+            epsilon = Variable(torch.randn(x.size()))
             if x.is_cuda:
                 epsilon = epsilon.cuda()
 
-            # Shring tensor values to range [-alpha, alpha]
-            self.log_alpha.data = self.clip(self.log_alpha.data, self.alpha)
-            alpha = self.log_alpha.exp()
+            alpha = torch.exp(self.log_alpha)
 
             # Epsilon ~ N(1, alpha)
-            epsilon *= alpha
+            epsilon = epsilon * alpha
 
-            return x * epsilon
+            return x * epsilon, kld
         else:
-            return x
+            return x, kld

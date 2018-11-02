@@ -32,7 +32,7 @@ class TextCnn(nn.Module):
         pretrained_weights = args["pretrained_weights"]
 
         # Dropout type
-        dropout_type = args["dropout_type"]
+        self.dropout_type = args["dropout_type"]
 
         # Dropout probabilities
         keep_prob = args["keep_prob"]
@@ -98,18 +98,21 @@ class TextCnn(nn.Module):
                                                   kernel_size=(filter_size, embed_dim),
                                                   bias=True) for filter_size in filter_sizes])
 
-        if dropout_type == "bernoulli" or dropout_type == "gaussian":
-            print("> Dropout - ", dropout_type)
-            self.dropout = Dropout(keep_prob=keep_prob, dimension=None, dropout_type=dropout_type).dropout
-        elif dropout_type == "variational":
-            print("> Dropout - Bernoulli (Variational Dropout is out-of-order for now)")
-            self.dropout = Dropout(keep_prob=keep_prob, dimension=None, dropout_type="bernoulli").dropout
+        num_flatten_feature = len(filter_sizes) * filter_count
+
+        if self.dropout_type == "bernoulli" or self.dropout_type == "gaussian":
+            print("> Dropout - ", self.dropout_type)
+            self.dropout = Dropout(keep_prob=keep_prob, dimension=None, dropout_type=self.dropout_type).dropout
+        elif self.dropout_type == "variational":
+            print("> Dropout - ", self.dropout_type)
+            self.dropout_before_flatten = Dropout(keep_prob=0.2, dimension=num_flatten_feature,
+                                                  dropout_type=self.dropout_type).dropout
+            self.dropout_fc1 = Dropout(keep_prob=keep_prob, dimension=num_flatten_feature // 2,
+                                       dropout_type=self.dropout_type).dropout
         else:
             print("> Dropout - Bernoulli (You provide undefined dropout type!)")
             self.dropout = Dropout(keep_prob=keep_prob, dimension=None, dropout_type="bernoulli").dropout
         # self.dropout = nn.Dropout(keep_prob)
-
-        num_flatten_feature = len(filter_sizes) * filter_count
 
         self.fc1 = nn.Linear(in_features=num_flatten_feature,
                              out_features=num_flatten_feature // 2,
@@ -132,6 +135,7 @@ class TextCnn(nn.Module):
                                          affine=batch_norm_affine)
 
     def forward(self, batch):
+        kl_loss = torch.Tensor([0.0])
         # Input shape: [sentence_length, batch_size]
         batch_permuted = batch.permute(1, 0)
         # X shape: [batch_size, sentence_length]
@@ -151,11 +155,24 @@ class TextCnn(nn.Module):
         # X[i] shape: [batch_size, filter_count, sentence_lenght - filter_size[i]]
         x = [F.max_pool1d(conv, conv.size(2)).squeeze(2) for conv in x]
         # X[i] shape: [batch_size, filter_count]
-        x = self.dropout(torch.cat(x, dim=1))
+        if self.dropout_type == "variational":
+            x, kld = self.dropout_before_flatten(torch.cat(x, dim=1))
+            kl_loss += kld.sum()
+        else:
+            x = self.dropout(torch.cat(x, dim=1))
+        # Fully Connected Layers
         if self.use_batch_norm:
-            x = self.dropout(self.fc1_bn(F.relu(self.fc1(x))))
+            if self.dropout_type == "variational":
+                x, kld = self.dropout_fc1(self.fc1_bn(F.relu(self.fc1(x))))
+                kl_loss += kld.sum()
+            else:
+                x = self.dropout(self.fc1_bn(F.relu(self.fc1(x))))
             x = self.fc2_bn(self.fc2(x))
         else:
-            x = self.dropout(F.relu(self.fc1(x)))
+            if self.dropout_type == "variational":
+                x, kld = self.dropout_fc1(F.relu(self.fc1(x)))
+                kl_loss += kld.sum()
+            else:
+                x = self.dropout(F.relu(self.fc1(x)))
             x = self.fc2(x)
-        return x
+        return x, kl_loss
