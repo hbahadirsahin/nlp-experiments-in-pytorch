@@ -127,10 +127,10 @@ Note: Epoch is set to 20 for all experiments, until further notice (last update:
 
 | Language | # Of Categories | Pre-trained Embedding | OOV Embedding | Embedding Training | Top-1 Test Accuracy | Top-5 Test Accuracy |   
 |----------|:-----------------------------:|-----------------------|---------------|--------------------|:-------------------:|:-------------------:|
-|Turkish| 25 | Fasttext | zeros | static	| 49.4565 | 76.2760 |
-|Turkish| 25  | Fasttext | zeros | nonstatic	| 62.6054 | 86.3384 |
+|Turkish|25| Fasttext | zeros | static	| 49.4565 | 76.2760 |
+|Turkish|25| Fasttext | zeros | nonstatic	| 62.6054 | 86.3384 |
 |Turkish|25| Fasttext | Fasttext | static	|  49.6810  | 75.2684 |
-|Turkish|25| Fasttext | Fasttext | nonstatic	| NaN (TBA)  | NaN (TBA) |
+|Turkish|25| Fasttext | Fasttext | nonstatic	| 63.9391  | 87.9597 |
 |Turkish|49| Fasttext | zeros | static	| NaN (TBA)  | NaN (TBA) |
 |Turkish|49| Fasttext | zeros | nonstatic	| NaN (TBA)  | NaN (TBA) |
 |Turkish|49| Fasttext | Fasttext | static	| NaN (TBA)  | NaN (TBA) |
