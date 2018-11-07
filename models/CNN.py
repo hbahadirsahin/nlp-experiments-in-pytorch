@@ -112,7 +112,6 @@ class TextCnn(nn.Module):
         else:
             print("> Dropout - Bernoulli (You provide undefined dropout type!)")
             self.dropout = Dropout(keep_prob=keep_prob, dimension=None, dropout_type="bernoulli").dropout
-        # self.dropout = nn.Dropout(keep_prob)
 
         self.fc1 = nn.Linear(in_features=num_flatten_feature,
                              out_features=num_flatten_feature // 2,
@@ -141,7 +140,7 @@ class TextCnn(nn.Module):
         # X shape: [batch_size, sentence_length]
         x = self.embed(batch_permuted)
         if self.embed_train_type == "multichannel":
-            x_static = self.embed_multi(batch_permuted)
+            x_static = self.embed_static(batch_permuted)
             x = torch.stack[(x_static, x), 1]
         if "cuda" in str(self.device):
             x = x.cuda()

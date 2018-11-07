@@ -10,6 +10,7 @@ from datahelper.embedding_helper import OOVEmbeddingCreator
 from datahelper.preprocessor import Preprocessor
 from evaluation.evaluate import evaluate_interactive
 from models.CNN import TextCnn
+from models.GRU import GRU
 from training.train import train_iters
 from utils.utils import save_vocabulary
 
@@ -27,30 +28,38 @@ dataset_properties = {"stop_word_path": "D:/nlpdata/stopwords/turkish",
 model_properties = {"use_pretrained_embed": True,
                     "embed_train_type": "static",
                     "use_padded_conv": True,
-                    "dropout_type": "gaussian",
-                    "keep_prob": 0.4,
+                    "dropout_type": "bernoulli",
+                    "keep_prob": 0.5,
                     "use_batch_norm": True,
                     "batch_norm_momentum": 0.1,
                     "batch_norm_affine": False,
+                    # CNN Related parameters
                     "filter_count": 64,
                     "filter_sizes": [3, 4, 5],
+                    # RNN-GRU-LSTM related parameters
+                    "rnn_hidden_dim": 300,
+                    "rnn_num_layers": 1,
+                    "rnn_bidirectional": False,
+                    "rnn_bias": True,
+                    # Run mode parameter
                     # "run_mode": "eval_interactive",
                     "run_mode": "train",
                     }
 
-training_properties = {"optimizer": "Adam",
+training_properties = {"learner": "gru",
+                       "optimizer": "Adam",
                        "learning_rate": 0.05,
                        "weight_decay": 0,
                        "momentum": 0.9,
                        "norm_ratio": 10,
-                       "epoch": 30,
+                       "epoch": 20,
                        "print_every_batch_step": 250,
                        "save_every_epoch": 1,
                        "topk": (5, 1),
                        "eval_every": 1,
                        }
 
-evaluation_properties = {"model_path": "D:/PyTorchNLP/saved/2018-10-21/",
+evaluation_properties = {"model_path": "D:/PyTorchNLP/saved/2018-11-05/",
                          "sentence_vocab": "D:/PyTorchNLP/saved/vocab/sentence_vocab.dat",
                          "category_vocab": "D:/PyTorchNLP/saved/vocab/category_vocab.dat"
                          }
@@ -62,7 +71,10 @@ if __name__ == '__main__':
            model_properties["run_mode"] == "eval_interactive"
 
     print("Initial device is", device)
-    torch.backends.cudnn.benchmark = True
+    if training_properties["learner"] != "gru":
+        torch.backends.cudnn.benchmark = True
+    else:
+        torch.backends.cudnn.enabled = False
 
     stop_word_path = dataset_properties["stop_word_path"]
     data_path = dataset_properties["data_path"]
@@ -121,7 +133,11 @@ if __name__ == '__main__':
         save_vocabulary(sentence_vocab, os.path.abspath(os.path.join(save_dir_vocab, "sentence_vocab.dat")))
         save_vocabulary(category_vocab, os.path.abspath(os.path.join(save_dir_vocab, "category_vocab.dat")))
         print("Initialize model")
-        model = TextCnn(model_properties).to(device)
+        if training_properties["learner"] == "textcnn":
+            model = TextCnn(model_properties).to(device)
+        elif training_properties["learner"] == "gru":
+            model = GRU(model_properties).to(device)
+
         if dataset_properties["checkpoint_path"] is None or dataset_properties["checkpoint_path"] == "":
             print("Train process is starting from scratch!")
             train_iters(model=model,
