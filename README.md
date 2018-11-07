@@ -129,7 +129,7 @@ Note: Epoch is set to 20 for all experiments, until further notice (last update:
 |Turkish|25| Fasttext | zeros | nonstatic	| 62.6054 | 86.3384 |
 |Turkish|25| Fasttext | Fasttext | static	|  49.6810  | 75.2684 |
 |Turkish|25| Fasttext | Fasttext | nonstatic	| 63.9391  | 87.9597 |
-|Turkish|49| Fasttext | zeros | static	| NaN (Training)  | NaN (Training) |
+|Turkish|49| Fasttext | zeros | static	| 43.5519  | 68.4336 |
 |Turkish|49| Fasttext | zeros | nonstatic	| NaN (TBA)  | NaN (TBA) |
 |Turkish|49| Fasttext | Fasttext | static	| NaN (TBA)  | NaN (TBA) |
 |Turkish|49| Fasttext | Fasttext | nonstatic	| NaN (TBA)  | NaN (TBA) |
