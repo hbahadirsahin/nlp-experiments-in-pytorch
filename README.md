@@ -52,7 +52,7 @@ I try to keep every part of the project clean and easy to follow. Even though th
 - `./dropout_models/variational_dropout.py` contains the Variational Dropout object. 
 - `./dropout_models/dropout.py` contains the Dropout object which you can select your dropout type among Bernoulli (basic), Gaussian and Variational dropout types. 
 - `./evaluation/evaluate.py` contains two methods for evaluation. The first one is evaluating validation and/or test sets while training. The other method is for interactive evaluation. Note that you need "spacy" to tokenize test sentences for interactive evaluation (note that my original dataset is already tokenized, so you do not need to use spacy while training).
-- `./model/xyz.py` is really self explanatory =) For now, it only contains basic TextCNN with several extra properties, however, more models will be implemented.
+- `./model/xyz.py` is self explanatory.
 - `./training/train.py` contains training specific methods. 
 - `./utils/utils.py` contains both utility and common methods that are being used in several places in the project.
 - `./main.py` is the main code. Run arguments/parameters/configurations are at the top of this file.
@@ -90,11 +90,16 @@ There are 3 dictionaries defined to hold run arguments.
    - use_batch_norm: A boolean argument to use batch normalization.
    - batch_norm_momentum: Batch normalization's momentum parameter.
    - batch_norm_affine: Batch normalization's affine parameter.
-   - filter_count: Number of filters.
-   - filter_sizes: List of convolution filter sizes (Example: [3, 4, 5])
+   - rnn_hidden_dim: Hidden dimension for RNN/GRU/LSTM-based models.
+   - rnn_num_layers: Number of layers for RNN/GRU/LSTM-based models. 
+   - rnn_bidirectional: A boolean argument for RNN/GRU/LSTM-based models to define bidirectionality.
+   - rnn_bias: A boolean argument for RNN/GRU/LSTM-based models to use bias.
+   - filter_count: Number of filters for CNN-based models.
+   - filter_sizes: List of convolution filter sizes for CNN-based models(Example: [3, 4, 5]).
    - run_mode: Can be "train" to start training process or "eval_interactive" to test your saved model(s) interactively. 
   
  - `training_properties` holds training-related arguments:
+   - learner: Argument to choose which learning algorithm to use. It can be "textcnn" or "gru" (Update: 07 Nov 2018) 
    - optimizer: It can be either "Adam" or "SGD".
    - learning_rate: Self-explanatory.
    - weight_decay: L2 normalization term. Note that for my case, any value bigger than 0, literally fucked my performance. 
