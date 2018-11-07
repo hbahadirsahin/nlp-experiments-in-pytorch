@@ -2,8 +2,6 @@
 
 ## Intro
 
-**Minor Update**: My beloved laptop has a motherboard issue and I am waiting for it to be repaired (approx. 7-10 days to wait). While waiting, I use my workstation to get some test results. However, the workstation does not have any GPU = trainings takes infinite amount of time :(
-
 Finally, I decided to do my all machine learning, NLP stuff by using PyTorch. The reason is simple actually, I like it more than Tensorflow =) 
 Eventually, I won't update the other text_categorization repository, but I will continue to develop same ideas in here. 
 
@@ -19,7 +17,7 @@ Before diving into details, the python and library versions are as follows:
 ## Code Details
 
 - As the other Tensorflow-based repository, I will use the dataset that me and my old colleagues constructed 3 years ago. "English/Turkish Wikipedia Named-Entity Recognition and Text Categorization Dataset" is publicly available: https://data.mendeley.com/datasets/cdcztymf4k/1
-- Initial commit introduces basic Text CNN (from 2014 paper). 
+- Initial commit introduces basic Text CNN (from 2014 paper). More models will be added.
 - Fasttext embeddings are used (by default but it can be changed). Eventually, one can use Torchtext to download the "pre-defined" embedding files. However, since Turkish embeddings were not included in, I manually edit the Torchtext backend codes (please check the "changes in the torchtext.txt" file). Also note that, everytime you update Torchtext, you need to re-add those changes again.
 - Embeddings (whether random or pretrained) can be "static", "nonstatic", or "multichannel".
 - For OOV words, OOVEmbeddingCreator is developed (under datahelper/embedding_helper). There are 5 different basic approaches defined to generate OOV embeddings: (1) zeros vector, (2) ones vector, (3) random vector (between 0, 1), (4) (r1, r2) ranged uniformly random vector, (5) Fasttext CharNgram-based vectors.
@@ -31,8 +29,9 @@ Before diving into details, the python and library versions are as follows:
 
 - [x] ~~Variational Dropout. Update: Variational and Gaussian dropout methods are added. Reference: [Variational Dropout and
 the Local Reparameterization Trick](https://arxiv.org/pdf/1506.02557.pdf)~~
-- [ ] Extending main flow and learning models with respect to new dropout models.
-- [ ] Run the current piece of code for the aforementioned datasets and define a text categorization baseline (for both Turkish and English). **Update (30-10-2018): Due to lack of proper computer, experiments are being executed in a CPU machine.**
+- [x] ~~Extending main flow and learning models with respect to new dropout models.~~ 
+- [ ] Run the current piece of code for the aforementioned datasets and define a text categorization baseline (for both Turkish and English). **Update (02-11-2018): I will be able to get my computer in 2 weeks according to service. Hence, slow trainings+slow result announcements for two more weeks**
+- [ ] Variational Dropout related extensions (current version is from 2015 paper but obviously more recent versions are out there for me to implement =)) + bayes by backprop for CNN (a.k.a. Bayesian CNN)
 - [ ] Attention.
 - [ ] Different learning algorithms (DeepCNN, LSTM, GRU, any-kind-of-hybrid versions of those algorithms, transformers).
 - [ ] CRF layer to be able to do NER experiments.
@@ -126,11 +125,11 @@ Note: Epoch is set to 20 for all experiments, until further notice (last update:
 
 | Language | # Of Categories | Pre-trained Embedding | OOV Embedding | Embedding Training | Top-1 Test Accuracy | Top-5 Test Accuracy |   
 |----------|:-----------------------------:|-----------------------|---------------|--------------------|:-------------------:|:-------------------:|
-|Turkish| 25 | Fasttext | zeros | static	| 49.4565 | 76.2760 |
-|Turkish| 25  | Fasttext | zeros | nonstatic	| 62.6054 | 86.3384 |
+|Turkish|25| Fasttext | zeros | static	| 49.4565 | 76.2760 |
+|Turkish|25| Fasttext | zeros | nonstatic	| 62.6054 | 86.3384 |
 |Turkish|25| Fasttext | Fasttext | static	|  49.6810  | 75.2684 |
-|Turkish|25| Fasttext | Fasttext | nonstatic	| NaN (TBA)  | NaN (TBA) |
-|Turkish|49| Fasttext | zeros | static	| NaN (TBA)  | NaN (TBA) |
+|Turkish|25| Fasttext | Fasttext | nonstatic	| 63.9391  | 87.9597 |
+|Turkish|49| Fasttext | zeros | static	| 43.5519  | 68.4336 |
 |Turkish|49| Fasttext | zeros | nonstatic	| NaN (TBA)  | NaN (TBA) |
 |Turkish|49| Fasttext | Fasttext | static	| NaN (TBA)  | NaN (TBA) |
 |Turkish|49| Fasttext | Fasttext | nonstatic	| NaN (TBA)  | NaN (TBA) |
