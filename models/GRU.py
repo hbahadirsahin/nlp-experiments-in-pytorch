@@ -107,6 +107,7 @@ class GRU(nn.Module):
         kl_loss = torch.Tensor([0.0])
 
         x = self.embed(batch)
+        x = self.dropout(x)
         x = x.view(len(x), self.batch_size, -1)
 
         if "cuda" in str(self.device):

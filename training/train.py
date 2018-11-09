@@ -29,14 +29,15 @@ def train(model, train_iter, optimizer, scheduler, criterion, norm_ratio, device
     epoch_total_acc_topk = 0
     step = 1
     model.train()
+
     for batch in train_iter:
         optimizer.zero_grad()
+        if isinstance(model, GRU):
+            model.hidden = model.init_hidden()
 
         batch_x = batch.sentence.to(device)
         batch_y = batch.category_labels.to(device)
 
-        if isinstance(model, GRU):
-            model.hidden = model.init_hidden()
         predictions, kl_loss = model(batch_x)
 
         loss = criterion(predictions, batch_y)
