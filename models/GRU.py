@@ -32,7 +32,6 @@ class GRU(nn.Module):
         self.embed_train_type = args["embed_train_type"]
         self.bidirectional = args["rnn_bidirectional"]
         self.rnn_bias = args["rnn_bias"]
-        self.use_batch_norm = args["use_batch_norm"]
 
         # Pretrained embedding weights
         self.pretrained_weights = args["pretrained_weights"]
@@ -42,10 +41,6 @@ class GRU(nn.Module):
 
         # Dropout probabilities
         self.keep_prob = args["keep_prob"]
-
-        # Batch normalization parameters
-        batch_norm_momentum = args["batch_norm_momentum"]
-        batch_norm_affine = args["batch_norm_affine"]
 
         self.embed = self.initialize_embeddings()
 
@@ -58,10 +53,6 @@ class GRU(nn.Module):
                           num_layers=self.num_layers,
                           bidirectional=self.bidirectional,
                           bias=self.rnn_bias)
-
-        if self.use_batch_norm:
-            print("> Batch Normalization")
-            self.bn = nn.BatchNorm1d(self.hidden_dim, momentum=batch_norm_momentum, affine=batch_norm_affine)
 
         self.hidden = self.init_hidden()
 
