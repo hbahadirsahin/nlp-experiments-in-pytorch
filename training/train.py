@@ -6,6 +6,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.optim.lr_scheduler as lr_scheduler
 
+from models.GRU import GRU
 from evaluation.evaluate import evaluate_iter
 from utils.utils import time_since, calculate_accuracy, calculate_topk_accuracy, save_best_model
 
@@ -34,6 +35,8 @@ def train(model, train_iter, optimizer, scheduler, criterion, norm_ratio, device
         batch_x = batch.sentence.to(device)
         batch_y = batch.category_labels.to(device)
 
+        if isinstance(model, GRU):
+            model.hidden = model.init_hidden()
         predictions, kl_loss = model(batch_x)
 
         loss = criterion(predictions, batch_y)
@@ -44,7 +47,8 @@ def train(model, train_iter, optimizer, scheduler, criterion, norm_ratio, device
 
         total_loss.backward()
 
-        # utils.clip_grad_norm_(model.parameters(), max_norm=norm_ratio)
+        if 0.0 < norm_ratio:
+            nn.utils.clip_grad_norm_(model.parameters(), norm_ratio)
 
         optimizer.step()
 
@@ -93,7 +97,10 @@ def train_iters(model, train_iter, dev_iter, test_iter, device, topk, training_p
 
     scheduler = lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.1)
 
-    criterion = nn.CrossEntropyLoss().to(device)
+    if isinstance(model, GRU):
+        criterion = nn.NLLLoss().to(device)
+    else:
+        criterion = nn.CrossEntropyLoss().to(device)
 
     start = time.time()
     old_path = None

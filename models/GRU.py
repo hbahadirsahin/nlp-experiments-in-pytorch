@@ -12,6 +12,7 @@ class GRU(nn.Module):
 
         self.hidden_dim = args["rnn_hidden_dim"]
         self.num_layers = args["rnn_num_layers"]
+        self.batch_size = args["batch_size"]
 
         self.vocab = args["vocab"]
 
@@ -62,10 +63,12 @@ class GRU(nn.Module):
             print("> Batch Normalization")
             self.bn = nn.BatchNorm1d(self.hidden_dim, momentum=batch_norm_momentum, affine=batch_norm_affine)
 
+        self.hidden = self.init_hidden()
+
         self.h2o = nn.Linear(self.hidden_dim, self.num_class)
 
-    def init_hidden(self, batch_size):
-        return Variable(torch.zeros((1, batch_size, self.hidden_dim)))
+    def init_hidden(self):
+        return Variable(torch.zeros((1, self.batch_size, self.hidden_dim)))
 
     def initialize_embeddings(self):
         print("> Embeddings")
@@ -103,18 +106,19 @@ class GRU(nn.Module):
     def forward(self, batch):
         kl_loss = torch.Tensor([0.0])
 
-        hidden = self.init_hidden(batch.size(1))
-
         x = self.embed(batch)
-        x = x.view(len(x), x.size(1), -1)
+        x = x.view(len(x), self.batch_size, -1)
 
         if "cuda" in str(self.device):
             x = x.cuda()
-        out, hidden = self.gru(x, hidden)
-        out = out.permute(1, 2, 0)
+            self.hidden = self.hidden.cuda()
+        out, self.hidden = self.gru(x, self.hidden)
+        out = torch.transpose(out, 0, 1)
+        out = torch.transpose(out, 1, 2)
 
         out = F.max_pool1d(input=out, kernel_size=out.size(2)).squeeze(2)
         out = torch.tanh(out)
 
-        logit = self.h2o(out)
-        return logit, kl_loss
+        out = self.h2o(out)
+        out = F.log_softmax(out, dim=1)
+        return out, kl_loss

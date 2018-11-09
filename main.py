@@ -16,7 +16,7 @@ from utils.utils import save_vocabulary
 
 dataset_properties = {"stop_word_path": "D:/nlpdata/stopwords/turkish",
                       # "stop_word_path": "D:/Anaconda3/nltk_data/corpora/stopwords/turkish",
-                      "data_path": "D:/nlpdata/TWNERTC_TC_Coarse Grained NER_No_NoiseReduction.DUMP",
+                      "data_path": "D:/nlpdata/TWNERTC_TC_Fine Grained NER_No_NoiseReduction.DUMP",
                       "embedding_vector": "fasttext.tr.300d",
                       "vector_cache": "D:/nlpdata/fasttext",
                       "pretrained_embedding_path": "D:/nlpdata/fasttext/wiki.tr",
@@ -128,6 +128,7 @@ if __name__ == '__main__':
         model_properties["vocab"] = sentence_vocab
         model_properties["padding_id"] = sentence_vocab.stoi["<pad>"]
         model_properties["pretrained_weights"] = pretrained_embeddings
+        model_properties["batch_size"] = dataset_properties["batch_size"]
 
         print("Saving vocabulary files")
         save_vocabulary(sentence_vocab, os.path.abspath(os.path.join(save_dir_vocab, "sentence_vocab.dat")))
