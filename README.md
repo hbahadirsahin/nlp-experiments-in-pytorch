@@ -34,6 +34,14 @@ the Local Reparameterization Trick](https://arxiv.org/pdf/1506.02557.pdf)~~
 - [ ] Variational Dropout related extensions (current version is from 2015 paper but obviously more recent versions are out there for me to implement =)) + bayes by backprop for CNN (a.k.a. Bayesian CNN)
 - [ ] Attention.
 - [ ] Different learning algorithms (DeepCNN, LSTM, GRU, any-kind-of-hybrid versions of those algorithms, transformers).
+  - [x] GRU
+  - [ ] LSTM
+  - [ ] Multi-layer CNN
+  - [ ] Transformers
+  - [ ] Conv-Deconv CNN
+  - [ ] Encoder-Decoder GRU
+  - [ ] Encoder-Decoder LSTM
+  - [ ] Hybrid stuff (Like CNN+LSTM/GRU)
 - [ ] CRF layer to be able to do NER experiments.
 - [ ] For Turkish, I plan to add morphological disambiguation (https://github.com/erayyildiz/Neural-Morphological-Disambiguation-for-Turkish). 
 - [ ] Different language models.
