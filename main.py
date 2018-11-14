@@ -11,6 +11,7 @@ from datahelper.preprocessor import Preprocessor
 from evaluation.evaluate import evaluate_interactive
 from models.CNN import TextCnn
 from models.GRU import GRU
+from models.LSTM import LSTM
 from training.train import train_iters
 from utils.utils import save_vocabulary
 
@@ -138,6 +139,8 @@ if __name__ == '__main__':
             model = TextCnn(model_properties).to(device)
         elif training_properties["learner"] == "gru":
             model = GRU(model_properties).to(device)
+        elif training_properties["learner"] == "lstm":
+            model = LSTM(model_properties).to(device)
 
         if dataset_properties["checkpoint_path"] is None or dataset_properties["checkpoint_path"] == "":
             print("Train process is starting from scratch!")

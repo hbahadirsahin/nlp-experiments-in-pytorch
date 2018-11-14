@@ -15,21 +15,21 @@ class TextCnn(nn.Module):
         self.device = args["device"]
 
         # Input/Output dimensions
-        embed_num = args["vocab_size"]
-        embed_dim = args["embed_dim"]
+        self.embed_num = args["vocab_size"]
+        self.embed_dim = args["embed_dim"]
         num_class = args["num_class"]
 
         # Embedding parameters
-        padding_id = args["padding_id"]
+        self.padding_id = args["padding_id"]
 
         # Condition parameters
-        use_pretrained_embed = args["use_pretrained_embed"]
+        self.use_pretrained_embed = args["use_pretrained_embed"]
         self.embed_train_type = args["embed_train_type"]
-        use_padded_conv = args["use_padded_conv"]
+        self.use_padded_conv = args["use_padded_conv"]
         self.use_batch_norm = args["use_batch_norm"]
 
         # Pretrained embedding weights
-        pretrained_weights = args["pretrained_weights"]
+        self.pretrained_weights = args["pretrained_weights"]
 
         # Dropout type
         self.dropout_type = args["dropout_type"]
@@ -42,64 +42,23 @@ class TextCnn(nn.Module):
         batch_norm_affine = args["batch_norm_affine"]
 
         # Convolution parameters
-        input_channel = 1
-        filter_count = args["filter_count"]
-        filter_sizes = args["filter_sizes"]
+        self.input_channel = 1
+        self.filter_count = args["filter_count"]
+        self.filter_sizes = args["filter_sizes"]
 
         # Embedding Layer Initialization
-        print("> Embeddings")
-        self.embed = nn.Embedding(num_embeddings=embed_num,
-                                  embedding_dim=embed_dim,
-                                  padding_idx=padding_id).cpu()
-
-        # Create 2nd embedding layer for multichannel purpose
         if self.embed_train_type == "multichannel":
-            self.embed_static = nn.Embedding(num_embeddings=embed_num,
-                                             embedding_dim=embed_dim,
-                                             padding_idx=padding_id).cpu()
-
-        if use_pretrained_embed:
-            print("> Pre-trained Embeddings")
-            self.embed.from_pretrained(pretrained_weights)
-            if self.embed_train_type == "multichannel":
-                self.embed_static.from_pretrained(pretrained_weights)
+            self.embed, self.embed_static = self.initialize_embeddings()
         else:
-            print("> Random Embeddings")
-            random_embedding_weights = torch.rand(embed_num, embed_dim)
-            self.embed.from_pretrained(random_embedding_weights)
-            if self.embed_train_type == "multichannel":
-                self.embed_static.from_pretrained(random_embedding_weights)
-
-        if self.embed_train_type == "static":
-            print("> Static Embeddings")
-            self.embed.weight.requires_grad = False
-        elif self.embed_train_type == "nonstatic":
-            print("> Non-Static Embeddings")
-            self.embed.weight.requires_grad = True
-        elif self.embed_train_type == "multichannel":
-            self.embed.weight.requires_grad = True
-            self.embed_static.weight.requires_grad = False
-        else:
-            raise KeyError("Embedding train type can be (1) static, (2) nonstatic or (3) multichannel")
+            self.embed, _ = self.initialize_embeddings()
 
         # Convolution Initialization
-        if use_padded_conv:
-            print("> Padded convolution")
-            self.convs = nn.ModuleList([nn.Conv2d(in_channels=input_channel,
-                                                  out_channels=filter_count,
-                                                  kernel_size=(filter_size, embed_dim),
-                                                  stride=(1, 1),
-                                                  padding=(filter_size // 2, 0),
-                                                  bias=True) for filter_size in filter_sizes])
-        else:
-            print("> Without-pad convolution")
-            self.convs = nn.ModuleList([nn.Conv2d(in_channels=input_channel,
-                                                  out_channels=filter_count,
-                                                  kernel_size=(filter_size, embed_dim),
-                                                  bias=True) for filter_size in filter_sizes])
+        self.convs = self.initialize_conv_layer()
 
-        num_flatten_feature = len(filter_sizes) * filter_count
+        # Flatten conv layers' output
+        num_flatten_feature = len(self.filter_sizes) * self.filter_count
 
+        # Dropout initialization
         if self.dropout_type == "bernoulli" or self.dropout_type == "gaussian":
             print("> Dropout - ", self.dropout_type)
             self.dropout = Dropout(keep_prob=keep_prob, dimension=None, dropout_type=self.dropout_type).dropout
@@ -113,17 +72,20 @@ class TextCnn(nn.Module):
             print("> Dropout - Bernoulli (You provide undefined dropout type!)")
             self.dropout = Dropout(keep_prob=keep_prob, dimension=None, dropout_type="bernoulli").dropout
 
+        # Fully Connected Layer 1 initialization
         self.fc1 = nn.Linear(in_features=num_flatten_feature,
                              out_features=num_flatten_feature // 2,
                              bias=True)
 
+        # Fully Connected Layer 2 initialization
         self.fc2 = nn.Linear(in_features=num_flatten_feature // 2,
                              out_features=num_class,
                              bias=True)
 
+        # Batch Normalization initialization
         if self.use_batch_norm:
             print("> Batch Normalization")
-            self.convs_bn = nn.BatchNorm2d(num_features=filter_count,
+            self.convs_bn = nn.BatchNorm2d(num_features=self.filter_count,
                                            momentum=batch_norm_momentum,
                                            affine=batch_norm_affine)
             self.fc1_bn = nn.BatchNorm1d(num_features=num_flatten_feature // 2,
@@ -132,6 +94,59 @@ class TextCnn(nn.Module):
             self.fc2_bn = nn.BatchNorm1d(num_features=num_class,
                                          momentum=batch_norm_momentum,
                                          affine=batch_norm_affine)
+
+    def initialize_embeddings(self):
+        print("> Embeddings")
+        embed = nn.Embedding(num_embeddings=self.embed_num,
+                             embedding_dim=self.embed_dim,
+                             padding_idx=self.padding_id).cpu()
+
+        # Create 2nd embedding layer for multichannel purpose
+        if self.embed_train_type == "multichannel":
+            embed_static = nn.Embedding(num_embeddings=self.embed_num,
+                                        embedding_dim=self.embed_dim,
+                                        padding_idx=self.padding_id).cpu()
+
+        if self.use_pretrained_embed:
+            print("> Pre-trained Embeddings")
+            embed.from_pretrained(self.pretrained_weights)
+            if self.embed_train_type == "multichannel":
+                embed_static.from_pretrained(self.pretrained_weights)
+        else:
+            print("> Random Embeddings")
+            random_embedding_weights = torch.rand(self.embed_num, self.embed_dim)
+            embed.from_pretrained(random_embedding_weights)
+            if self.embed_train_type == "multichannel":
+                embed_static.from_pretrained(random_embedding_weights)
+
+        if self.embed_train_type == "static":
+            print("> Static Embeddings")
+            embed.weight.requires_grad = False
+        elif self.embed_train_type == "nonstatic":
+            print("> Non-Static Embeddings")
+            embed.weight.requires_grad = True
+        elif self.embed_train_type == "multichannel":
+            embed.weight.requires_grad = True
+            embed_static.weight.requires_grad = False
+        else:
+            raise KeyError("Embedding train type can be (1) static, (2) nonstatic or (3) multichannel")
+        return embed, embed_static
+
+    def initialize_conv_layer(self):
+        if self.use_padded_conv:
+            print("> Padded convolution")
+            return nn.ModuleList([nn.Conv2d(in_channels=self.input_channel,
+                                            out_channels=self.filter_count,
+                                            kernel_size=(filter_size, self.embed_dim),
+                                            stride=(1, 1),
+                                            padding=(filter_size // 2, 0),
+                                            bias=True) for filter_size in self.filter_sizes])
+        else:
+            print("> Without-pad convolution")
+            return nn.ModuleList([nn.Conv2d(in_channels=self.input_channel,
+                                            out_channels=self.filter_count,
+                                            kernel_size=(filter_size, self.embed_dim),
+                                            bias=True) for filter_size in self.filter_sizes])
 
     def forward(self, batch):
         kl_loss = torch.Tensor([0.0])

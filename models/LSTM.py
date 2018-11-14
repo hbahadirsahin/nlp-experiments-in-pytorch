@@ -5,9 +5,9 @@ from torch.autograd import Variable
 from dropout_models.dropout import Dropout
 
 
-class GRU(nn.Module):
+class LSTM(nn.Module):
     def __init__(self, args):
-        super(GRU, self).__init__()
+        super(LSTM, self).__init__()
         self.args = args
 
         self.hidden_dim = args["rnn_hidden_dim"]
@@ -44,15 +44,15 @@ class GRU(nn.Module):
 
         self.embed = self.initialize_embeddings()
 
-        # It is NOT the inner GRU dropout!
+        # It is NOT the inner LSTM dropout!
         self.dropout = self.initialize_dropout()
 
-        self.gru = nn.GRU(self.embed_dim,
-                          self.hidden_dim,
-                          dropout=self.keep_prob,
-                          num_layers=self.num_layers,
-                          bidirectional=self.bidirectional,
-                          bias=self.rnn_bias)
+        self.lstm = nn.LSTM(self.embed_dim,
+                            self.hidden_dim,
+                            dropout=self.keep_prob,
+                            num_layers=self.num_layers,
+                            bidirectional=self.bidirectional,
+                            bias=self.rnn_bias)
 
         self.hidden = self.init_hidden()
 
@@ -63,9 +63,11 @@ class GRU(nn.Module):
 
     def init_hidden(self):
         if self.bidirectional is True:
-            return Variable(torch.zeros((1, self.batch_size, self.hidden_dim * 2)))
+            return (Variable(torch.zeros(1, self.batch_size, self.hidden_dim * 2)),
+                    Variable(torch.zeros(1, self.batch_size, self.hidden_dim * 2)))
         else:
-            return Variable(torch.zeros((1, self.batch_size, self.hidden_dim)))
+            return (Variable(torch.zeros(1, self.batch_size, self.hidden_dim)),
+                    Variable(torch.zeros(1, self.batch_size, self.hidden_dim)))
 
     def initialize_embeddings(self):
         print("> Embeddings")
@@ -109,7 +111,7 @@ class GRU(nn.Module):
 
         if "cuda" in str(self.device):
             x = x.cuda()
-        out, self.hidden = self.gru(x, self.hidden)
+        out, self.hidden = self.lstm(x, self.hidden)
         out = torch.transpose(out, 0, 1)
         out = torch.transpose(out, 1, 2)
 
