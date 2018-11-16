@@ -55,6 +55,9 @@ class TextCnn(nn.Module):
         # Convolution Initialization
         self.convs = self.initialize_conv_layer()
 
+        # Initialize convolution weights
+        self.initialize_weights()
+
         # Flatten conv layers' output
         num_flatten_feature = len(self.filter_sizes) * self.filter_count
 
@@ -148,6 +151,11 @@ class TextCnn(nn.Module):
                                             kernel_size=(filter_size, self.embed_dim),
                                             bias=True) for filter_size in self.filter_sizes])
 
+    def initialize_weights(self):
+        for conv in self.convs:
+            nn.init.xavier_normal_(conv.weight)
+            conv.bias.data.fill_(0.01)
+
     def forward(self, batch):
         kl_loss = torch.Tensor([0.0])
         # Input shape: [sentence_length, batch_size]
@@ -190,3 +198,78 @@ class TextCnn(nn.Module):
                 x = self.dropout(F.relu(self.fc1(x)))
             x = self.fc2(x)
         return x, kl_loss
+
+
+class DeepTextCNN(nn.Module):
+    def __init__(self, args):
+        super(DeepTextCNN, self).__init__()
+
+        self.args = args
+
+        self.vocab = args["vocab"]
+
+        # Device
+        self.device = args["device"]
+
+        # Input/Output dimensions
+        self.embed_num = args["vocab_size"]
+        self.embed_dim = args["embed_dim"]
+        num_class = args["num_class"]
+
+        # Embedding parameters
+        self.padding_id = args["padding_id"]
+
+        # Condition parameters
+        self.use_pretrained_embed = args["use_pretrained_embed"]
+        self.embed_train_type = args["embed_train_type"]
+        self.use_padded_conv = args["use_padded_conv"]
+        self.use_batch_norm = args["use_batch_norm"]
+
+        # Pretrained embedding weights
+        self.pretrained_weights = args["pretrained_weights"]
+
+        # Dropout type
+        self.dropout_type = args["dropout_type"]
+
+        # Dropout probabilities
+        keep_prob = args["keep_prob"]
+
+        # Batch normalization parameters
+        batch_norm_momentum = args["batch_norm_momentum"]
+        batch_norm_affine = args["batch_norm_affine"]
+
+        # Convolution parameters
+        self.input_channel = 1
+        self.num_conv_layers = args["num_conv_layers"]
+        self.filter_counts = args["filter_count"]
+        self.filter_sizes = args["filter_sizes"]
+
+        assert len(self.filter_counts) == self.num_conv_layers and len(self.filter_sizes) == self.num_conv_layers
+
+        # Embedding Layer Initialization
+        if self.embed_train_type == "multichannel":
+            self.embed, self.embed_static = self.initialize_embeddings()
+        else:
+            self.embed, _ = self.initialize_embeddings()
+
+        # Convolution Initialization
+        self.convs = self.initialize_conv_layers()
+
+    def initialize_conv_layers(self):
+        if self.use_padded_conv:
+            print("> Padded convolution")
+            convs = nn.ModuleList([nn.Conv2d(in_channels=self.input_channel,
+                                             out_channels=self.filter_counts[0],
+                                             kernel_size=(filter_size, self.embed_dim),
+                                             stride=(1, 1),
+                                             padding=(filter_size // 2, 0),
+                                             bias=True) for filter_size in self.filter_sizes])
+            for layer_count in range(1, self.num_conv_layers - 1):
+                convs.append()
+
+        else:
+            print("> Without-pad convolution")
+            return nn.ModuleList([nn.Conv2d(in_channels=self.input_channel,
+                                            out_channels=self.filter_count,
+                                            kernel_size=(filter_size, self.embed_dim),
+                                            bias=True) for filter_size in self.filter_sizes])
