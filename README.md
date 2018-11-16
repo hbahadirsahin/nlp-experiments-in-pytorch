@@ -47,7 +47,7 @@ the Local Reparameterization Trick](https://arxiv.org/pdf/1506.02557.pdf)~~
 - [ ] Different language models.
   - [ ] ELMO (pretrained Turkish/English embeddings)
   - [ ] BERT (pretrained Turkish/English embeddings)
-- [ ] Document length categorization/NER tasks (Current project guarantess the results for sentences)
+- [ ] Document length categorization/NER tasks (Current runs are on sentence-level; however, with ELMO/BERT I will be able to do document level tasks, too.)
 
 ## Project Skeleton
 
