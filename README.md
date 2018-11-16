@@ -45,6 +45,8 @@ the Local Reparameterization Trick](https://arxiv.org/pdf/1506.02557.pdf)~~
 - [ ] CRF layer to be able to do NER experiments.
 - [ ] For Turkish, I plan to add morphological disambiguation (https://github.com/erayyildiz/Neural-Morphological-Disambiguation-for-Turkish). 
 - [ ] Different language models.
+  - [ ] ELMO (pretrained Turkish/English embeddings)
+  - [ ] BERT (pretrained Turkish/English embeddings)
 - [ ] Document length categorization/NER tasks (Current project guarantess the results for sentences)
 
 ## Project Skeleton
