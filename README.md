@@ -35,7 +35,7 @@ the Local Reparameterization Trick](https://arxiv.org/pdf/1506.02557.pdf)~~
 - [ ] Attention.
 - [ ] Different learning algorithms (DeepCNN, LSTM, GRU, any-kind-of-hybrid versions of those algorithms, transformers).
   - [x] GRU
-  - [ ] LSTM
+  - [x] LSTM
   - [ ] Multi-layer CNN
   - [ ] Transformers
   - [ ] Conv-Deconv CNN
@@ -107,7 +107,7 @@ There are 3 dictionaries defined to hold run arguments.
    - run_mode: Can be "train" to start training process or "eval_interactive" to test your saved model(s) interactively. 
   
  - `training_properties` holds training-related arguments:
-   - learner: Argument to choose which learning algorithm to use. It can be "textcnn" or "gru" (Update: 07 Nov 2018) 
+   - learner: Argument to choose which learning algorithm to use. It can be "textcnn", "gru" and "lstm" (Update: 14 Nov 2018) 
    - optimizer: It can be either "Adam" or "SGD".
    - learning_rate: Self-explanatory.
    - weight_decay: L2 normalization term. Note that for my case, any value bigger than 0, literally fucked my performance. 
@@ -129,6 +129,8 @@ After you make the necessary changes in "changes_in_torchtext" and edit the hard
 If you succesfully train and save a model, you can evaluate the saved model interactively by changing the "run_mode" parameter from "train" to "evaluate_interactive". 
 
 ## Results
+
+**Update (14-11-2018): Workstation is busy with executing other tasks so I can't provide new results. Hopefully, my main computer will be fixed till Friday.**
 
 This section presents the Top-1 and Top-5 test accuracies for **text categorization task** of my experiments. Due to computational resource limit, I cannot test every single parameter/hyperparameter. In general, I hold algorithm parameters same for all experiments; however, I change embedding related parameters. I assume the result table is self-explanatory. As a final note, I *won't* share my best models and I *won't* guarantee reproducibility. Dataset splits (training/validation/test) are deterministic for all experiments, but anything else that needs random initialization is non-deterministic. 
 
