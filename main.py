@@ -9,18 +9,18 @@ from datahelper.dataset_reader import DatasetLoader
 from datahelper.embedding_helper import OOVEmbeddingCreator
 from datahelper.preprocessor import Preprocessor
 from evaluation.evaluate import evaluate_interactive
-from models.CNN import TextCnn
+from models.CNN import TextCnn, DeepTextCNN
 from models.GRU import GRU
 from models.LSTM import LSTM
 from training.train import train_iters
 from utils.utils import save_vocabulary
 
-dataset_properties = {"stop_word_path": "D:/nlpdata/stopwords/turkish",
-                      # "stop_word_path": "D:/Anaconda3/nltk_data/corpora/stopwords/turkish",
-                      "data_path": "D:/nlpdata/TWNERTC_TC_Coarse Grained NER_No_NoiseReduction.DUMP",
+dataset_properties = {"stop_word_path": "D:/Anaconda3/nltk_data/corpora/stopwords/turkish",
+                      # "stop_word_path": "D:/nlpdata/stopwords/turkish",
+                      "data_path": "D:/PyTorchNLP/data/TWNERTC_TC_Coarse Grained NER_No_NoiseReduction.DUMP",
                       "embedding_vector": "fasttext.tr.300d",
-                      "vector_cache": "D:/nlpdata/fasttext",
-                      "pretrained_embedding_path": "D:/nlpdata/fasttext/wiki.tr",
+                      "vector_cache": "D:/PyTorchNLP/data/fasttext",
+                      "pretrained_embedding_path": "D:/PyTorchNLP/data/fasttext/wiki.tr",
                       "checkpoint_path": "",
                       "oov_embedding_type": "zeros",
                       "batch_size": 64
@@ -34,9 +34,13 @@ model_properties = {"use_pretrained_embed": True,
                     "use_batch_norm": True,
                     "batch_norm_momentum": 0.1,
                     "batch_norm_affine": False,
-                    # CNN Related parameters
+                    # ShallowCNN (Single Layer) Related parameters
                     "filter_count": 64,
                     "filter_sizes": [3, 4, 5],
+                    # DeepCNN Related parameters
+                    "num_conv_layers": 3,
+                    "filter_counts": [64, 64, 32],
+                    "filter_sizes_deep": [[3, 4, 5], [3, 4, 5], [2, 3, 4]],
                     # RNN-GRU-LSTM related parameters
                     "rnn_hidden_dim": 300,
                     "rnn_num_layers": 1,
@@ -47,9 +51,9 @@ model_properties = {"use_pretrained_embed": True,
                     "run_mode": "train",
                     }
 
-training_properties = {"learner": "gru",
+training_properties = {"learner": "deeptextcnn",
                        "optimizer": "Adam",
-                       "learning_rate": 0.001,
+                       "learning_rate": 0.05,
                        "weight_decay": 0,
                        "momentum": 0.9,
                        "norm_ratio": 0.25,
@@ -74,7 +78,9 @@ if __name__ == '__main__':
     print("Initial device is", device)
     if training_properties["learner"] != "gru":
         torch.backends.cudnn.benchmark = True
+        torch.backends.cudnn.fastest = True
     else:
+        torch.set_num_threads(8)
         torch.backends.cudnn.enabled = False
 
     stop_word_path = dataset_properties["stop_word_path"]
@@ -141,6 +147,8 @@ if __name__ == '__main__':
             model = GRU(model_properties).to(device)
         elif training_properties["learner"] == "lstm":
             model = LSTM(model_properties).to(device)
+        elif training_properties["learner"] == "deeptextcnn":
+            model = DeepTextCNN(model_properties).to(device)
 
         if dataset_properties["checkpoint_path"] is None or dataset_properties["checkpoint_path"] == "":
             print("Train process is starting from scratch!")

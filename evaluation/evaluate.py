@@ -7,7 +7,6 @@ except pkg_resources.DistributionNotFound:
     HAS_SPACY = False
 else:
     import spacy
-
     HAS_SPACY = True
 import torch
 import torch.nn.functional as F
