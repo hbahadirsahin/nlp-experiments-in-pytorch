@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
 from dropout_models.dropout import Dropout
 
 
@@ -104,6 +105,7 @@ class TextCnn(nn.Module):
                              embedding_dim=self.embed_dim,
                              padding_idx=self.padding_id).cpu()
 
+        embed_static = None
         # Create 2nd embedding layer for multichannel purpose
         if self.embed_train_type == "multichannel":
             embed_static = nn.Embedding(num_embeddings=self.embed_num,
@@ -167,6 +169,7 @@ class TextCnn(nn.Module):
             x = torch.stack[(x_static, x), 1]
         if "cuda" in str(self.device):
             x = x.cuda()
+            kl_loss = kl_loss.cuda()
         # X shape: [batch_size, sentence_length, embedding_dim]
         x = x.unsqueeze(1)
         # X shape: [batch_size, 1, sentence_length, embedding_dim]

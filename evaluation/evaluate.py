@@ -1,4 +1,14 @@
-import spacy
+import pkg_resources
+
+try:
+    pkg_resources.get_distribution("spacy")
+except pkg_resources.DistributionNotFound:
+    print("Spacy has not been found! As sentence tokenizer .split() will be used!")
+    HAS_SPACY = False
+else:
+    import spacy
+
+    HAS_SPACY = True
 import torch
 import torch.nn.functional as F
 
@@ -22,7 +32,7 @@ def evaluate_iter(model, input, criterion, device, save_path, topk, is_vali=True
             batch_x = batch.sentence.to(device)
             batch_y = batch.category_labels.to(device)
 
-            predictions = model(batch_x).squeeze(1)
+            predictions = model(batch_x)
 
             loss = criterion(predictions, batch_y)
             accuracy = calculate_accuracy(predictions, batch_y)
@@ -66,12 +76,15 @@ def evaluate_interactive(model_path, sentence_vocab_path, category_vocab_path, p
                 # whole dataset in training process. Since the dataset I am using is already tokenized as it should be,
                 # I wrote the below code to only evaluation process which is less shorter than my comment to explain
                 # this situation =)
-                nlp_tokenizer = spacy.load("en")
-                doc = nlp_tokenizer(sentence.lower())
-                tokenized_sentence = [token.text for token in doc]
-                preprocessed_sentence = preprocessor(tokenized_sentence)
-                temp = nlp_tokenizer(" ".join(preprocessed_sentence))
-                preprocessed_sentence = [token.text for token in temp]
+                if HAS_SPACY:
+                    nlp_tokenizer = spacy.load("en")
+                    doc = nlp_tokenizer(sentence.lower())
+                    tokenized_sentence = [token.text for token in doc]
+                    preprocessed_sentence = preprocessor(tokenized_sentence)
+                    temp = nlp_tokenizer(" ".join(preprocessed_sentence))
+                    preprocessed_sentence = [token.text for token in temp]
+                else:
+                    preprocessed_sentence = preprocessor(sentence.lower().split())
 
                 indexed_test_sentence = [sentence_vocab.stoi[token] for token in preprocessed_sentence]
 
