@@ -22,7 +22,7 @@ Before diving into details, the python and library versions are as follows:
 - Embeddings (whether random or pretrained) can be "static", "nonstatic", or "multichannel".
 - For OOV words, OOVEmbeddingCreator is developed (under datahelper/embedding_helper). There are 5 different basic approaches defined to generate OOV embeddings: (1) zeros vector, (2) ones vector, (3) random vector (between 0, 1), (4) (r1, r2) ranged uniformly random vector, (5) Fasttext CharNgram-based vectors.
 - Even though I am focusing on Turkish versions of the dataset, I believe "Preprocessor" can work for English dataset, too. In future, I may add more language specific methods. 
-- Due to laziness, I defined all my necessary arguments/configs/properties in "main.py". However, I also implemented argparse versions of the same properties (Sorry for hard-coded paths).
+- Due to laziness, I defined all my necessary arguments/configs/properties in "main.py". However, I also implemented argparse versions of the same properties but it may lack recent updated properties (Sorry for hard-coded paths). 
 - I tested all training, evaluation, model/vocabulary saving/loading aspects of the code for several epochs without any problem (except out of memory errors =)).
 
 ## To-do 
@@ -164,7 +164,7 @@ Note: Epoch is set to 20 for all experiments, until further notice (last update:
 
 
 ### References for code development: 
-Below two repositories really helped me to write a decent and working code:
+Below repositories really helped me to write a decent and working code:
 - https://github.com/bamtercelboo/cnn-lstm-bilstm-deepcnn-clstm-in-pytorch
 - https://github.com/bentrevett/pytorch-sentiment-analysis
 - https://github.com/j-min/Dropouts/blob/master/Gaussian_Variational_Dropout.ipynb
