@@ -30,13 +30,13 @@ Before diving into details, the python and library versions are as follows:
 - [x] ~~Variational Dropout. Update: Variational and Gaussian dropout methods are added. Reference: [Variational Dropout and
 the Local Reparameterization Trick](https://arxiv.org/pdf/1506.02557.pdf)~~
 - [x] ~~Extending main flow and learning models with respect to new dropout models.~~ 
-- [ ] Run the current piece of code for the aforementioned datasets and define a text categorization baseline (for both Turkish and English). **Update (02-11-2018): I will be able to get my computer in 2 weeks according to service. Hence, slow trainings+slow result announcements for two more weeks**
+- [ ] Run the current piece of code for the aforementioned datasets and define a text categorization baseline (for both Turkish and English). 
 - [ ] Variational Dropout related extensions (current version is from 2015 paper but obviously more recent versions are out there for me to implement =)) + bayes by backprop for CNN (a.k.a. Bayesian CNN)
 - [ ] Attention.
 - [ ] Different learning algorithms (DeepCNN, LSTM, GRU, any-kind-of-hybrid versions of those algorithms, transformers).
   - [x] GRU
   - [x] LSTM
-  - [ ] Multi-layer CNN
+  - [x] Multi-layer CNN
   - [ ] Transformers
   - [ ] Conv-Deconv CNN
   - [ ] Encoder-Decoder GRU
@@ -106,10 +106,13 @@ There are 3 dictionaries defined to hold run arguments.
    - rnn_bias: A boolean argument for RNN/GRU/LSTM-based models to use bias.
    - filter_count: Number of filters for CNN-based models.
    - filter_sizes: List of convolution filter sizes for CNN-based models(Example: [3, 4, 5]).
+   - num_conv_layers: Number of layers for creating deeper convolution layers.
+   - filter_counts: List of filter counts for each convolution layer in a Deep CNN architecture (Example: If there are 3-layers of convolution, filter_counts can be [64, 32, 64]).
+   - filter_sizes_deep: List of list of convolution filter sizes (Example: [[3, 4, 5], [2, 3, 4], [1, 2, 3]] for 3-layers of convolution).
    - run_mode: Can be "train" to start training process or "eval_interactive" to test your saved model(s) interactively. 
   
  - `training_properties` holds training-related arguments:
-   - learner: Argument to choose which learning algorithm to use. It can be "textcnn", "gru" and "lstm" (Update: 14 Nov 2018) 
+   - learner: Argument to choose which learning algorithm to use. It can be "textcnn", "gru", "lstm", and "deeptextcnn" (Update: 19 Nov 2018) 
    - optimizer: It can be either "Adam" or "SGD".
    - learning_rate: Self-explanatory.
    - weight_decay: L2 normalization term. Note that for my case, any value bigger than 0, literally fucked my performance. 
