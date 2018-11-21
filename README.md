@@ -36,7 +36,7 @@ the Local Reparameterization Trick](https://arxiv.org/pdf/1506.02557.pdf)~~
 - [ ] Different learning algorithms (DeepCNN, LSTM, GRU, any-kind-of-hybrid versions of those algorithms, transformers).
   - [x] GRU
   - [x] LSTM
-  - [x] Multi-layer CNN
+  - [ ] Multi-layer CNN (Update 21-11-2018: Current version is seriously bugged! A fix will come, hopefully.)
   - [ ] Transformers
   - [ ] Conv-Deconv CNN
   - [ ] Encoder-Decoder GRU
@@ -150,7 +150,7 @@ Note: Epoch is set to 20 for all experiments, until further notice (last update:
 |Turkish|25| Fasttext | Fasttext | static	|  49.6810  | 75.2684 |
 |Turkish|25| Fasttext | Fasttext | nonstatic	| 63.9391  | 87.9597 |
 |Turkish|49| Fasttext | zeros | static	| 43.5519  | 68.4336 |
-|Turkish|49| Fasttext | zeros | nonstatic	| NaN (TBA)  | NaN (TBA) |
+|Turkish|49| Fasttext | zeros | nonstatic	| 56.0081  | 79.8634 |
 |Turkish|49| Fasttext | Fasttext | static	| 43.8025  | 68.8641 |
 |Turkish|49| Fasttext | Fasttext | nonstatic	| NaN (TBA)  | NaN (TBA) |
 |English|25| Fasttext | zeros | static	| NaN (TBA) | NaN (TBA) |
