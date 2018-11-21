@@ -135,7 +135,7 @@ If you succesfully train and save a model, you can evaluate the saved model inte
 
 ## Results
 
-**Update (14-11-2018): Workstation is busy with executing other tasks so I can't provide new results. Hopefully, my main computer will be fixed till Friday.**
+**Update (21-11-2018): Laptop is back = Faster trainings = Faster result announcemenst =)**
 
 This section presents the Top-1 and Top-5 test accuracies for **text categorization task** of my experiments. Due to computational resource limit, I cannot test every single parameter/hyperparameter. In general, I hold algorithm parameters same for all experiments; however, I change embedding related parameters. I assume the result table is self-explanatory. As a final note, I *won't* share my best models and I *won't* guarantee reproducibility. Dataset splits (training/validation/test) are deterministic for all experiments, but anything else that needs random initialization is non-deterministic. 
 
