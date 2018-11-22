@@ -36,12 +36,15 @@ the Local Reparameterization Trick](https://arxiv.org/pdf/1506.02557.pdf)~~
 - [ ] Different learning algorithms (DeepCNN, LSTM, GRU, any-kind-of-hybrid versions of those algorithms, transformers).
   - [x] GRU
   - [x] LSTM
-  - [ ] Multi-layer CNN (Update 21-11-2018: Current version is seriously bugged! A fix will come, hopefully.)
+  - [x] ~~Multilayer CNN~~ (I removed this model and decided to continue with CharCNN and VDCNN instead).
+  - [ ] CharCNN
+  - [ ] VDCNN (Very Deep CNN)
   - [ ] Transformers
   - [ ] Conv-Deconv CNN
   - [ ] Encoder-Decoder GRU
   - [ ] Encoder-Decoder LSTM
   - [ ] Hybrid stuff (Like CNN+LSTM/GRU)
+- [ ] Adding character-level preprocessing.
 - [ ] CRF layer to be able to do NER experiments.
 - [ ] For Turkish, I plan to add morphological disambiguation (https://github.com/erayyildiz/Neural-Morphological-Disambiguation-for-Turkish). 
 - [ ] Different language models.
