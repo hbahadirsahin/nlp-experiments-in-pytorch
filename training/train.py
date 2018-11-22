@@ -6,8 +6,8 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.optim.lr_scheduler as lr_scheduler
 
-from models.GRU import GRU
 from evaluation.evaluate import evaluate_iter
+from models.GRU import GRU
 from utils.utils import time_since, calculate_accuracy, calculate_topk_accuracy, save_best_model
 
 
@@ -132,18 +132,19 @@ def train_iters(model, train_iter, dev_iter, test_iter, device, topk, training_p
 
         print("{} - "
               "Epoch {}/{} - "
-              "Cross Entropy Loss: {:.4f} -"
-              "KL Loss: {:.4f} -"
+              "Cross Entropy Loss: {:.4f} - "
+              "KL Loss: {:.4f} - "
               "Loss: {:.4f} - "
               "Accuracy: {:.4f} - "
-              "Accuracy Top-{}".format(time_since(start, e / epoch),
-                                       e,
-                                       epoch,
-                                       cross_entropy_loss,
-                                       kl_loss,
-                                       total_loss,
-                                       accuracy,
-                                       accuracy_topk))
+              "Accuracy Top-{}: {:.4f}".format(time_since(start, e / epoch),
+                                               e,
+                                               epoch,
+                                               cross_entropy_loss,
+                                               kl_loss,
+                                               total_loss,
+                                               accuracy,
+                                               topk[0],
+                                               accuracy_topk))
         if e % eval_every == 0:
             vali_loss, vali_accuracy, vali_accuracy_topk = evaluate_iter(model=model,
                                                                          input=dev_iter,

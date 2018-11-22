@@ -121,6 +121,7 @@ if __name__ == '__main__':
         datasetloader = DatasetLoader(data_path=data_path,
                                       vector=embedding_vector,
                                       preprocessor=preprocessor.preprocess,
+                                      level="word",
                                       vector_cache=vector_cache,
                                       unk_init=unkembedding.create_oov_embedding)
 

@@ -11,13 +11,14 @@ SEED = 1234
 
 
 class DatasetLoader(object):
-    def __init__(self, data_path, vector, unk_init=None, preprocessor=None, vector_cache=None):
+    def __init__(self, data_path, vector, level="word", unk_init=None, preprocessor=None, vector_cache=None):
         assert data_path is not None and vector is not None
         self.data_path = data_path
         self.vector = vector
         self.preprocessor = preprocessor
         self.vector_cache = vector_cache
         self.unk_init = unk_init
+        self.level = level
 
         self.sentence_vocab = None
         self.category_vocab = None
@@ -32,6 +33,8 @@ class DatasetLoader(object):
     def create_fields(self, seq_input=True, seq_ner=True, seq_cat=False, fix_length=None):
         sentence_field = data.Field(sequential=seq_input, preprocessing=self.preprocessor, pad_first=True,
                                     fix_length=fix_length)
+        if self.level == "char":
+            sentence_field = data.NestedField(nesting_field=sentence_field)
         ner_label_field = data.Field(sequential=seq_ner)
         category_label_field = data.LabelField(sequential=seq_cat)
         return sentence_field, ner_label_field, category_label_field
