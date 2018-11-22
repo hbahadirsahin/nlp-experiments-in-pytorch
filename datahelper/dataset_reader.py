@@ -34,7 +34,9 @@ class DatasetLoader(object):
         sentence_field = data.Field(sequential=seq_input, preprocessing=self.preprocessor, pad_first=True,
                                     fix_length=fix_length)
         if self.level == "char":
-            sentence_field = data.NestedField(nesting_field=sentence_field)
+            nesting_field = data.Field(sequential=seq_input, preprocessing=self.preprocessor, tokenize=list,
+                                       pad_first=True, fix_length=fix_length)
+            sentence_field = data.NestedField(nesting_field=nesting_field)
         ner_label_field = data.Field(sequential=seq_ner)
         category_label_field = data.LabelField(sequential=seq_cat)
         return sentence_field, ner_label_field, category_label_field
