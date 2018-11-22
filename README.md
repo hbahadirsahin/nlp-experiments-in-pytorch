@@ -22,7 +22,7 @@ Before diving into details, the python and library versions are as follows:
 - Embeddings (whether random or pretrained) can be "static", "nonstatic", or "multichannel".
 - For OOV words, OOVEmbeddingCreator is developed (under datahelper/embedding_helper). There are 5 different basic approaches defined to generate OOV embeddings: (1) zeros vector, (2) ones vector, (3) random vector (between 0, 1), (4) (r1, r2) ranged uniformly random vector, (5) Fasttext CharNgram-based vectors.
 - Even though I am focusing on Turkish versions of the dataset, I believe "Preprocessor" can work for English dataset, too. In future, I may add more language specific methods. 
-- Due to laziness, I defined all my necessary arguments/configs/properties in "main.py". However, I also implemented argparse versions of the same properties (Sorry for hard-coded paths).
+- Due to laziness, I defined all my necessary arguments/configs/properties in "main.py". However, I also implemented argparse versions of the same properties but it may lack recent updated properties (Sorry for hard-coded paths). 
 - I tested all training, evaluation, model/vocabulary saving/loading aspects of the code for several epochs without any problem (except out of memory errors =)).
 
 ## To-do 
@@ -30,18 +30,21 @@ Before diving into details, the python and library versions are as follows:
 - [x] ~~Variational Dropout. Update: Variational and Gaussian dropout methods are added. Reference: [Variational Dropout and
 the Local Reparameterization Trick](https://arxiv.org/pdf/1506.02557.pdf)~~
 - [x] ~~Extending main flow and learning models with respect to new dropout models.~~ 
-- [ ] Run the current piece of code for the aforementioned datasets and define a text categorization baseline (for both Turkish and English). **Update (02-11-2018): I will be able to get my computer in 2 weeks according to service. Hence, slow trainings+slow result announcements for two more weeks**
+- [ ] Run the current piece of code for the aforementioned datasets and define a text categorization baseline (for both Turkish and English). 
 - [ ] Variational Dropout related extensions (current version is from 2015 paper but obviously more recent versions are out there for me to implement =)) + bayes by backprop for CNN (a.k.a. Bayesian CNN)
 - [ ] Attention.
 - [ ] Different learning algorithms (DeepCNN, LSTM, GRU, any-kind-of-hybrid versions of those algorithms, transformers).
   - [x] GRU
   - [x] LSTM
-  - [ ] Multi-layer CNN
+  - [x] ~~Multilayer CNN~~ (I removed this model and decided to continue with CharCNN and VDCNN instead).
+  - [ ] CharCNN
+  - [ ] VDCNN (Very Deep CNN)
   - [ ] Transformers
   - [ ] Conv-Deconv CNN
   - [ ] Encoder-Decoder GRU
   - [ ] Encoder-Decoder LSTM
   - [ ] Hybrid stuff (Like CNN+LSTM/GRU)
+- [ ] Adding character-level preprocessing.
 - [ ] CRF layer to be able to do NER experiments.
 - [ ] For Turkish, I plan to add morphological disambiguation (https://github.com/erayyildiz/Neural-Morphological-Disambiguation-for-Turkish). 
 - [ ] Different language models.
@@ -106,10 +109,13 @@ There are 3 dictionaries defined to hold run arguments.
    - rnn_bias: A boolean argument for RNN/GRU/LSTM-based models to use bias.
    - filter_count: Number of filters for CNN-based models.
    - filter_sizes: List of convolution filter sizes for CNN-based models(Example: [3, 4, 5]).
+   - num_conv_layers: Number of layers for creating deeper convolution layers.
+   - filter_counts: List of filter counts for each convolution layer in a Deep CNN architecture (Example: If there are 3-layers of convolution, filter_counts can be [64, 32, 64]).
+   - filter_sizes_deep: List of list of convolution filter sizes (Example: [[3, 4, 5], [2, 3, 4], [1, 2, 3]] for 3-layers of convolution).
    - run_mode: Can be "train" to start training process or "eval_interactive" to test your saved model(s) interactively. 
   
  - `training_properties` holds training-related arguments:
-   - learner: Argument to choose which learning algorithm to use. It can be "textcnn", "gru" and "lstm" (Update: 14 Nov 2018) 
+   - learner: Argument to choose which learning algorithm to use. It can be "textcnn", "gru", "lstm", and "deeptextcnn" (Update: 19 Nov 2018) 
    - optimizer: It can be either "Adam" or "SGD".
    - learning_rate: Self-explanatory.
    - weight_decay: L2 normalization term. Note that for my case, any value bigger than 0, literally fucked my performance. 
@@ -132,7 +138,7 @@ If you succesfully train and save a model, you can evaluate the saved model inte
 
 ## Results
 
-**Update (14-11-2018): Workstation is busy with executing other tasks so I can't provide new results. Hopefully, my main computer will be fixed till Friday.**
+**Update (21-11-2018): Laptop is back = Faster trainings = Faster result announcemenst =)**
 
 This section presents the Top-1 and Top-5 test accuracies for **text categorization task** of my experiments. Due to computational resource limit, I cannot test every single parameter/hyperparameter. In general, I hold algorithm parameters same for all experiments; however, I change embedding related parameters. I assume the result table is self-explanatory. As a final note, I *won't* share my best models and I *won't* guarantee reproducibility. Dataset splits (training/validation/test) are deterministic for all experiments, but anything else that needs random initialization is non-deterministic. 
 
@@ -147,7 +153,7 @@ Note: Epoch is set to 20 for all experiments, until further notice (last update:
 |Turkish|25| Fasttext | Fasttext | static	|  49.6810  | 75.2684 |
 |Turkish|25| Fasttext | Fasttext | nonstatic	| 63.9391  | 87.9597 |
 |Turkish|49| Fasttext | zeros | static	| 43.5519  | 68.4336 |
-|Turkish|49| Fasttext | zeros | nonstatic	| NaN (TBA)  | NaN (TBA) |
+|Turkish|49| Fasttext | zeros | nonstatic	| 56.0081  | 79.8634 |
 |Turkish|49| Fasttext | Fasttext | static	| 43.8025  | 68.8641 |
 |Turkish|49| Fasttext | Fasttext | nonstatic	| NaN (TBA)  | NaN (TBA) |
 |English|25| Fasttext | zeros | static	| NaN (TBA) | NaN (TBA) |
@@ -161,7 +167,7 @@ Note: Epoch is set to 20 for all experiments, until further notice (last update:
 
 
 ### References for code development: 
-Below two repositories really helped me to write a decent and working code:
+Below repositories really helped me to write a decent and working code:
 - https://github.com/bamtercelboo/cnn-lstm-bilstm-deepcnn-clstm-in-pytorch
 - https://github.com/bentrevett/pytorch-sentiment-analysis
 - https://github.com/j-min/Dropouts/blob/master/Gaussian_Variational_Dropout.ipynb
