@@ -21,9 +21,13 @@ dataset_properties = {"stop_word_path": "D:/Anaconda3/nltk_data/corpora/stopword
                       "embedding_vector": "fasttext.tr.300d",
                       "vector_cache": "D:/PyTorchNLP/data/fasttext",
                       "pretrained_embedding_path": "D:/PyTorchNLP/data/fasttext/wiki.tr",
+                      # "data_path": "D:/PyTorchNLP/data/EWNERTC_TC_Coarse Grained NER_No_NoiseReduction.DUMP",
+                      # "embedding_vector": "fasttext.en.300d",
+                      # "vector_cache": "D:/PyTorchNLP/data/fasttext",
+                      # "pretrained_embedding_path": "D:/PyTorchNLP/data/fasttext/wiki.en",
                       "checkpoint_path": "",
                       "oov_embedding_type": "zeros",
-                      "batch_size": 64
+                      "batch_size": 96
                       }
 
 model_properties = {"use_pretrained_embed": True,
@@ -31,16 +35,16 @@ model_properties = {"use_pretrained_embed": True,
                     "use_padded_conv": True,
                     "dropout_type": "bernoulli",
                     "keep_prob": 0.5,
-                    "use_batch_norm": True,
+                    "use_batch_norm": False,
                     "batch_norm_momentum": 0.1,
                     "batch_norm_affine": False,
-                    # ShallowCNN (Single Layer) Related parameters
+                    # ShallowCNN (Single Layer) related parameters
                     "filter_count": 64,
                     "filter_sizes": [3, 4, 5],
-                    # DeepCNN Related parameters
+                    # DeepCNN (Multi Layer) related parameters
                     "num_conv_layers": 3,
-                    "filter_counts": [64, 64, 32],
-                    "filter_sizes_deep": [[3, 4, 5], [3, 4, 5], [2, 3, 4]],
+                    "filter_counts": [64, 32, 16],
+                    "filter_sizes_deep": [[3, 4, 5], [2, 3, 4], [1, 2, 3]],
                     # RNN-GRU-LSTM related parameters
                     "rnn_hidden_dim": 300,
                     "rnn_num_layers": 1,
