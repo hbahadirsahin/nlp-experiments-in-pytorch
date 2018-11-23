@@ -20,6 +20,7 @@ class DatasetLoader(object):
         self.unk_init = unk_init
         self.level = level
 
+        self.sentence_field = None
         self.sentence_vocab = None
         self.category_vocab = None
         self.ner_vocab = None
@@ -31,12 +32,14 @@ class DatasetLoader(object):
         self.test_iter = None
 
     def create_fields(self, seq_input=True, seq_ner=True, seq_cat=False, fix_length=None):
-        sentence_field = data.Field(sequential=seq_input, preprocessing=self.preprocessor, pad_first=True,
-                                    fix_length=fix_length)
-        if self.level == "char":
+        if self.level == "word":
+            sentence_field = data.Field(sequential=seq_input, preprocessing=self.preprocessor, pad_first=True,
+                                        fix_length=fix_length)
+        elif self.level == "char":
             nesting_field = data.Field(sequential=seq_input, preprocessing=self.preprocessor, tokenize=list,
-                                       pad_first=True, fix_length=fix_length)
-            sentence_field = data.NestedField(nesting_field=nesting_field)
+                                       fix_length=fix_length, init_token="<word>", eos_token="</word>")
+            sentence_field = data.NestedField(nesting_field=nesting_field, init_token="<sentence>",
+                                              eos_token="</sentence>")
 
         ner_label_field = data.Field(sequential=seq_ner)
         category_label_field = data.LabelField(sequential=seq_cat)
@@ -44,6 +47,7 @@ class DatasetLoader(object):
 
     def read_dataset(self, batch_size=128, split_ratio=0.7, format="tsv"):
         sf, nlf, clf = self.create_fields()
+        self.sentence_field = sf
         dataset = data.TabularDataset(path=self.data_path,
                                       format=format,
                                       skip_header=True,
@@ -148,3 +152,4 @@ if __name__ == '__main__':
             s = [sentence_vocab.itos[char] for sentence in batch_x for word in sentence for char in word]
         print(idx, "-", s)
         print("")
+        break
