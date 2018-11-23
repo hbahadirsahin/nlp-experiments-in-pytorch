@@ -9,7 +9,7 @@ from datahelper.dataset_reader import DatasetLoader
 from datahelper.embedding_helper import OOVEmbeddingCreator
 from datahelper.preprocessor import Preprocessor
 from evaluation.evaluate import evaluate_interactive
-from models.CNN import TextCnn, DeepTextCNN
+from models.CNN import TextCnn, CharCNN
 from models.GRU import GRU
 from models.LSTM import LSTM
 from training.train import train_iters
@@ -118,10 +118,15 @@ if __name__ == '__main__':
                                            fasttext_model_path=fasttext_model_path)
 
         print("Initialize DatasetLoader")
+        if training_properties["learner"] == "charcnn" or training_properties["learner"] == "vdcnn":
+            level = "char"
+        else:
+            level = "word",
+
         datasetloader = DatasetLoader(data_path=data_path,
                                       vector=embedding_vector,
                                       preprocessor=preprocessor.preprocess,
-                                      level="word",
+                                      level=level,
                                       vector_cache=vector_cache,
                                       unk_init=unkembedding.create_oov_embedding)
 
@@ -152,8 +157,8 @@ if __name__ == '__main__':
             model = GRU(model_properties).to(device)
         elif training_properties["learner"] == "lstm":
             model = LSTM(model_properties).to(device)
-        elif training_properties["learner"] == "deeptextcnn":
-            model = DeepTextCNN(model_properties).to(device)
+        elif training_properties["learner"] == "charcnn":
+            model = CharCNN(model_properties).to(device)
 
         if dataset_properties["checkpoint_path"] is None or dataset_properties["checkpoint_path"] == "":
             print("Train process is starting from scratch!")

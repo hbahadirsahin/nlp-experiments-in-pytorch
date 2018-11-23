@@ -37,6 +37,7 @@ class DatasetLoader(object):
             nesting_field = data.Field(sequential=seq_input, preprocessing=self.preprocessor, tokenize=list,
                                        pad_first=True, fix_length=fix_length)
             sentence_field = data.NestedField(nesting_field=nesting_field)
+
         ner_label_field = data.Field(sequential=seq_ner)
         category_label_field = data.LabelField(sequential=seq_cat)
         return sentence_field, ner_label_field, category_label_field
@@ -77,8 +78,12 @@ class DatasetLoader(object):
         return dataset.split(split_ratio=split_ratio, random_state=random.seed(SEED))
 
     def create_vocabs(self, train, sentence_field, category_label_field, min_freq=1):
-        sentence_field.build_vocab(train, vectors=self.vector, vectors_cache=self.vector_cache, unk_init=self.unk_init,
-                                   min_freq=min_freq)
+        if self.level == "word":
+            sentence_field.build_vocab(train, vectors=self.vector, vectors_cache=self.vector_cache,
+                                       unk_init=self.unk_init,
+                                       min_freq=min_freq)
+        else:
+            sentence_field.build_vocab(train)
         category_label_field.build_vocab(train)
 
         self.sentence_vocab = sentence_field.vocab
@@ -97,7 +102,7 @@ class DatasetLoader(object):
 
 if __name__ == '__main__':
     stop_word_path = "D:/Anaconda3/nltk_data/corpora/stopwords/turkish"
-    data_path = "D:/PyTorchNLP/data/twnertc_basic_tr.DUMP"
+    data_path = "D:/PyTorchNLP/data/turkish_test.DUMP"
     vector_cache = "D:/PyTorchNLP/data/fasttext"
 
     preprocessor = Preprocessor(stop_word_path,
@@ -109,6 +114,7 @@ if __name__ == '__main__':
 
     dataset_helper = DatasetLoader(data_path=data_path,
                                    vector="fasttext.tr.300d",
+                                   level="char",
                                    preprocessor=preprocessor.preprocess,
                                    vector_cache=vector_cache,
                                    unk_init=unkembedding.create_oov_embedding)
@@ -136,6 +142,9 @@ if __name__ == '__main__':
 
     for idx, batch in enumerate(train_iter):
         batch_x = batch.sentence
-        s = [sentence_vocab.itos[idx] for idx in batch_x]
+        if dataset_helper.level == "word":
+            s = [sentence_vocab.itos[idx] for idx in batch_x]
+        else:
+            s = [sentence_vocab.itos[char] for sentence in batch_x for word in sentence for char in word]
         print(idx, "-", s)
         print("")
