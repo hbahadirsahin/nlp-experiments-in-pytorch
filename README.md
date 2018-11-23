@@ -141,8 +141,6 @@ If you succesfully train and save a model, you can evaluate the saved model inte
 
 ## Results
 
-**Update (21-11-2018): Laptop is back = Faster trainings = Faster result announcemenst =)**
-
 This section presents the Top-1 and Top-5 test accuracies for **text categorization task** of my experiments. Due to computational resource limit, I cannot test every single parameter/hyperparameter. In general, I hold algorithm parameters same for all experiments; however, I change embedding related parameters. I assume the result table is self-explanatory. As a final note, I *won't* share my best models and I *won't* guarantee reproducibility. Dataset splits (training/validation/test) are deterministic for all experiments, but anything else that needs random initialization is non-deterministic. 
 
 Note: Epoch is set to 20 for all experiments, until further notice (last update: 31-10-2018). However, if I believe that results may improve, I let the experiment run for 10 more epochs (at most 30 epoch per experiments). 
@@ -158,7 +156,7 @@ Note: Epoch is set to 20 for all experiments, until further notice (last update:
 |Turkish|49| Fasttext | zeros | static	| 43.5519  | 68.4336 |
 |Turkish|49| Fasttext | zeros | nonstatic	| 56.0081  | 79.8634 |
 |Turkish|49| Fasttext | Fasttext | static	| 43.8025  | 68.8641 |
-|Turkish|49| Fasttext | Fasttext | nonstatic	| NaN (TBA)  | NaN (TBA) |
+|Turkish|49| Fasttext | Fasttext | nonstatic	| NaN (Training)  | NaN (Training) |
 |English|25| Fasttext | zeros | static	| NaN (TBA) | NaN (TBA) |
 |English|25| Fasttext | zeros | nonstatic	| NaN (TBA) | NaN (TBA) |
 |English|25| Fasttext | Fasttext | static	|  NaN (TBA)  | NaN (TBA) |
