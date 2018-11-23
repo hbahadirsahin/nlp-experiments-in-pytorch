@@ -17,7 +17,7 @@ from utils.utils import save_vocabulary
 
 dataset_properties = {"stop_word_path": "D:/Anaconda3/nltk_data/corpora/stopwords/turkish",
                       # "stop_word_path": "D:/nlpdata/stopwords/turkish",
-                      "data_path": "D:/PyTorchNLP/data/TWNERTC_TC_Coarse Grained NER_No_NoiseReduction.DUMP",
+                      "data_path": "D:/PyTorchNLP/data/turkish_test.DUMP",
                       "embedding_vector": "fasttext.tr.300d",
                       "vector_cache": "D:/PyTorchNLP/data/fasttext",
                       "pretrained_embedding_path": "D:/PyTorchNLP/data/fasttext/wiki.tr",
@@ -41,10 +41,13 @@ model_properties = {"use_pretrained_embed": True,
                     # ShallowCNN (Single Layer) related parameters
                     "filter_count": 64,
                     "filter_sizes": [3, 4, 5],
-                    # DeepCNN (Multi Layer) related parameters
-                    "num_conv_layers": 3,
-                    "filter_counts": [64, 32, 16],
-                    "filter_sizes_deep": [[3, 4, 5], [2, 3, 4], [1, 2, 3]],
+                    # CharCNN related parameters
+                    "max_sequence_length": 1014,
+                    "feature_size": "large",
+                    "filter_count": 1024,
+                    "filter_sizes": [7, 7, 3, 3, 3, 3],
+                    "max_pool_kernels": [3, 3, 3],
+                    "linear_unit_count": 2048,
                     # RNN-GRU-LSTM related parameters
                     "rnn_hidden_dim": 300,
                     "rnn_num_layers": 1,
@@ -55,7 +58,7 @@ model_properties = {"use_pretrained_embed": True,
                     "run_mode": "train",
                     }
 
-training_properties = {"learner": "deeptextcnn",
+training_properties = {"learner": "charcnn",
                        "optimizer": "Adam",
                        "learning_rate": 0.05,
                        "weight_decay": 0,
@@ -139,8 +142,17 @@ if __name__ == '__main__':
         pretrained_embeddings = datasetloader.sentence_vocab_vectors
         print("Updating properties")
         model_properties["device"] = device
-        model_properties["vocab_size"] = pretrained_embeddings.size()[0]
-        model_properties["embed_dim"] = pretrained_embeddings.size()[1]
+
+        if training_properties["learner"] == "charcnn":
+            model_properties["vocab_size"] = len(sentence_vocab)
+            model_properties["embed_dim"] = len(sentence_vocab) - 1
+        elif training_properties["learner"] == "vdcnn":
+            model_properties["vocab_size"] = len(sentence_vocab)
+            model_properties["embed_dim"] = 16
+        else:
+            model_properties["vocab_size"] = pretrained_embeddings.size()[0]
+            model_properties["embed_dim"] = pretrained_embeddings.size()[1]
+
         model_properties["num_class"] = len(category_vocab)
         model_properties["vocab"] = sentence_vocab
         model_properties["padding_id"] = sentence_vocab.stoi["<pad>"]

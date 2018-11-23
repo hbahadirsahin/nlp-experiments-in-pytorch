@@ -20,7 +20,6 @@ class DatasetLoader(object):
         self.unk_init = unk_init
         self.level = level
 
-        self.sentence_field = None
         self.sentence_vocab = None
         self.category_vocab = None
         self.ner_vocab = None
@@ -47,7 +46,6 @@ class DatasetLoader(object):
 
     def read_dataset(self, batch_size=128, split_ratio=0.7, format="tsv"):
         sf, nlf, clf = self.create_fields()
-        self.sentence_field = sf
         dataset = data.TabularDataset(path=self.data_path,
                                       format=format,
                                       skip_header=True,
@@ -118,7 +116,7 @@ if __name__ == '__main__':
 
     dataset_helper = DatasetLoader(data_path=data_path,
                                    vector="fasttext.tr.300d",
-                                   level="char",
+                                   level="word",
                                    preprocessor=preprocessor.preprocess,
                                    vector_cache=vector_cache,
                                    unk_init=unkembedding.create_oov_embedding)
@@ -146,6 +144,8 @@ if __name__ == '__main__':
 
     for idx, batch in enumerate(train_iter):
         batch_x = batch.sentence
+        print(batch_x.size())
+        print(batch_x)
         if dataset_helper.level == "word":
             s = [sentence_vocab.itos[idx] for idx in batch_x]
         else:

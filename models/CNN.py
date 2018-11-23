@@ -212,13 +212,11 @@ class CharCNN(nn.Module):
 
         self.args = args
 
-        self.vocab = args["vocab"]
-
         # Device
         self.device = args["device"]
 
         # Input/Output dimensions
-        self.embed_num = args["vocab_size"]
+        self.vocab_size = args["vocab_size"]
         self.embed_dim = args["embed_dim"]
         self.num_class = args["num_class"]
 
@@ -226,30 +224,122 @@ class CharCNN(nn.Module):
         self.padding_id = args["padding_id"]
 
         # Condition parameters
-        self.use_pretrained_embed = args["use_pretrained_embed"]
-        self.embed_train_type = args["embed_train_type"]
-        self.use_padded_conv = args["use_padded_conv"]
         self.use_batch_norm = args["use_batch_norm"]
-
-        # Pretrained embedding weights
-        self.pretrained_weights = args["pretrained_weights"]
 
         # Dropout type
         self.dropout_type = args["dropout_type"]
 
         # Dropout probabilities
-        keep_prob = args["keep_prob"]
+        self.keep_prob = args["keep_prob"]
 
         # Batch normalization parameters
         self.batch_norm_momentum = args["batch_norm_momentum"]
         self.batch_norm_affine = args["batch_norm_affine"]
 
-        # Convolution parameters
-        self.input_channel = 1
-        self.num_conv_layers = args["num_conv_layers"]
-        self.filter_counts = args["filter_counts"]
-        self.filter_sizes = args["filter_sizes_deep"]
+        # CharCNN specific parameters
+        self.max_sequence_length = args["max_sequence_length"]
 
-        assert len(self.filter_counts) == self.num_conv_layers and len(self.filter_sizes) == self.num_conv_layers
+        if args["feature_size"] == "large":
+            self.filter_count = 1024
+            self.linear_unit_count = 2048
+        elif args["feature_size"] == "small":
+            self.filter_count = 256
+            self.linear_unit_count = 1024
+        else:
+            self.filter_count = args["filter_count"]
+            self.linear_unit_count = args["linear_unit_count"]
 
-        raise (NotImplementedError)
+        self.filter_sizes = args["filter_sizes"]
+        self.max_pool_kernels = args["max_pool_kernels"]
+
+        # Embedding initialization
+        # As the original CharCNN paper, I initialized char embeddings as one-hot vector.
+        self.embedding = nn.Embedding(self.vocab_size, self.embed_dim, padding_idx=self.padding_id)
+        self.embedding.weight.data = torch.eye(self.vocab_size, self.embed_dim)
+        self.embedding.weight.reqiures_grad = False
+
+        # Convolution Layer 1
+        self.conv1 = nn.Conv1d(in_channels=self.embed_dim, out_channels=self.filter_count,
+                               kernel_size=self.filter_sizes[0])
+        self.pool1 = nn.MaxPool1d(kernel_size=self.max_pool_kernels[0])
+
+        # Convolution Layer 2
+        self.conv2 = nn.Conv1d(in_channels=self.filter_count, out_channels=self.filter_count,
+                               kernel_size=self.filter_sizes[1])
+        self.pool2 = nn.MaxPool1d(kernel_size=self.max_pool_kernels[1])
+
+        # Convolution Layer 3
+        self.conv3 = nn.Conv1d(in_channels=self.filter_count, out_channels=self.filter_count,
+                               kernel_size=self.filter_sizes[2])
+
+        # Convolution Layer 4
+        self.conv4 = nn.Conv1d(in_channels=self.filter_count, out_channels=self.filter_count,
+                               kernel_size=self.filter_sizes[3])
+
+        # Convolution Layer 5
+        self.conv5 = nn.Conv1d(in_channels=self.filter_count, out_channels=self.filter_count,
+                               kernel_size=self.filter_sizes[4])
+
+        # Convolution Layer 6
+        self.conv6 = nn.Conv1d(in_channels=self.filter_count, out_channels=self.filter_count,
+                               kernel_size=self.filter_sizes[5])
+        self.pool3 = nn.MaxPool1d(kernel_size=self.max_pool_kernels[2])
+
+        # Activation
+        self.relu = nn.ReLU()
+
+        # Number of features after convolution blocks
+        num_features = (self.max_sequence_length - 96) // 27 * self.filter_count
+
+        self.initialize_dropout(num_features)
+
+        # Linear Block 1
+        self.linear1 = nn.Linear(num_features, self.linear_unit_count)
+
+        # Linear Block 2
+        self.linear2 = nn.Linear(self.linear_unit_count, self.linear_unit_count)
+
+        # Linear Block 3
+        self.linear3 = nn.Linear(self.linear_unit_count, self.num_class)
+
+    def initialize_dropout(self, num_features):
+        # Dropout initialization
+        if self.dropout_type == "bernoulli" or self.dropout_type == "gaussian":
+            print("> Dropout - ", self.dropout_type)
+            self.dropout = Dropout(keep_prob=self.keep_prob, dimension=None, dropout_type=self.dropout_type).dropout
+        elif self.dropout_type == "variational":
+            print("> Dropout - ", self.dropout_type)
+            self.dropout = Dropout(keep_prob=self.keep_prob, dimension=num_features,
+                                   dropout_type=self.dropout_type).dropout
+        else:
+            print("> Dropout - Bernoulli (You provide undefined dropout type!)")
+            self.dropout = Dropout(keep_prob=self.keep_prob, dimension=None, dropout_type="bernoulli").dropout
+
+    def forward(self, batch):
+        kl_loss = torch.Tensor([0.0])
+        # Get batch size to beginning
+        # Embedding magic
+        x = self.embedding(batch)
+        # To Convolution-Pooling
+        x = self.pool1(self.relu(self.conv1(x)))
+        x = self.pool2(self.relu(self.conv2(x)))
+        x = self.relu(self.conv3(x))
+        x = self.relu(self.conv4(x))
+        x = self.relu(self.conv5(x))
+        x = self.pool3(self.relu(self.conv6(x)))
+        # Flatten
+        x = x.view(x.size(0), 1)
+        # To Linear
+        if self.dropout_type == "variational":
+            x, kld = self.dropout(self.relu(self.linear1(x)))
+            kl_loss += kld.sum()
+        else:
+            x = self.dropout(self.relu(self.linear1(x)))
+        if self.dropout_type == "variational":
+            x, kld = self.dropout(self.relu(self.linear2(x)))
+            kl_loss += kld.sum()
+        else:
+            x = self.dropout(self.relu(self.linear2(x)))
+        x = self.linear3(x)
+
+        return x, kl_loss
