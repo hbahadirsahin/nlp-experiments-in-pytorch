@@ -31,7 +31,7 @@ def evaluate_iter(model, input, criterion, device, save_path, topk, is_vali=True
             batch_x = batch.sentence.to(device)
             batch_y = batch.category_labels.to(device)
 
-            predictions = model(batch_x)
+            predictions, _ = model(batch_x)
 
             loss = criterion(predictions, batch_y)
             accuracy = calculate_accuracy(predictions, batch_y)

@@ -15,19 +15,22 @@ from models.LSTM import LSTM
 from training.train import train_iters
 from utils.utils import save_vocabulary
 
-dataset_properties = {"stop_word_path": "D:/Anaconda3/nltk_data/corpora/stopwords/turkish",
-                      # "stop_word_path": "D:/nlpdata/stopwords/turkish",
-                      "data_path": "D:/PyTorchNLP/data/turkish_test.DUMP",
+dataset_properties = {"stop_word_path": "D:/nlpdata/stopwords/turkish",
+                      # "stop_word_path": "D:/Anaconda3/nltk_data/corpora/stopwords/turkish",
+                      "data_path": "D:/nlpdata/tr_test.DUMP",
+                      # "data_path": "D:/PyTorchNLP/data/turkish_test.DUMP",
                       "embedding_vector": "fasttext.tr.300d",
-                      "vector_cache": "D:/PyTorchNLP/data/fasttext",
-                      "pretrained_embedding_path": "D:/PyTorchNLP/data/fasttext/wiki.tr",
+                      "vector_cache": "D:/nlpdata/fasttext",
+                      # "vector_cache": "D:/PyTorchNLP/data/fasttext",
+                      "pretrained_embedding_path": "D:/nlpdata/fasttext/wiki.tr",
+                      # "pretrained_embedding_path": "D:/PyTorchNLP/data/fasttext/wiki.tr",
                       # "data_path": "D:/PyTorchNLP/data/EWNERTC_TC_Coarse Grained NER_No_NoiseReduction.DUMP",
                       # "embedding_vector": "fasttext.en.300d",
                       # "vector_cache": "D:/PyTorchNLP/data/fasttext",
                       # "pretrained_embedding_path": "D:/PyTorchNLP/data/fasttext/wiki.en",
                       "checkpoint_path": "",
                       "oov_embedding_type": "zeros",
-                      "batch_size": 96
+                      "batch_size": 128
                       }
 
 model_properties = {"use_pretrained_embed": True,
@@ -35,7 +38,7 @@ model_properties = {"use_pretrained_embed": True,
                     "use_padded_conv": True,
                     "dropout_type": "bernoulli",
                     "keep_prob": 0.5,
-                    "use_batch_norm": False,
+                    "use_batch_norm": True,
                     "batch_norm_momentum": 0.1,
                     "batch_norm_affine": False,
                     # ShallowCNN (Single Layer) related parameters
@@ -58,9 +61,9 @@ model_properties = {"use_pretrained_embed": True,
                     "run_mode": "train",
                     }
 
-training_properties = {"learner": "charcnn",
-                       "optimizer": "Adam",
-                       "learning_rate": 0.05,
+training_properties = {"learner": "textcnn",
+                       "optimizer": "SGD",
+                       "learning_rate": 0.1,
                        "weight_decay": 0,
                        "momentum": 0.9,
                        "norm_ratio": 0.25,
@@ -121,10 +124,9 @@ if __name__ == '__main__':
                                            fasttext_model_path=fasttext_model_path)
 
         print("Initialize DatasetLoader")
+        level = "word"
         if training_properties["learner"] == "charcnn" or training_properties["learner"] == "vdcnn":
             level = "char"
-        else:
-            level = "word",
 
         datasetloader = DatasetLoader(data_path=data_path,
                                       vector=embedding_vector,

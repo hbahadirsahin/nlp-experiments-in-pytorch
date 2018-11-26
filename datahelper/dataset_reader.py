@@ -31,10 +31,9 @@ class DatasetLoader(object):
         self.test_iter = None
 
     def create_fields(self, seq_input=True, seq_ner=True, seq_cat=False, fix_length=None):
-        if self.level == "word":
-            sentence_field = data.Field(sequential=seq_input, preprocessing=self.preprocessor, pad_first=True,
-                                        fix_length=fix_length)
-        elif self.level == "char":
+        sentence_field = data.Field(sequential=seq_input, preprocessing=self.preprocessor, pad_first=True,
+                                    fix_length=fix_length)
+        if self.level == "char":
             nesting_field = data.Field(sequential=seq_input, preprocessing=self.preprocessor, tokenize=list,
                                        fix_length=fix_length, init_token="<word>", eos_token="</word>")
             sentence_field = data.NestedField(nesting_field=nesting_field, init_token="<sentence>",
