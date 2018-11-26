@@ -174,5 +174,4 @@ Below repositories really helped me to write a decent and working code:
 - https://github.com/j-min/Dropouts/blob/master/Gaussian_Variational_Dropout.ipynb
 - https://github.com/felix-laumann/Bayesian_CNN/
 - https://github.com/kefirski/variational_dropout/
-- https://github.com/dreamgonfly/deep-text-classification-pytorch/tree/master/models
-
+- https://github.com/dreamgonfly/deep-text-classification-pytorch/
