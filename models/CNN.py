@@ -318,8 +318,12 @@ class CharCNN(nn.Module):
     def forward(self, batch):
         kl_loss = torch.Tensor([0.0])
         # Get batch size to beginning
+        x = batch.permute(1, 0)
         # Embedding magic
-        x = self.embedding(batch)
+        x = self.embedding(x)
+        x = x.permute(0, 2, 1)
+        if "cuda" in str(self.device):
+            kl_loss = kl_loss.cuda()
         # To Convolution-Pooling
         x = self.pool1(self.relu(self.conv1(x)))
         x = self.pool2(self.relu(self.conv2(x)))
@@ -328,7 +332,7 @@ class CharCNN(nn.Module):
         x = self.relu(self.conv5(x))
         x = self.pool3(self.relu(self.conv6(x)))
         # Flatten
-        x = x.view(x.size(0), 1)
+        x = x.view(x.size(0), -1)
         # To Linear
         if self.dropout_type == "variational":
             x, kld = self.dropout(self.relu(self.linear1(x)))

@@ -5,10 +5,11 @@ all_letters = string.ascii_letters + ".,;"
 
 
 class Preprocessor(object):
-    def __init__(self, stop_word_path, is_remove_digit=True, is_remove_punctuations=True):
+    def __init__(self, stop_word_path, is_remove_digit=True, is_remove_punctuations=True, is_char_level=False):
         self.stop_words = self.load_stop_words(stop_word_path)
         self.is_remove_digit = is_remove_digit
         self.is_remove_punctuations = is_remove_punctuations
+        self.is_char_level = is_char_level
 
     @staticmethod
     def load_stop_words(path):
@@ -42,6 +43,14 @@ class Preprocessor(object):
         return re.sub("\d+", "<NUM>", sentence)
 
     @staticmethod
+    def replace_digits_in_char_level(sentence):
+        return [re.sub("\d+", "<NUM>", i) for i in sentence]
+
+    @staticmethod
+    def change_space_to_special_token(sentence):
+        return ["<SPACE>" if i == " " else i for i in sentence]
+
+    @staticmethod
     def remove_alphanumeric(sentence):
         return "".join([word for word in sentence if not word.isalnum()])
 
@@ -53,11 +62,18 @@ class Preprocessor(object):
     def change_currency_characters(sentence):
         return sentence.replace('$', 'dolar').replace('£', 'sterlin').replace('€', 'euro')
 
+    @staticmethod
+    def change_space_to_special_token(sentence):
+        return ["<SPACE>" if i == " " else i for i in sentence]
+
     def preprocess(self, sentence):
         # TorchText returns a list of words instead of a normal sentence.
         # First, create the sentence again. Then, do preprocess. Finally, return the preprocessed sentence as list
         # of words
-        x = " ".join(sentence)
+        if self.is_char_level:
+            x = sentence
+        else:
+            x = " ".join(sentence)
         x = self.to_lowercase(x)
         x = self.change_currency_characters(x)
 
@@ -68,12 +84,19 @@ class Preprocessor(object):
 
         if self.is_remove_digit:
             x = self.remove_digits(x)
-        else:
+        elif self.is_remove_digit is False and self.is_char_level is False:
             x = self.replace_digits(x)
 
         x = self.remove_line_breaks(x)
         x = self.remove_multiple_white_spaces(x)
-        return (x.strip()).split()
+
+        if self.is_char_level:
+            x = list((x.strip()))
+            x = self.change_space_to_special_token(x)
+            x = self.replace_digits_in_char_level(x)
+            return x
+        else:
+            return (x.strip()).split()
 
 
 if __name__ == '__main__':

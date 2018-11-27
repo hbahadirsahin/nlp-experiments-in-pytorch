@@ -15,22 +15,22 @@ from models.LSTM import LSTM
 from training.train import train_iters
 from utils.utils import save_vocabulary
 
-dataset_properties = {"stop_word_path": "D:/nlpdata/stopwords/turkish",
-                      # "stop_word_path": "D:/Anaconda3/nltk_data/corpora/stopwords/turkish",
-                      "data_path": "D:/nlpdata/tr_test.DUMP",
-                      # "data_path": "D:/PyTorchNLP/data/turkish_test.DUMP",
+dataset_properties = {"stop_word_path": "D:/Anaconda3/nltk_data/corpora/stopwords/turkish",
+                      # "stop_word_path": "D:/nlpdata/stopwords/turkish",
+                      # "data_path": "D:/nlpdata/tr_test.DUMP",
+                      "data_path": "D:/PyTorchNLP/data/turkish_test.DUMP",
                       "embedding_vector": "fasttext.tr.300d",
-                      "vector_cache": "D:/nlpdata/fasttext",
-                      # "vector_cache": "D:/PyTorchNLP/data/fasttext",
-                      "pretrained_embedding_path": "D:/nlpdata/fasttext/wiki.tr",
-                      # "pretrained_embedding_path": "D:/PyTorchNLP/data/fasttext/wiki.tr",
+                      # "vector_cache": "D:/nlpdata/fasttext",
+                      "vector_cache": "D:/PyTorchNLP/data/fasttext",
+                      # "pretrained_embedding_path": "D:/nlpdata/fasttext/wiki.tr",
+                      "pretrained_embedding_path": "D:/PyTorchNLP/data/fasttext/wiki.tr",
                       # "data_path": "D:/PyTorchNLP/data/EWNERTC_TC_Coarse Grained NER_No_NoiseReduction.DUMP",
                       # "embedding_vector": "fasttext.en.300d",
                       # "vector_cache": "D:/PyTorchNLP/data/fasttext",
                       # "pretrained_embedding_path": "D:/PyTorchNLP/data/fasttext/wiki.en",
                       "checkpoint_path": "",
                       "oov_embedding_type": "zeros",
-                      "batch_size": 128
+                      "batch_size": 32
                       }
 
 model_properties = {"use_pretrained_embed": True,
@@ -61,7 +61,7 @@ model_properties = {"use_pretrained_embed": True,
                     "run_mode": "train",
                     }
 
-training_properties = {"learner": "textcnn",
+training_properties = {"learner": "charcnn",
                        "optimizer": "SGD",
                        "learning_rate": 0.1,
                        "weight_decay": 0,
@@ -113,10 +113,18 @@ if __name__ == '__main__':
     print("Saving directory for vocabulary files is", save_dir_vocab)
     training_properties["save_path"] = save_dir
 
+    level = "word"
+    is_char_level = False
+    if training_properties["learner"] == "charcnn" or training_properties["learner"] == "vdcnn":
+        print("Caution: Due to selected learning model, everything will be executed in character-level!")
+        level = "char"
+        is_char_level = True
+
     print("Initialize Preprocessor")
     preprocessor = Preprocessor(stop_word_path,
                                 is_remove_digit=True,
-                                is_remove_punctuations=False)
+                                is_remove_punctuations=False,
+                                is_char_level=is_char_level)
 
     if model_properties["run_mode"] == "train":
         print("Initialize OOVEmbeddingCreator")
@@ -124,10 +132,6 @@ if __name__ == '__main__':
                                            fasttext_model_path=fasttext_model_path)
 
         print("Initialize DatasetLoader")
-        level = "word"
-        if training_properties["learner"] == "charcnn" or training_properties["learner"] == "vdcnn":
-            level = "char"
-
         datasetloader = DatasetLoader(data_path=data_path,
                                       vector=embedding_vector,
                                       preprocessor=preprocessor.preprocess,
