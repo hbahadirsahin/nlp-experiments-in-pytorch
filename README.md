@@ -29,8 +29,9 @@ Before diving into details, the python and library versions are as follows:
 
 - [x] ~~Variational Dropout. Update: Variational and Gaussian dropout methods are added. Reference: [Variational Dropout and
 the Local Reparameterization Trick](https://arxiv.org/pdf/1506.02557.pdf)~~
-- [x] ~~Extending main flow and learning models with respect to new dropout models.~~ 
-- [x] ~~Adding character-level data loading.~~
+- [x] ~~Extend main flow and learning models with respect to new dropout models.~~ 
+- [x] ~~Add character-level data preprocessing.~~
+- [x] ~~Add character-level data loading.~~
 - [ ] Run the current piece of code for the aforementioned datasets and define a text categorization baseline (for both Turkish and English). 
 - [ ] Variational Dropout related extensions (current version is from 2015 paper but obviously more recent versions are out there for me to implement =)) + bayes by backprop for CNN (a.k.a. Bayesian CNN)
 - [ ] Attention.
@@ -38,7 +39,7 @@ the Local Reparameterization Trick](https://arxiv.org/pdf/1506.02557.pdf)~~
   - [x] GRU
   - [x] LSTM
   - [x] ~~Multilayer CNN~~ (I removed this model and decided to continue with CharCNN and VDCNN instead).
-  - [ ] CharCNN
+  - [x] CharCNN
   - [ ] VDCNN (Very Deep CNN)
   - [ ] Transformers
   - [ ] Conv-Deconv CNN
@@ -78,7 +79,7 @@ I had to make some changes in the torchtext backend codes to be able to do sever
 
 - I don't know why, torchtext does not split a dataset into 3 subsets (train/val/test) even if there is a function for it. I changed it to fix that issue. Hopefully, one day torchtext will fix it offically =)
 - To be able to work with Turkish Fasttext embeddings, I added its respective alias.
-- To bea able to apply Fasttext's CharNGram to OOV words to generate OOV embeddings, I made a minor change to Vector object.
+- To be able to apply Fasttext's CharNGram to OOV words to generate OOV embeddings, a minor change has been made to Vector object.
 
 ### Run Arguments
 
