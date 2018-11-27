@@ -36,7 +36,8 @@ the Local Reparameterization Trick](https://arxiv.org/pdf/1506.02557.pdf)~~
 - [ ] Variational Dropout related extensions (current version is from 2015 paper but obviously more recent versions are out there for me to implement =)) + bayes by backprop for CNN (a.k.a. Bayesian CNN)
 - [ ] Attention.
 - [ ] Different learning algorithms (DeepCNN, LSTM, GRU, any-kind-of-hybrid versions of those algorithms, transformers).
-  - [x] GRU
+  - [x] TextCNN
+  - [x] GRU 
   - [x] LSTM
   - [x] ~~Multilayer CNN~~ (I removed this model and decided to continue with CharCNN and VDCNN instead).
   - [x] CharCNN
