@@ -67,7 +67,8 @@ I try to keep every part of the project clean and easy to follow. Even though th
 - `./dropout_models/variational_dropout.py` contains the Variational Dropout object. 
 - `./dropout_models/dropout.py` contains the Dropout object which you can select your dropout type among Bernoulli (basic), Gaussian and Variational dropout types. 
 - `./evaluation/evaluate.py` contains two methods for evaluation. The first one is evaluating validation and/or test sets while training. The other method is for interactive evaluation. Note that you need "spacy" to tokenize test sentences for interactive evaluation (note that my original dataset is already tokenized, so you do not need to use spacy while training).
-- `./model/xyz.py` is self explanatory.
+- `./model/xyz.py` contains network objects.
+- `./model/Util_xyz.py` contains custom-defined objects that are used in `xyz`.
 - `./training/train.py` contains training specific methods. 
 - `./utils/utils.py` contains both utility and common methods that are being used in several places in the project.
 - `./main.py` is the main code. Run arguments/parameters/configurations are at the top of this file.
