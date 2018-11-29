@@ -41,7 +41,7 @@ the Local Reparameterization Trick](https://arxiv.org/pdf/1506.02557.pdf)~~
   - [x] LSTM
   - [x] ~~Multilayer CNN~~ (I removed this model and decided to continue with CharCNN and VDCNN instead).
   - [x] CharCNN
-  - [ ] VDCNN (Very Deep CNN)
+  - [x] VDCNN (Very Deep CNN)
   - [ ] Transformers
   - [ ] Conv-Deconv CNN
   - [ ] Encoder-Decoder GRU
@@ -114,14 +114,21 @@ There are 3 dictionaries defined to hold run arguments.
    - filter_sizes: List of convolution filter sizes for CNN-based models(Example: [3, 4, 5]).
    - max_sequence_length: An integer parameter for char-level CNN models. Initial value is set to 1014 (same as the original papers) 
    - feature_size: Network size parameter for CharCNN. It can be "large" (conv_filter_size=1024, linear_unit_count=2048), "small" (conv_filter_size=256, linear_unit_count=1024) or ""(empty string). 
-   - filter_count: If feature_size is empty, all convolution layers will use this parameter as it is filter_count parameter.
-   - filter_sizes: If feature size is empty, all convolution layers will use this parameter as it is filter_size parameter. It contains list of integer and list's length is equal to number of convolution layers.
+   - charcnn_filter_count: If feature_size is empty, all convolution layers will use this parameter as it is filter_count parameter.
+   - charcnn_filter_sizes: If feature size is empty, all convolution layers will use this parameter as it is filter_size parameter. It contains list of integer and list's length is equal to number of convolution layers.
    - max_pool_kernels: List of max_pooling operations' kernel sizes. Initial list contains 3 integer values since the CharCNN architecture has 3 max_pooling operations.
    - linear_unit_count: If feature size is empty, all linear units will use this parameter as it is their in and/or out feature size.
+   - depth: An integer parameter that defines the depth of a VDCNN model. It can take only 9, 17, 29, 49 as value.
+   - vdcnn_filter_counts: List of integers that defines the out channels of all convolutional layers.
+   - vdcnn_filter_size: An integer parameter that defines the kernel_size for all convolution operations.
+   - use_shortcut: A boolean parameter that defines whether using shortcut operation in VDCNN.
+   - downsampling_type: A string parameter that defines downsampling operation type. It can be "resnet", "vgg" or kmax".
+   - maxpool_kernel_size: An integer parameter that defines kernel size for all maxpooling operations.
+   - kmax: An integer parameter that defines "k" value for KMaxPooling operation. 
    - run_mode: Can be "train" to start training process or "eval_interactive" to test your saved model(s) interactively. 
   
  - `training_properties` holds training-related arguments:
-   - learner: Argument to choose which learning algorithm to use. It can be "textcnn", "gru", "lstm", and "charcnn" (Update: 23 Nov 2018) 
+   - learner: Argument to choose which learning algorithm to use. It can be "textcnn", "gru", "lstm", "charcnn", and "vdcnn" (Update: 29 Nov 2018) 
    - optimizer: It can be either "Adam" or "SGD".
    - learning_rate: Self-explanatory.
    - weight_decay: L2 normalization term. Note that for my case, any value bigger than 0, literally fucked my performance. 
