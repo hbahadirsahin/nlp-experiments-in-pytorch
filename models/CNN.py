@@ -240,10 +240,10 @@ class CharCNN(nn.Module):
             self.filter_count = 256
             self.linear_unit_count = 1024
         else:
-            self.filter_count = args["filter_count"]
+            self.filter_count = args["charcnn_filter_count"]
             self.linear_unit_count = args["linear_unit_count"]
 
-        self.filter_sizes = args["filter_sizes"]
+        self.filter_sizes = args["charcnn_filter_sizes"]
         self.max_pool_kernels = args["max_pool_kernels"]
 
         # Embedding initialization
@@ -380,8 +380,8 @@ class VDCNN(nn.Module):
         # Convolution parameters
         self.depth = args["depth"]
         assert self.depth in [9, 17, 29, 49]
-        self.filter_counts = args["filter_counts"]
-        self.filter_size = args["filter_size"]
+        self.filter_counts = args["vdcnn_filter_counts"]
+        self.filter_size = args["vdcnn_filter_size"]
 
         # Downsampling parameters
         self.downsampling_type = args["downsampling_type"]
