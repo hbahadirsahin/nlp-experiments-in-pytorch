@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from Util_CNN import KMaxPooling, LayerBlock
 from dropout_models.dropout import Dropout
 
 
@@ -223,18 +224,11 @@ class CharCNN(nn.Module):
         # Embedding parameters
         self.padding_id = args["padding_id"]
 
-        # Condition parameters
-        self.use_batch_norm = args["use_batch_norm"]
-
         # Dropout type
         self.dropout_type = args["dropout_type"]
 
         # Dropout probabilities
         self.keep_prob = args["keep_prob"]
-
-        # Batch normalization parameters
-        self.batch_norm_momentum = args["batch_norm_momentum"]
-        self.batch_norm_affine = args["batch_norm_affine"]
 
         # CharCNN specific parameters
         self.max_sequence_length = args["max_sequence_length"]
@@ -346,4 +340,158 @@ class CharCNN(nn.Module):
             x = self.dropout(self.relu(self.linear2(x)))
         x = self.linear3(x)
 
+        return x, kl_loss
+
+
+class VDCNN(nn.Module):
+    def __init__(self, args):
+        super(VDCNN, self).__init__()
+
+        self.args = args
+
+        # Device
+        self.device = args["device"]
+
+        # Input/Output dimensions
+        self.embed_num = args["vocab_size"]
+        self.embed_dim = args["embed_dim"]
+        self.num_class = args["num_class"]
+
+        # Embedding parameters
+        self.padding_id = args["padding_id"]
+
+        # Condition parameters
+        self.use_pretrained_embed = args["use_pretrained_embed"]
+        self.use_shortcut = args["use_shortcut"]
+
+        # Pretrained embedding weights
+        self.pretrained_weights = args["pretrained_weights"]
+
+        # Dropout type
+        self.dropout_type = args["dropout_type"]
+
+        # Dropout probabilities
+        self.keep_prob = args["keep_prob"]
+
+        # Batch normalization parameters
+        self.batch_norm_momentum = args["batch_norm_momentum"]
+        self.batch_norm_affine = args["batch_norm_affine"]
+
+        # Convolution parameters
+        self.depth = args["depth"]
+        assert self.depth in [9, 17, 29, 49]
+        self.filter_counts = args["filter_count"]
+        self.filter_size = args["filter_size"]
+
+        # Downsampling parameters
+        self.downsampling_type = args["downsampling_type"]
+        self.maxpool_filter_size = args["maxpool_filter_size"]
+        self.k = args["kmax"]
+
+        number_of_layers = self.initialize_number_of_layers()
+        layers = nn.ModuleList()
+
+        first_conv_layer = nn.Conv1d(in_channels=self.embed_dim,
+                                     out_channels=self.filter_count[0],
+                                     kernel_size=self.filter_size,
+                                     padding=1)
+        layers.append(first_conv_layer)
+
+        # Add second convolution layer block where input_size is self.filter_count[0], output_size is self.filter_count[0]
+        for n in range(number_of_layers[0]):
+            layers.append(LayerBlock(input_channel_size=self.filter_count[0],
+                                     filter_count=self.filter_count[0],
+                                     conv_filter_size=self.filter_size,
+                                     maxpool_filter_size=self.maxpool_filter_size,
+                                     kmax_k=self.k,
+                                     downsample_type=self.downsampling_type,
+                                     use_shortcut=self.use_shortcut))
+
+        # Add third convolution layer block where input_size is self.filter_count[0], output_size is self.filter_count[1]
+        layers.append(LayerBlock(input_channel_size=self.filter_count[0],
+                                 filter_count=self.filter_count[1],
+                                 conv_filter_size=self.filter_size,
+                                 maxpool_filter_size=self.maxpool_filter_size,
+                                 kmax_k=self.k,
+                                 downsample_type=self.downsampling_type,
+                                 downsample=True,
+                                 use_shortcut=self.use_shortcut))
+        for n in range(number_of_layers[1] - 1):
+            layers.append(LayerBlock(input_channel_size=self.filter_count[1],
+                                     filter_count=self.filter_count[1],
+                                     conv_filter_size=self.filter_size,
+                                     maxpool_filter_size=self.maxpool_filter_size,
+                                     kmax_k=self.k,
+                                     downsample_type=self.downsampling_type,
+                                     use_shortcut=self.use_shortcut))
+
+        # Add fourth convolution layer block where input_size is self.filter_count[1], output_size is self.filter_count[2]
+        layers.append(LayerBlock(input_channel_size=self.filter_count[1],
+                                 filter_count=self.filter_count[2],
+                                 conv_filter_size=self.filter_size,
+                                 maxpool_filter_size=self.maxpool_filter_size,
+                                 kmax_k=self.k,
+                                 downsample_type=self.downsampling_type,
+                                 downsample=True,
+                                 use_shortcut=self.use_shortcut))
+        for n in range(number_of_layers[2] - 1):
+            layers.append(LayerBlock(input_channel_size=self.filter_count[2],
+                                     filter_count=self.filter_count[2],
+                                     conv_filter_size=self.filter_size,
+                                     maxpool_filter_size=self.maxpool_filter_size,
+                                     kmax_k=self.k,
+                                     downsample_type=self.downsampling_type,
+                                     use_shortcut=self.use_shortcut))
+
+        # Add fifth convolution layer block where input_size is self.filter_count[2], output_size is self.filter_count[3]
+        layers.append(LayerBlock(input_channel_size=self.filter_count[2],
+                                 filter_count=self.filter_count[3],
+                                 conv_filter_size=self.filter_size,
+                                 maxpool_filter_size=self.maxpool_filter_size,
+                                 kmax_k=self.k,
+                                 downsample_type=self.downsampling_type,
+                                 downsample=True,
+                                 use_shortcut=self.use_shortcut))
+        for n in range(number_of_layers[2] - 1):
+            layers.append(LayerBlock(input_channel_size=self.filter_count[3],
+                                     filter_count=self.filter_count[3],
+                                     conv_filter_size=self.filter_size,
+                                     maxpool_filter_size=self.maxpool_filter_size,
+                                     kmax_k=self.k,
+                                     downsample_type=self.downsampling_type,
+                                     use_shortcut=self.use_shortcut))
+
+        self.all_conv_layers == nn.Sequential(*layers)
+        self.kmax_pooling == KMaxPooling(k=self.k)
+
+        self.relu = nn.ReLU()
+        self.fc1 = nn.Linear(self.filter_counts[3] * self.k, 2048)
+        self.fc2 = nn.Linear(2048, 2048)
+        self.fc3 = nn.Linear(2048, self.num_class)
+
+    def initialize_number_of_layers(self):
+        if self.depth == 9:
+            return [2] * 4
+        elif self.depth == 17:
+            return [4] * 4
+        elif self.depth == 29:
+            return [10, 10, 4, 4]
+        elif self.depth == 49:
+            return [16, 16, 10, 6]
+
+    def forward(self, batch):
+        kl_loss = torch.Tensor([0.0])
+        # Get batch size to beginning
+        x = batch.permute(1, 0)
+        # Embedding magic
+        x = self.embedding(x)
+        x = x.permute(0, 2, 1)
+        if "cuda" in str(self.device):
+            kl_loss = kl_loss.cuda()
+        x = self.all_conv_layers(x)
+        x = self.kmax_pooling(x)
+        x = x.view(x.size(0), -1)
+        x = self.relu(self.fc1(x))
+        x = self.relu(self.fc2(x))
+        x = self.fc3(x)
         return x, kl_loss
