@@ -353,7 +353,7 @@ class VDCNN(nn.Module):
         self.device = args["device"]
 
         # Input/Output dimensions
-        self.embed_num = args["vocab_size"]
+        self.vocab_size = args["vocab_size"]
         self.embed_dim = args["embed_dim"]
         self.num_class = args["num_class"]
 
@@ -380,13 +380,15 @@ class VDCNN(nn.Module):
         # Convolution parameters
         self.depth = args["depth"]
         assert self.depth in [9, 17, 29, 49]
-        self.filter_counts = args["filter_count"]
+        self.filter_counts = args["filter_counts"]
         self.filter_size = args["filter_size"]
 
         # Downsampling parameters
         self.downsampling_type = args["downsampling_type"]
         self.maxpool_filter_size = args["maxpool_filter_size"]
         self.k = args["kmax"]
+
+        self.embedding = nn.Embedding(self.vocab_size, self.embed_dim, padding_idx=self.padding_id)
 
         number_of_layers = self.initialize_number_of_layers()
         layers = nn.ModuleList()

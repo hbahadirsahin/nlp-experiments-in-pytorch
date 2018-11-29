@@ -9,7 +9,7 @@ from datahelper.dataset_reader import DatasetLoader
 from datahelper.embedding_helper import OOVEmbeddingCreator
 from datahelper.preprocessor import Preprocessor
 from evaluation.evaluate import evaluate_interactive
-from models.CNN import TextCnn, CharCNN
+from models.CNN import TextCnn, CharCNN, VDCNN
 from models.GRU import GRU
 from models.LSTM import LSTM
 from training.train import train_iters
@@ -51,6 +51,14 @@ model_properties = {"use_pretrained_embed": True,
                     "filter_sizes": [7, 7, 3, 3, 3, 3],
                     "max_pool_kernels": [3, 3, 3],
                     "linear_unit_count": 2048,
+                    # VDCNN related parameters
+                    "depth": 9,
+                    "filter_counts": [64, 128, 256, 512],
+                    "filter_size": 3,
+                    "use_shortcut": True,
+                    "downsampling_type": "resnet",
+                    "maxpool_filter_size": 3,
+                    "kmax": 8,
                     # RNN-GRU-LSTM related parameters
                     "rnn_hidden_dim": 300,
                     "rnn_num_layers": 1,
@@ -177,6 +185,8 @@ if __name__ == '__main__':
             model = LSTM(model_properties).to(device)
         elif training_properties["learner"] == "charcnn":
             model = CharCNN(model_properties).to(device)
+        elif training_properties["learner"] == "vdcnn":
+            model = VDCNN(model_properties).to(device)
 
         if dataset_properties["checkpoint_path"] is None or dataset_properties["checkpoint_path"] == "":
             print("Train process is starting from scratch!")
