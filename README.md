@@ -185,3 +185,6 @@ Below repositories really helped me to write a decent and working code:
 - https://github.com/felix-laumann/Bayesian_CNN/
 - https://github.com/kefirski/variational_dropout/
 - https://github.com/dreamgonfly/deep-text-classification-pytorch/
+- https://pytorch.org/tutorials/beginner/nlp/advanced_tutorial.html
+- https://github.com/allenai/allennlp/blob/master/allennlp/modules/conditional_random_field.py
+- https://github.com/ymym3412/textcnn-conv-deconv-pytorch/blob/master/model.py
