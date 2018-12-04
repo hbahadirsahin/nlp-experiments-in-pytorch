@@ -15,20 +15,20 @@ from models.LSTM import LSTM
 from training.train import train_iters
 from utils.utils import save_vocabulary
 
-dataset_properties = {"stop_word_path": "D:/Anaconda3/nltk_data/corpora/stopwords/turkish",
+dataset_properties = {"stop_word_path": "D:/Anaconda3/nltk_data/corpora/stopwords/english",
                       # "stop_word_path": "D:/nlpdata/stopwords/turkish",
                       # "data_path": "D:/nlpdata/tr_test.DUMP",
-                      "data_path": "D:/PyTorchNLP/data/turkish_test.DUMP",
-                      "embedding_vector": "fasttext.tr.300d",
+                      "data_path": "D:/PyTorchNLP/data/EWNERTC_TC_Coarse Grained NER_No_NoiseReduction.DUMP",
+                      "embedding_vector": "fasttext.en.300d",
                       # "vector_cache": "D:/nlpdata/fasttext",
                       "vector_cache": "D:/PyTorchNLP/data/fasttext",
                       # "pretrained_embedding_path": "D:/nlpdata/fasttext/wiki.tr",
-                      "pretrained_embedding_path": "D:/PyTorchNLP/data/fasttext/wiki.tr",
+                      "pretrained_embedding_path": "D:/PyTorchNLP/data/fasttext/wiki.en",
                       # "data_path": "D:/PyTorchNLP/data/EWNERTC_TC_Coarse Grained NER_No_NoiseReduction.DUMP",
                       # "embedding_vector": "fasttext.en.300d",
                       # "vector_cache": "D:/PyTorchNLP/data/fasttext",
                       # "pretrained_embedding_path": "D:/PyTorchNLP/data/fasttext/wiki.en",
-                      "checkpoint_path": "",
+                      "checkpoint_path": "D:/PyTorchNLP/saved/2018-12-05/saved_model_step10.pt",
                       "oov_embedding_type": "zeros",
                       "batch_size": 32
                       }
@@ -69,9 +69,9 @@ model_properties = {"use_pretrained_embed": True,
                     "run_mode": "train",
                     }
 
-training_properties = {"learner": "charcnn",
-                       "optimizer": "SGD",
-                       "learning_rate": 0.1,
+training_properties = {"learner": "textcnn",
+                       "optimizer": "Adam",
+                       "learning_rate": 0.05,
                        "weight_decay": 0,
                        "momentum": 0.9,
                        "norm_ratio": 0.25,
@@ -82,7 +82,7 @@ training_properties = {"learner": "charcnn",
                        "eval_every": 1,
                        }
 
-evaluation_properties = {"model_path": "D:/PyTorchNLP/saved/2018-11-05/",
+evaluation_properties = {"model_path": "D:/PyTorchNLP/saved/2018-12-05/",
                          "sentence_vocab": "D:/PyTorchNLP/saved/vocab/sentence_vocab.dat",
                          "category_vocab": "D:/PyTorchNLP/saved/vocab/category_vocab.dat"
                          }
@@ -176,6 +176,7 @@ if __name__ == '__main__':
         print("Saving vocabulary files")
         save_vocabulary(sentence_vocab, os.path.abspath(os.path.join(save_dir_vocab, "sentence_vocab.dat")))
         save_vocabulary(category_vocab, os.path.abspath(os.path.join(save_dir_vocab, "category_vocab.dat")))
+
         print("Initialize model")
         if training_properties["learner"] == "textcnn":
             model = TextCnn(model_properties).to(device)

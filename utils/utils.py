@@ -65,3 +65,18 @@ def time_since(since, percent):
     es = s / percent
     rs = es - s
     return "%s (- %s)" % (as_minutes(s), as_minutes(rs))
+
+
+# Direct c/p from Pytorch/BiLSTM Tutorial
+def argmax(vec):
+    # return the argmax as a python int
+    _, idx = torch.max(vec, 1)
+    return idx.item()
+
+
+# Direct c/p from Pytorch/BiLSTM Tutorial
+def log_sum_exp(vec):
+    max_score = vec[0, argmax(vec)]
+    max_score_broadcast = max_score.view(1, -1).expand(1, vec.size()[1])
+    return max_score + \
+           torch.log(torch.sum(torch.exp(vec - max_score_broadcast)))

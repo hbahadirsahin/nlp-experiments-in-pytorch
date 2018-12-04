@@ -127,7 +127,7 @@ class TextCnn(nn.Module):
             embed.weight.requires_grad = True
             embed_static.weight.requires_grad = False
         else:
-            raise KeyError("Embedding train type can be (1) static, (2) nonstatic or (3) multichannel")
+            raise ValueError("Embedding train type can be (1) static, (2) nonstatic or (3) multichannel")
         return embed, embed_static
 
     def initialize_conv_layer(self):
@@ -248,7 +248,7 @@ class CharCNN(nn.Module):
 
         # Embedding initialization
         # As the original CharCNN paper, I initialized char embeddings as one-hot vector.
-        self.embedding = nn.Embedding(self.vocab_size, self.embed_dim, padding_idx=self.padding_id)
+        self.embedding = nn.Embedding(self.vocab_size, self.embed_dim, padding_idx=self.padding_id).cpu()
         self.embedding.weight.data = torch.eye(self.vocab_size, self.embed_dim)
         self.embedding.weight.reqiures_grad = False
 
@@ -317,6 +317,7 @@ class CharCNN(nn.Module):
         x = self.embedding(x)
         x = x.permute(0, 2, 1)
         if "cuda" in str(self.device):
+            x = x.cuda()
             kl_loss = kl_loss.cuda()
         # To Convolution-Pooling
         x = self.pool1(self.relu(self.conv1(x)))
@@ -388,7 +389,7 @@ class VDCNN(nn.Module):
         self.maxpool_filter_size = args["maxpool_filter_size"]
         self.k = args["kmax"]
 
-        self.embedding = nn.Embedding(self.vocab_size, self.embed_dim, padding_idx=self.padding_id)
+        self.embedding = nn.Embedding(self.vocab_size, self.embed_dim, padding_idx=self.padding_id).cpu()
 
         number_of_layers = self.initialize_number_of_layers()
         layers = nn.ModuleList()
@@ -489,6 +490,7 @@ class VDCNN(nn.Module):
         x = self.embedding(x)
         x = x.permute(0, 2, 1)
         if "cuda" in str(self.device):
+            x = x.cuda()
             kl_loss = kl_loss.cuda()
         x = self.all_conv_layers(x)
         x = self.kmax_pooling(x)
