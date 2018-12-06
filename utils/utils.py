@@ -80,3 +80,10 @@ def log_sum_exp(vec):
     max_score_broadcast = max_score.view(1, -1).expand(1, vec.size()[1])
     return max_score + \
            torch.log(torch.sum(torch.exp(vec - max_score_broadcast)))
+
+
+def scheduled_annealing_strategy(epoch, max_epoch, max=1.0, min=0.01, gain=0.3):
+    upper_alpha = max - min
+    lower_alpha = (1 + torch.exp(gain * (epoch - (max_epoch // 2))))
+    alpha = (upper_alpha / lower_alpha) + max
+    return alpha

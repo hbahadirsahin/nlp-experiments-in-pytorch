@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from Util_CNN import KMaxPooling, LayerBlock
+from Util_CNN import KMaxPooling, LayerBlock, ConvolutionEncoder, DeconvolutionDecoder, FullyConnectedClassifier
 from dropout_models.dropout import Dropout
 
 
@@ -499,3 +499,33 @@ class VDCNN(nn.Module):
         x = self.relu(self.fc2(x))
         x = self.fc3(x)
         return x, kl_loss
+
+
+class ConvDeconvCNN():
+    def __init__(self, args):
+        super(ConvDeconvCNN, self).__init__()
+
+        self.args = args
+
+        # Input/Output dimensions
+        self.vocab_size = args["vocab_size"]
+        self.embed_dim = args["embed_dim"]
+
+        # Embedding parameters
+        self.padding_id = args["padding_id"]
+
+        # Condition parameters
+        self.use_pretrained_embed = args["use_pretrained_embed"]
+
+        # Pretrained embedding weights
+        self.pretrained_weights = args["pretrained_weights"]
+
+        # Initialize embeddings
+        self.embedding = nn.Embedding(self.vocab_size, self.embed_dim, padding_idx=self.padding_id).cpu()
+        if self.use_pretrained_embed:
+            print("> Pre-trained Embeddings")
+            self.embedding.from_pretrained(self.pretrained_weights)
+
+        self.encoder = ConvolutionEncoder(self.args, self.embedding)
+        self.decoder = DeconvolutionDecoder(self.args, self.embedding)
+        self.classifier = FullyConnectedClassifier(self.args)

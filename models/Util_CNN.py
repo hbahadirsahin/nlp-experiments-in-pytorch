@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class ConvolutionalBlock(nn.Module):
     def __init__(self, input_channel_size, filter_count, filter_size, stride):
         super(ConvolutionalBlock, self).__init__()
@@ -79,7 +80,7 @@ class LayerBlock(nn.Module):
 
 
 class ConvolutionEncoder(nn.Module):
-    def __init__(self, args):
+    def __init__(self, args, embedding):
         super(ConvolutionEncoder, self).__init__()
         self.args = args
 
@@ -87,18 +88,10 @@ class ConvolutionEncoder(nn.Module):
         self.device = args["device"]
 
         # Input/Output dimensions
-        self.vocab_size = args["vocab_size"]
         self.embed_dim = args["embed_dim"]
 
-        # Embedding parameters
-        self.padding_id = args["padding_id"]
-
         # Condition parameters
-        self.use_pretrained_embed = args["use_pretrained_embed"]
         self.use_batch_norm = args["use_batch_norm"]
-
-        # Pretrained embedding weights
-        self.pretrained_weights = args["pretrained_weights"]
 
         # Batch normalization parameters
         self.batch_norm_momentum = args["batch_norm_momentum"]
@@ -110,11 +103,7 @@ class ConvolutionEncoder(nn.Module):
         self.filter_sizes = args["encodercnn_filter_sizes"]
         self.strides = args["encodercnn_strides"]
 
-        # Initialize embeddings
-        self.embedding = nn.Embedding(self.vocab_size, self.embed_dim, padding_idx=self.padding_id).cpu()
-        if self.use_pretrained_embed:
-            print("> Pre-trained Embeddings")
-            self.embedding.from_pretrained(self.pretrained_weights)
+        self.embedding = embedding
 
         # Initialize convolutions
         self.conv1 = nn.Conv2d(in_channels=self.input_channel,
@@ -160,7 +149,7 @@ class ConvolutionEncoder(nn.Module):
             h = self.relu(self.conv2(h))
             h = self.relu(self.conv3(h))
 
-        return h, self.embed
+        return h
 
 
 class DeconvolutionDecoder(nn.Module):
@@ -173,9 +162,6 @@ class DeconvolutionDecoder(nn.Module):
 
         # Input/Output dimensions
         self.embed_dim = args["embed_dim"]
-
-        # Embedding initialized in Encoder
-        self.embedding = embedding
 
         # Condition parameters
         self.use_batch_norm = args["use_batch_norm"]
@@ -190,6 +176,8 @@ class DeconvolutionDecoder(nn.Module):
         self.filter_sizes = list(reversed(args["encodercnn_filter_sizes"]))
         self.strides = list(reversed(args["encodercnn_strides"]))
         self.temperature = args["deconv_temperature"]
+
+        self.embedding = embedding
 
         # Initialize deconvolutions
         self.deconv1 = nn.ConvTranspose2d(in_channels=self.filter_counts[0],
@@ -243,11 +231,13 @@ class DeconvolutionDecoder(nn.Module):
         return F.log_softmax(probs, dim=2)
 
 
-class FullyConnectedNetwork(nn.Module):
-    def __init__(self, args, input_size):
-        super(FullyConnectedNetwork, self).__init__()
+class FullyConnectedClassifier(nn.Module):
+    def __init__(self, args):
+        super(FullyConnectedClassifier, self).__init__()
 
-        self.input_size = input_size
+        # This block is not configurable for any network architecture!
+        # It is designed for Conv-Deconv CNN, hence its input size is the output size of the Encoder CNN.
+        self.input_size = args["encodercnn_filter_counts"][2]
         self.hidden_layer_size = args["conv_deconv_hidden_layer_size"]
         self.num_class = args["num_class"]
         self.keep_prob = args["conv_deconv_keep_prob"]

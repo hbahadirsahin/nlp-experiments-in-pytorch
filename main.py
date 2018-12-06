@@ -9,26 +9,26 @@ from datahelper.dataset_reader import DatasetLoader
 from datahelper.embedding_helper import OOVEmbeddingCreator
 from datahelper.preprocessor import Preprocessor
 from evaluation.evaluate import evaluate_interactive
-from models.CNN import TextCnn, CharCNN, VDCNN
+from models.CNN import TextCnn, CharCNN, VDCNN, ConvDeconvCNN
 from models.GRU import GRU
 from models.LSTM import LSTM
-from training.train import train_iters
+from training.trainer import Trainer
 from utils.utils import save_vocabulary
 
-dataset_properties = {"stop_word_path": "D:/Anaconda3/nltk_data/corpora/stopwords/english",
+dataset_properties = {"stop_word_path": "D:/Anaconda3/nltk_data/corpora/stopwords/turkish",
                       # "stop_word_path": "D:/nlpdata/stopwords/turkish",
                       # "data_path": "D:/nlpdata/tr_test.DUMP",
-                      "data_path": "D:/PyTorchNLP/data/EWNERTC_TC_Coarse Grained NER_No_NoiseReduction.DUMP",
-                      "embedding_vector": "fasttext.en.300d",
+                      "data_path": "D:/PyTorchNLP/data/turkish_test.DUMP",
+                      "embedding_vector": "fasttext.tr.300d",
                       # "vector_cache": "D:/nlpdata/fasttext",
                       "vector_cache": "D:/PyTorchNLP/data/fasttext",
                       # "pretrained_embedding_path": "D:/nlpdata/fasttext/wiki.tr",
-                      "pretrained_embedding_path": "D:/PyTorchNLP/data/fasttext/wiki.en",
+                      "pretrained_embedding_path": "D:/PyTorchNLP/data/fasttext/wiki.tr",
                       # "data_path": "D:/PyTorchNLP/data/EWNERTC_TC_Coarse Grained NER_No_NoiseReduction.DUMP",
                       # "embedding_vector": "fasttext.en.300d",
                       # "vector_cache": "D:/PyTorchNLP/data/fasttext",
                       # "pretrained_embedding_path": "D:/PyTorchNLP/data/fasttext/wiki.en",
-                      "checkpoint_path": "D:/PyTorchNLP/saved/2018-12-05/saved_model_step10.pt",
+                      "checkpoint_path": "",
                       "oov_embedding_type": "zeros",
                       "batch_size": 32
                       }
@@ -82,19 +82,56 @@ training_properties = {"learner": "textcnn",
                        "eval_every": 1,
                        }
 
-evaluation_properties = {"model_path": "D:/PyTorchNLP/saved/2018-12-05/",
+evaluation_properties = {"model_path": "D:/PyTorchNLP/saved/2018-12-06/",
                          "sentence_vocab": "D:/PyTorchNLP/saved/vocab/sentence_vocab.dat",
                          "category_vocab": "D:/PyTorchNLP/saved/vocab/category_vocab.dat"
                          }
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+
+def initialize_model_and_trainer(training_properties, datasetloader, device):
+    model, trainer = None, None
+    print("Model type is", training_properties["learner"])
+    if training_properties["learner"] == "textcnn":
+        model = TextCnn(model_properties).to(device)
+        trainer = Trainer.trainer_factory("single_model_trainer", training_properties, datasetloader.train_iter,
+                                          datasetloader.val_iter, datasetloader.test_iter, device)
+    elif training_properties["learner"] == "gru":
+        model = GRU(model_properties).to(device)
+        trainer = Trainer.trainer_factory("single_model_trainer", training_properties, datasetloader.train_iter,
+                                          datasetloader.val_iter, datasetloader.test_iter, device)
+    elif training_properties["learner"] == "lstm":
+        model = LSTM(model_properties).to(device)
+        trainer = Trainer.trainer_factory("single_model_trainer", training_properties, datasetloader.train_iter,
+                                          datasetloader.val_iter, datasetloader.test_iter, device)
+    elif training_properties["learner"] == "charcnn":
+        model = CharCNN(model_properties).to(device)
+        trainer = Trainer.trainer_factory("single_model_trainer", training_properties, datasetloader.train_iter,
+                                          datasetloader.val_iter, datasetloader.test_iter, device)
+    elif training_properties["learner"] == "vdcnn":
+        model = VDCNN(model_properties).to(device)
+        trainer = Trainer.trainer_factory("single_model_trainer", training_properties, datasetloader.train_iter,
+                                          datasetloader.val_iter, datasetloader.test_iter, device)
+    elif training_properties["learner"] == "conv-deconv-cnn":
+        convDeconveCNN = ConvDeconvCNN(model_properties)
+        encoderCNN = convDeconveCNN.encoder.to(device)
+        decoderCNN = convDeconveCNN.decoder.to(device)
+        classifier = convDeconveCNN.classifier.to(device)
+        trainer = Trainer.trainer_factory("conv_deconv_trainer", training_properties, datasetloader.train_iter,
+                                          datasetloader.val_iter, datasetloader.test_iter, device)
+    else:
+        raise ValueError("Model is not defined!")
+
+    return model, trainer
+
+
 if __name__ == '__main__':
     assert model_properties["run_mode"] == "train" or \
            model_properties["run_mode"] == "eval_interactive"
 
     print("Initial device is", device)
-    if training_properties["learner"] != "gru":
+    if "cuda" == device:
         torch.backends.cudnn.benchmark = True
         torch.backends.cudnn.fastest = True
     else:
@@ -178,37 +215,16 @@ if __name__ == '__main__':
         save_vocabulary(category_vocab, os.path.abspath(os.path.join(save_dir_vocab, "category_vocab.dat")))
 
         print("Initialize model")
-        if training_properties["learner"] == "textcnn":
-            model = TextCnn(model_properties).to(device)
-        elif training_properties["learner"] == "gru":
-            model = GRU(model_properties).to(device)
-        elif training_properties["learner"] == "lstm":
-            model = LSTM(model_properties).to(device)
-        elif training_properties["learner"] == "charcnn":
-            model = CharCNN(model_properties).to(device)
-        elif training_properties["learner"] == "vdcnn":
-            model = VDCNN(model_properties).to(device)
+        model, trainer = initialize_model_and_trainer(training_properties, datasetloader, device)
 
         if dataset_properties["checkpoint_path"] is None or dataset_properties["checkpoint_path"] == "":
             print("Train process is starting from scratch!")
-            train_iters(model=model,
-                        train_iter=datasetloader.train_iter,
-                        dev_iter=datasetloader.val_iter,
-                        test_iter=datasetloader.test_iter,
-                        device=device,
-                        topk=training_properties["topk"],
-                        training_properties=training_properties)
+            trainer.train_iters(model)
         else:
             checkpoint = torch.load(dataset_properties["checkpoint_path"])
-            print("Train process is starting from checkpoint! Starting epoch is {}".format(checkpoint["epoch"]))
-            train_iters(model=model,
-                        train_iter=datasetloader.train_iter,
-                        dev_iter=datasetloader.val_iter,
-                        test_iter=datasetloader.test_iter,
-                        device=device,
-                        topk=training_properties["topk"],
-                        training_properties=training_properties,
-                        checkpoint=checkpoint)
+            print("Train process is reloading from epoch {}".format(checkpoint["epoch"]))
+            trainer.train_iters(model, checkpoint)
+
     elif model_properties["run_mode"] == "eval_interactive":
         model_path = evaluation_properties["model_path"]
         sentence_vocab_path = evaluation_properties["sentence_vocab"]
