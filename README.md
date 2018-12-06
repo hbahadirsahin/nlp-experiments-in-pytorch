@@ -69,7 +69,10 @@ I try to keep every part of the project clean and easy to follow. Even though th
 - `./evaluation/evaluate.py` contains two methods for evaluation. The first one is evaluating validation and/or test sets while training. The other method is for interactive evaluation. Note that you need "spacy" to tokenize test sentences for interactive evaluation (note that my original dataset is already tokenized, so you do not need to use spacy while training).
 - `./model/xyz.py` contains network objects.
 - `./model/Util_xyz.py` contains custom-defined objects that are used in `xyz`.
-- `./training/train.py` contains training specific methods. 
+- `./training/trainer.py` is a class that returns the necessary trainer for the user's selected learning model
+- `./training/single_model_trainer.py` contains a class that can train only "one" model-based algorithms (such that TextCNN, LSTM, GRU, etc.). 
+- `./training/double_model_trainer.py` contains a class that can train only "encoder-decoder" model-based algorithms (Not in repository yet, but it will be added).
+- - `./training/multiple_model_trainer.py` contains a class that can train only algorithms that has more than two models internally, such that Conv-Deconv CNN which has encoder, decoder and fully-connected classifier. (Not in repository yet, but it will be added).
 - `./utils/utils.py` contains both utility and common methods that are being used in several places in the project.
 - `./main.py` is the main code. Run arguments/parameters/configurations are at the top of this file.
 
@@ -166,8 +169,8 @@ Note: Epoch is set to 20 for all experiments, until further notice (last update:
 |Turkish|49| Fasttext | zeros | static	| 43.5519  | 68.4336 |
 |Turkish|49| Fasttext | zeros | nonstatic	| 56.0081  | 79.8634 |
 |Turkish|49| Fasttext | Fasttext | static	| 43.8025  | 68.8641 |
-|Turkish|49| Fasttext | Fasttext | nonstatic	| NaN (Training)  | NaN (Training) |
-|English|25| Fasttext | zeros | static	| NaN (TBA) | NaN (TBA) |
+|Turkish|49| Fasttext | Fasttext | nonstatic	| NaN (Training in CPU)  | NaN (Training in CPU) |
+|English|25| Fasttext | zeros | static	| NaN (Training in GPU) | NaN (Training in GPU) |
 |English|25| Fasttext | zeros | nonstatic	| NaN (TBA) | NaN (TBA) |
 |English|25| Fasttext | Fasttext | static	|  NaN (TBA)  | NaN (TBA) |
 |English|25| Fasttext | Fasttext | nonstatic	| NaN (TBA)  | NaN (TBA) |
