@@ -9,7 +9,7 @@ class Trainer(object):
             return SingleModelTrainer(training_properties, train_iter, dev_iter, test_iter, device)
         elif type == "encoder_decoder_trainer":
             return
-        elif type == "conv_deconv_trainer":
+        elif type == "multiple_model_trainer":
             return
         else:
             ValueError("Unrecognized trainer type")

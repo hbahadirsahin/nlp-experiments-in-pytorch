@@ -8,7 +8,7 @@ import torch
 from datahelper.dataset_reader import DatasetLoader
 from datahelper.embedding_helper import OOVEmbeddingCreator
 from datahelper.preprocessor import Preprocessor
-from evaluation.evaluate import evaluate_interactive
+from evaluation.evaluator import Evaluator
 from models.CNN import TextCnn, CharCNN, VDCNN, ConvDeconvCNN
 from models.GRU import GRU
 from models.LSTM import LSTM
@@ -90,7 +90,7 @@ evaluation_properties = {"model_path": "D:/PyTorchNLP/saved/2018-12-06/",
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-def initialize_model_and_trainer(training_properties, datasetloader, device):
+def initialize_model_and_trainer(model_properties, training_properties, datasetloader, device):
     model, trainer = None, None
     print("Model type is", training_properties["learner"])
     if training_properties["learner"] == "textcnn":
@@ -214,8 +214,8 @@ if __name__ == '__main__':
         save_vocabulary(sentence_vocab, os.path.abspath(os.path.join(save_dir_vocab, "sentence_vocab.dat")))
         save_vocabulary(category_vocab, os.path.abspath(os.path.join(save_dir_vocab, "category_vocab.dat")))
 
-        print("Initialize model")
-        model, trainer = initialize_model_and_trainer(training_properties, datasetloader, device)
+        print("Initialize model and trainer")
+        model, trainer = initialize_model_and_trainer(model_properties, training_properties, datasetloader, device)
 
         if dataset_properties["checkpoint_path"] is None or dataset_properties["checkpoint_path"] == "":
             print("Train process is starting from scratch!")
@@ -226,16 +226,17 @@ if __name__ == '__main__':
             trainer.train_iters(model, checkpoint)
 
     elif model_properties["run_mode"] == "eval_interactive":
+        interactive_evaluator = Evaluator.evaluator_factory("interactive_evaluator", "cpu")
+
         model_path = evaluation_properties["model_path"]
         sentence_vocab_path = evaluation_properties["sentence_vocab"]
         category_vocab_path = evaluation_properties["category_vocab"]
 
         print("Interactive evaluation mode for model {}:".format(model_path))
 
-        evaluate_interactive(model_path=model_path,
-                             sentence_vocab_path=sentence_vocab_path,
-                             category_vocab_path=category_vocab_path,
-                             preprocessor=preprocessor.preprocess,
-                             topk=training_properties["topk"],
-                             device=device)
+        interactive_evaluator.evaluate_interactive(model_path=model_path,
+                                                   sentence_vocab_path=sentence_vocab_path,
+                                                   category_vocab_path=category_vocab_path,
+                                                   preprocessor=preprocessor.preprocess,
+                                                   topk=training_properties["topk"])
     print("")

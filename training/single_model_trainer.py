@@ -6,7 +6,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.optim.lr_scheduler as lr_scheduler
 
-from evaluation.evaluate import evaluate_iter
+from evaluation.evaluator import Evaluator
 from models.GRU import GRU
 from utils.utils import time_since, calculate_accuracy, calculate_topk_accuracy, save_best_model
 
@@ -30,6 +30,8 @@ class SingleModelTrainer(object):
         self.test_iter = test_iter
 
         self.device = device
+
+        self.dev_evaluator, self.test_evaluator = Evaluator().evaluator_factory("single_model_evaluator", self.device)
 
     def init_optimizer(self, model):
         print("Optimizer type is {} !".format(self.optimizer_type))
@@ -71,25 +73,18 @@ class SingleModelTrainer(object):
         print("Training...")
         for e in range(start_epoch, self.epoch + 1):
             total_loss, cross_entropy_loss, kl_loss, accuracy, accuracy_topk = self.train(model=model,
-                                                                                          train_iter=self.train_iter,
                                                                                           optimizer=optimizer,
                                                                                           scheduler=None,
-                                                                                          criterion=criterion,
-                                                                                          norm_ratio=self.norm_ratio,
-                                                                                          device=self.device,
-                                                                                          topk=self.topk,
-                                                                                          print_every=self.print_every)
+                                                                                          criterion=criterion)
 
             self.print_epoch(start, e, cross_entropy_loss, kl_loss, total_loss, accuracy, accuracy_topk)
 
             if e % self.eval_every == 0:
-                vali_loss, vali_accuracy, vali_accuracy_topk = evaluate_iter(model=model,
-                                                                             input=self.dev_iter,
-                                                                             criterion=criterion,
-                                                                             device=self.device,
-                                                                             save_path=self.save_path,
-                                                                             topk=self.topk,
-                                                                             is_vali=True)
+                vali_loss, vali_accuracy, vali_accuracy_topk = self.dev_evaluator.evaluate_iter(model=model,
+                                                                                                input=self.dev_iter,
+                                                                                                criterion=criterion,
+                                                                                                save_path=self.save_path,
+                                                                                                topk=self.topk)
                 if best_vali_acc < vali_accuracy:
                     best_vali_loss = vali_loss
                     best_vali_acc = vali_accuracy
@@ -114,13 +109,11 @@ class SingleModelTrainer(object):
                 }, out_path)
                 old_path = out_path
 
-        test_loss, test_accuracy, test_accuracy_topk = evaluate_iter(model=model,
-                                                                     input=self.test_iter,
-                                                                     criterion=criterion,
-                                                                     device=self.device,
-                                                                     save_path=self.save_path,
-                                                                     topk=self.topk,
-                                                                     is_vali=False)
+        test_loss, test_accuracy, test_accuracy_topk = self.test_evaluator.evaluate_iter(model=model,
+                                                                                         input=self.test_iter,
+                                                                                         criterion=criterion,
+                                                                                         save_path=self.save_path,
+                                                                                         topk=self.topk)
 
         self.print_test(test_loss, test_accuracy, test_accuracy_topk)
 
