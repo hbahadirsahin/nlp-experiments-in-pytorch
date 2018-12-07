@@ -55,8 +55,8 @@ the Local Reparameterization Trick](https://arxiv.org/pdf/1506.02557.pdf)~~
 - [ ] Different language models.
   - [ ] ELMO (pretrained Turkish/English embeddings)
   - [ ] BERT (pretrained Turkish/English embeddings)
-- [ ] Document length categorization/NER tasks (Current runs are on sentence-level; however, with ELMO/BERT I will be able to do document level tasks, too.)
-
+- [ ] Document length categorization/NER support (Conv-Deconv CNN implementation supports document-length tasks, but more support will come ELMO and BERT).
+     
 ## Project Skeleton
 
 I try to keep every part of the project clean and easy to follow. Even though the folders are self explanatory for me, let me explain them for those who may have hard time to understand.
