@@ -10,9 +10,12 @@ Eventually, I won't update the other text_categorization repository, but I will 
 Before diving into details, the python and library versions are as follows: 
 
 - python 3.6 (works well with 3.7, too)
-- pytorch 0.4.1 (no 1.0 preview for windows =))
+- torch 1.0.0
 - torchtext 0.3.1
-- gensim 3.4.0 (for fasttext embeddings, as well as OOV Embedding generation. Downgraded from 3.6.0 to 3.4.0(Conda version))
+- numpy 1.15.4 (due to PyTorch 1.0)
+- setuptools 40.6.2 (Hell no idea why pipreqs put this into requirements.txt)
+- spacy 2.0.16 (for interactive evaluation only)
+- gensim 3.6.0 (for fasttext embeddings, as well as OOV Embedding generation.)
 
 ## Code Details
 
