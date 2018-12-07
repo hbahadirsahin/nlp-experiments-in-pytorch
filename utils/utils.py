@@ -16,14 +16,12 @@ def load_vocabulary(path):
         return pickle.load(f)
 
 
-def save_best_model(model, path):
-    filename = "saved_best_model.pt"
+def save_best_model(model, path, filename="saved_best_model.pt"):
     out_path = os.path.abspath(os.path.join(path, filename))
     torch.save(model, out_path)
 
 
-def load_best_model(path):
-    filename = "saved_best_model.pt"
+def load_best_model(path, filename="saved_best_model.pt"):
     out_path = os.path.abspath(os.path.join(path, filename))
     return torch.load(out_path)
 

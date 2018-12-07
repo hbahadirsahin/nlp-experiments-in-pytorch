@@ -5,7 +5,9 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-from utils.utils import time_since, calculate_accuracy, calculate_topk_accuracy, scheduled_annealing_strategy
+from evaluation.evaluator import Evaluator
+from utils.utils import time_since, calculate_accuracy, save_best_model, calculate_topk_accuracy, \
+    scheduled_annealing_strategy
 
 
 class MultipleModelTrainer(object):
@@ -27,6 +29,8 @@ class MultipleModelTrainer(object):
 
         self.device = device
 
+        self.dev_evaluator, self.test_evaluator = Evaluator().evaluator_factory("multiple_model_evaluator", self.device)
+
     def init_optimizer(self, model):
         print("Optimizer type is {} !".format(self.optimizer_type))
 
@@ -39,16 +43,14 @@ class MultipleModelTrainer(object):
             raise ValueError("Invalid optimizer type! Choose Adam or SGD!")
 
     def train_iters_multi_model(self, models, checkpoint=None):
+        # Under the assumption of models is a list that contains encoder, decoder and classifier in order.
         encoder = models[0]
         decoder = models[1]
         classifier = models[2]
 
-        encoder_optimizer = self.init_optimizer(self.optimizer_type, encoder, self.learning_rate, self.weight_decay,
-                                                self.momentum)
-        decoder_optimizer = self.init_optimizer(self.optimizer_type, decoder, self.learning_rate, self.weight_decay,
-                                                self.momentum)
-        classifier_optimizer = self.init_optimizer(self.optimizer_type, classifier, self.learning_rate,
-                                                   self.weight_decay, self.momentum)
+        encoder_optimizer = self.init_optimizer(encoder)
+        decoder_optimizer = self.init_optimizer(decoder)
+        classifier_optimizer = self.init_optimizer(classifier)
 
         reconstruction_criterion = nn.CrossEntropyLoss().to(self.device)
         supervised_criterion = nn.NLLLoss().to(self.device)
@@ -88,29 +90,24 @@ class MultipleModelTrainer(object):
             self.print_epoch(start, e, reconst_loss, supervised_loss, total_loss, accuracy, accuracy_topk)
 
             if e % self.eval_every == 0:
-                # vali_loss, vali_accuracy, vali_accuracy_topk = evaluate_iter(model=model,
-                #                                                              input=dev_iter,
-                #                                                              criterion=criterion,
-                #                                                              device=device,
-                #                                                              save_path=save_path,
-                #                                                              topk=topk,
-                #                                                              is_vali=True)
-                # if best_vali_acc < vali_accuracy:
-                #     best_vali_loss = vali_loss
-                #     best_vali_acc = vali_accuracy
-                #     best_vali_acc_topk = vali_accuracy_topk
-                #     save_best_model(model, save_path)
-                # print(
-                #     "Validation Loss: {:.4f} (Best: {:.4f}) - "
-                #     "Validation Accuracy: {:.4f} (Best: {:.4f}) - "
-                #     "Validation Accuracy Top-{}: {:.4f} (Best: {:.4f})".format(vali_loss,
-                #                                                                best_vali_loss,
-                #                                                                vali_accuracy,
-                #                                                                best_vali_acc,
-                #                                                                topk[0],
-                #                                                                vali_accuracy_topk,
-                #                                                                best_vali_acc_topk))
-                raise NotImplementedError()
+                vali_loss, vali_accuracy, vali_accuracy_topk = self.dev_evaluatorevaluate_iter(encoder=encoder,
+                                                                                               decoder=decoder,
+                                                                                               classifier=classifier,
+                                                                                               input=self.dev_iter,
+                                                                                               reconstruction_criterion=reconstruction_criterion,
+                                                                                               supervised_criterion=supervised_criterion,
+                                                                                               save_path=self.save_path,
+                                                                                               topk=self.topk)
+                if best_vali_acc < vali_accuracy:
+                    best_vali_loss = vali_loss
+                    best_vali_acc = vali_accuracy
+                    best_vali_acc_topk = vali_accuracy_topk
+                    save_best_model(encoder, self.save_path, filename="saved_best_encoder.pt")
+                    save_best_model(decoder, self.save_path, filename="saved_best_decoder.pt")
+                    save_best_model(classifier, self.save_path, filename="saved_best_classifier.pt")
+
+                self.print_validation(vali_loss, best_vali_loss, vali_accuracy, best_vali_acc, vali_accuracy_topk,
+                                      best_vali_acc_topk)
 
             if e % self.save_every == 0:
                 filename = "saved_model_step{}.pt".format(e)
@@ -131,22 +128,18 @@ class MultipleModelTrainer(object):
                 }, out_path)
                 old_path = out_path
 
-        # test_loss, test_accuracy, test_accuracy_topk = evaluate_iter(model=model,
-        #                                                              input=test_iter,
-        #                                                              criterion=criterion,
-        #                                                              device=device,
-        #                                                              save_path=save_path,
-        #                                                              topk=topk,
-        #                                                              is_vali=False)
-        # print("Test Loss: {:.4f} - "
-        #       "Test Accuracy: {:.4f} - "
-        #       "Test Accuracy Top-{}: {:.4f}".format(test_loss,
-        #                                             test_accuracy,
-        #                                             topk[0],
-        #                                             test_accuracy_topk))
+        test_loss, test_accuracy, test_accuracy_topk = self.test_evaluatorevaluate_iter(encoder=encoder,
+                                                                                        decoder=decoder,
+                                                                                        classifier=classifier,
+                                                                                        input=self.dev_iter,
+                                                                                        reconstruction_criterion=reconstruction_criterion,
+                                                                                        supervised_criterion=supervised_criterion,
+                                                                                        save_path=self.save_path,
+                                                                                        topk=self.topk)
+        self.print_test(test_loss, test_accuracy, test_accuracy_topk)
 
     def train(self, encoder, decoder, classifier, encoder_optimizer, decoder_optimizer, classifier_optimizer,
-              reconst_criterion, supervised_criterion, alpha):
+              reconst_criterion, supervised_criterion, alpha=1):
         epoch_reconstruction_loss = 0
         epoch_supervised_loss = 0
         epoch_total_acc = 0
@@ -228,3 +221,24 @@ class MultipleModelTrainer(object):
                                                accuracy,
                                                self.topk[0],
                                                accuracy_topk))
+
+    def print_validation(self, vali_loss, best_vali_loss, vali_accuracy, best_vali_acc, vali_accuracy_topk,
+                         best_vali_acc_topk):
+        print(
+            "Validation Loss: {:.4f} (Best: {:.4f}) - "
+            "Validation Accuracy: {:.4f} (Best: {:.4f}) - "
+            "Validation Accuracy Top-{}: {:.4f} (Best: {:.4f})".format(vali_loss,
+                                                                       best_vali_loss,
+                                                                       vali_accuracy,
+                                                                       best_vali_acc,
+                                                                       self.topk[0],
+                                                                       vali_accuracy_topk,
+                                                                       best_vali_acc_topk))
+
+    def print_test(self, test_loss, test_accuracy, test_accuracy_topk):
+        print("Test Loss: {:.4f} - "
+              "Test Accuracy: {:.4f} - "
+              "Test Accuracy Top-{}: {:.4f}".format(test_loss,
+                                                    test_accuracy,
+                                                    self.topk[0],
+                                                    test_accuracy_topk))

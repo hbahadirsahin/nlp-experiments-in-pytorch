@@ -240,7 +240,7 @@ class FullyConnectedClassifier(nn.Module):
         self.input_size = args["encodercnn_filter_counts"][2]
         self.hidden_layer_size = args["conv_deconv_hidden_layer_size"]
         self.num_class = args["num_class"]
-        self.keep_prob = args["conv_deconv_keep_prob"]
+        self.keep_prob = args["keep_prob"]
 
         self.fc1 = nn.Linear(self.input_size, self.hidden_layer_size)
         self.fc2 = nn.Linear(self.hidden_layer_size, self.num_class)

@@ -1,4 +1,5 @@
 from evaluation.interactive_evaluator import InteractiveEvaluator
+from evaluation.multiple_model_evaluator import MultipleModelEvaluator
 from evaluation.single_model_evaluator import SingleModelEvaluator
 
 
@@ -13,7 +14,9 @@ class Evaluator(object):
         elif type == "encoder_decoder_evaluator":
             return
         elif type == "multiple_model_evaluator":
-            return
+            dev_evaluator = MultipleModelEvaluator(device, is_vali=True)
+            test_evaluator = MultipleModelEvaluator(device, is_vali=False)
+            return dev_evaluator, test_evaluator
         elif type == "interactive_evaluator":
             return InteractiveEvaluator(device)
         else:

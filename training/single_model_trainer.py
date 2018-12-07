@@ -45,8 +45,7 @@ class SingleModelTrainer(object):
             raise ValueError("Invalid optimizer type! Choose Adam or SGD!")
 
     def train_iters(self, model, checkpoint=None):
-        optimizer = self.init_optimizer(self.optimizer_type, model, self.learning_rate, self.weight_decay,
-                                        self.momentum)
+        optimizer = self.init_optimizer(model)
 
         scheduler = lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.1)
 

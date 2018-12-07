@@ -15,20 +15,20 @@ from models.LSTM import LSTM
 from training.trainer import Trainer
 from utils.utils import save_vocabulary
 
-dataset_properties = {"stop_word_path": "D:/Anaconda3/nltk_data/corpora/stopwords/turkish",
+dataset_properties = {"stop_word_path": "D:/Anaconda3/nltk_data/corpora/stopwords/english",
                       # "stop_word_path": "D:/nlpdata/stopwords/turkish",
                       # "data_path": "D:/nlpdata/tr_test.DUMP",
-                      "data_path": "D:/PyTorchNLP/data/turkish_test.DUMP",
-                      "embedding_vector": "fasttext.tr.300d",
+                      "data_path": "D:/PyTorchNLP/data/EWNERTC_TC_Coarse Grained NER_No_NoiseReduction.DUMP",
+                      "embedding_vector": "fasttext.en.300d",
                       # "vector_cache": "D:/nlpdata/fasttext",
                       "vector_cache": "D:/PyTorchNLP/data/fasttext",
                       # "pretrained_embedding_path": "D:/nlpdata/fasttext/wiki.tr",
-                      "pretrained_embedding_path": "D:/PyTorchNLP/data/fasttext/wiki.tr",
+                      "pretrained_embedding_path": "D:/PyTorchNLP/data/fasttext/wiki.en",
                       # "data_path": "D:/PyTorchNLP/data/EWNERTC_TC_Coarse Grained NER_No_NoiseReduction.DUMP",
                       # "embedding_vector": "fasttext.en.300d",
                       # "vector_cache": "D:/PyTorchNLP/data/fasttext",
                       # "pretrained_embedding_path": "D:/PyTorchNLP/data/fasttext/wiki.en",
-                      "checkpoint_path": "",
+                      "checkpoint_path": "D:/PyTorchNLP/saved/2018-12-07/saved_model_step13.pt",
                       "oov_embedding_type": "zeros",
                       "batch_size": 32
                       }
@@ -59,6 +59,12 @@ model_properties = {"use_pretrained_embed": True,
                     "downsampling_type": "resnet",
                     "maxpool_filter_size": 3,
                     "kmax": 8,
+                    # Conv-Deconv related parameters
+                    "encodercnn_filter_counts": [300, 600, 500],
+                    "encodercnn_filter_sizes": [5, 5, 12],
+                    "encodercnn_strides": [2, 2, 1],
+                    "deconv_temperature": 0.01,
+                    "conv_deconv_hidden_layer_size": 500,
                     # RNN-GRU-LSTM related parameters
                     "rnn_hidden_dim": 300,
                     "rnn_num_layers": 1,
@@ -118,8 +124,9 @@ def initialize_model_and_trainer(model_properties, training_properties, datasetl
         encoderCNN = convDeconveCNN.encoder.to(device)
         decoderCNN = convDeconveCNN.decoder.to(device)
         classifier = convDeconveCNN.classifier.to(device)
-        trainer = Trainer.trainer_factory("conv_deconv_trainer", training_properties, datasetloader.train_iter,
+        trainer = Trainer.trainer_factory("multiple_model_trainer", training_properties, datasetloader.train_iter,
                                           datasetloader.val_iter, datasetloader.test_iter, device)
+        model = [encoderCNN, decoderCNN, classifier]
     else:
         raise ValueError("Model is not defined!")
 
