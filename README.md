@@ -43,7 +43,7 @@ the Local Reparameterization Trick](https://arxiv.org/pdf/1506.02557.pdf)~~
   - [x] CharCNN
   - [x] VDCNN (Very Deep CNN)
   - [ ] Transformers
-  - [ ] Conv-Deconv CNN
+  - [x] Conv-Deconv CNN
   - [ ] Encoder-Decoder GRU
   - [ ] Encoder-Decoder LSTM
   - [ ] Hybrid stuff (Like CNN+LSTM/GRU)
