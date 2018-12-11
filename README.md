@@ -10,9 +10,12 @@ Eventually, I won't update the other text_categorization repository, but I will 
 Before diving into details, the python and library versions are as follows: 
 
 - python 3.6 (works well with 3.7, too)
-- pytorch 0.4.1 (no 1.0 preview for windows =))
+- torch 1.0.0
 - torchtext 0.3.1
-- gensim 3.4.0 (for fasttext embeddings, as well as OOV Embedding generation. Downgraded from 3.6.0 to 3.4.0(Conda version))
+- numpy 1.15.4 (due to PyTorch 1.0)
+- setuptools 40.6.2 (Hell no idea why pipreqs put this into requirements.txt)
+- spacy 2.0.16 (for interactive evaluation only)
+- gensim 3.6.0 (for fasttext embeddings, as well as OOV Embedding generation.)
 
 ## Code Details
 
@@ -52,27 +55,27 @@ the Local Reparameterization Trick](https://arxiv.org/pdf/1506.02557.pdf)~~
 - [ ] Different language models.
   - [ ] ELMO (pretrained Turkish/English embeddings)
   - [ ] BERT (pretrained Turkish/English embeddings)
-- [ ] Document length categorization/NER tasks (Current runs are on sentence-level; however, with ELMO/BERT I will be able to do document level tasks, too.)
-
+- [ ] Document length categorization/NER support (Conv-Deconv CNN implementation supports document-length tasks, but more support will come ELMO and BERT).
+     
 ## Project Skeleton
 
 I try to keep every part of the project clean and easy to follow. Even though the folders are self explanatory for me, let me explain them for those who may have hard time to understand.
 
 - `./argument/argument_reader.py` contains arguments and their parsers. Default values are same with the hard coded variables in 
 `main.py`
+- `./crf/CRF.py` contains the conditional random field implementation (not finished yet). 
 - `./datahelper/dataset_reader.py` contains the "DatasetLoader" object that reads a text dataset, splits it into 3 subsets (train/vali/test), creates vocabulary and iterators. It is a little bit hard-coded for the dataset I am using now. However, it is easy to make changes to use it for your own dataset.
 - `./datahelper/embedding_helper.py` is a helper class to generate OOV word embeddings. To use Fasttext-based OOV embedding generation, it leverages Gensim!
 - `./datahelper/preprocessor.py` contains the "Preprocessor" object and actions to apply on sentences. 
 - `./dropout_models/gaussian_dropout.py` contains the Gaussian Dropout object. 
 - `./dropout_models/variational_dropout.py` contains the Variational Dropout object. 
 - `./dropout_models/dropout.py` contains the Dropout object which you can select your dropout type among Bernoulli (basic), Gaussian and Variational dropout types. 
-- `./evaluation/evaluate.py` contains two methods for evaluation. The first one is evaluating validation and/or test sets while training. The other method is for interactive evaluation. Note that you need "spacy" to tokenize test sentences for interactive evaluation (note that my original dataset is already tokenized, so you do not need to use spacy while training).
+- `./evaluation/evaluator.py` is the factory for evaluation objects that are used in model trainings as well as interactive evaluation.
+- `./evaluation/xyz_evaluator.py` methods are the evaluator functions for specified models.
 - `./model/xyz.py` contains network objects.
 - `./model/Util_xyz.py` contains custom-defined objects that are used in `xyz`.
 - `./training/trainer.py` is a class that returns the necessary trainer for the user's selected learning model
-- `./training/single_model_trainer.py` contains a class that can train only "one" model-based algorithms (such that TextCNN, LSTM, GRU, etc.). 
-- `./training/double_model_trainer.py` contains a class that can train only "encoder-decoder" model-based algorithms (Not in repository yet, but it will be added).
-- - `./training/multiple_model_trainer.py` contains a class that can train only algorithms that has more than two models internally, such that Conv-Deconv CNN which has encoder, decoder and fully-connected classifier. (Not in repository yet, but it will be added).
+- `./training/xyz_trainer.py` methods are the trainer functions for specified models.
 - `./utils/utils.py` contains both utility and common methods that are being used in several places in the project.
 - `./main.py` is the main code. Run arguments/parameters/configurations are at the top of this file.
 
@@ -128,10 +131,15 @@ There are 3 dictionaries defined to hold run arguments.
    - downsampling_type: A string parameter that defines downsampling operation type. It can be "resnet", "vgg" or kmax".
    - maxpool_kernel_size: An integer parameter that defines kernel size for all maxpooling operations.
    - kmax: An integer parameter that defines "k" value for KMaxPooling operation. 
+   - encodercnn_filter_counts: List of integers that defines the out channels of all convolutional layers (For deconv part, this parameter is reversed).
+   - encodercnn_filter_sizes: List of integers that defines the kernel_size for all convolutional layers (For deconv part, this parameter is reversed).
+   - encodercnn_strides: List of integers that defines the stride for all convolutional layers (For deconv part, this parameter is reversed).
+   - deconv_temperature: An integer parameter to define temperature parameter of the Deconvolution stage of Conv-Deconv CNN model.
+   - conv_deconv_hidden_layer_size: An integer parameter to define the number of hidden units in the Classifier stage of Conv-Deconv CNN model.
    - run_mode: Can be "train" to start training process or "eval_interactive" to test your saved model(s) interactively. 
   
  - `training_properties` holds training-related arguments:
-   - learner: Argument to choose which learning algorithm to use. It can be "textcnn", "gru", "lstm", "charcnn", and "vdcnn" (Update: 29 Nov 2018) 
+   - learner: Argument to choose which learning algorithm to use. It can be "textcnn", "gru", "lstm", "charcnn", "vdcnn" and "conv-deconv-cnn" (Update: 11 Dec 2018) 
    - optimizer: It can be either "Adam" or "SGD".
    - learning_rate: Self-explanatory.
    - weight_decay: L2 normalization term. Note that for my case, any value bigger than 0, literally fucked my performance. 
@@ -169,7 +177,7 @@ Note: Epoch is set to 20 for all experiments, until further notice (last update:
 |Turkish|49| Fasttext | zeros | static	| 43.5519  | 68.4336 |
 |Turkish|49| Fasttext | zeros | nonstatic	| 56.0081  | 79.8634 |
 |Turkish|49| Fasttext | Fasttext | static	| 43.8025  | 68.8641 |
-|Turkish|49| Fasttext | Fasttext | nonstatic	| NaN (Training in CPU)  | NaN (Training in CPU) |
+|Turkish|49| Fasttext | Fasttext | nonstatic	| 60.4009  | 82.7879 |
 |English|25| Fasttext | zeros | static	| NaN (Training in GPU) | NaN (Training in GPU) |
 |English|25| Fasttext | zeros | nonstatic	| NaN (TBA) | NaN (TBA) |
 |English|25| Fasttext | Fasttext | static	|  NaN (TBA)  | NaN (TBA) |
