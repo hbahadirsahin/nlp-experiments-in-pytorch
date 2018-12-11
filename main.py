@@ -29,8 +29,10 @@ dataset_properties = {"stop_word_path": "D:/Anaconda3/nltk_data/corpora/stopword
                       # "vector_cache": "D:/PyTorchNLP/data/fasttext",
                       # "pretrained_embedding_path": "D:/PyTorchNLP/data/fasttext/wiki.en",
                       "checkpoint_path": "D:/PyTorchNLP/saved/2018-12-07/saved_model_step13.pt",
+                      "saved_sentence_vocab": "D:/PyTorchNLP/saved/vocab/category_vocab.dat",
+                      "saved_category_vocab": "D:/PyTorchNLP/saved/vocab/sentence_vocab.dat",
                       "oov_embedding_type": "zeros",
-                      "batch_size": 32
+                      "batch_size": 26
                       }
 
 model_properties = {"use_pretrained_embed": True,

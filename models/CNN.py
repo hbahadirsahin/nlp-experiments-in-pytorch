@@ -51,8 +51,11 @@ class TextCnn(nn.Module):
         # Embedding Layer Initialization
         if self.embed_train_type == "multichannel":
             self.embed, self.embed_static = self.initialize_embeddings()
+            self.embed = self.embed.cpu()
+            self.embed_static = self.embed_static.cpu()
         else:
             self.embed, _ = self.initialize_embeddings()
+            self.embed = self.embed.cpu()
 
         # Convolution Initialization
         self.convs = self.initialize_conv_layer()
@@ -96,14 +99,14 @@ class TextCnn(nn.Module):
         print("> Embeddings")
         embed = nn.Embedding(num_embeddings=self.embed_num,
                              embedding_dim=self.embed_dim,
-                             padding_idx=self.padding_id).cpu()
+                             padding_idx=self.padding_id)
 
         embed_static = None
         # Create 2nd embedding layer for multichannel purpose
         if self.embed_train_type == "multichannel":
             embed_static = nn.Embedding(num_embeddings=self.embed_num,
                                         embedding_dim=self.embed_dim,
-                                        padding_idx=self.padding_id).cpu()
+                                        padding_idx=self.padding_id)
 
         if self.use_pretrained_embed:
             print("> Pre-trained Embeddings")
