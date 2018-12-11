@@ -139,7 +139,7 @@ There are 3 dictionaries defined to hold run arguments.
    - run_mode: Can be "train" to start training process or "eval_interactive" to test your saved model(s) interactively. 
   
  - `training_properties` holds training-related arguments:
-   - learner: Argument to choose which learning algorithm to use. It can be "textcnn", "gru", "lstm", "charcnn", and "vdcnn" (Update: 29 Nov 2018) 
+   - learner: Argument to choose which learning algorithm to use. It can be "textcnn", "gru", "lstm", "charcnn", "vdcnn" and "conv-deconv-cnn" (Update: 11 Dec 2018) 
    - optimizer: It can be either "Adam" or "SGD".
    - learning_rate: Self-explanatory.
    - weight_decay: L2 normalization term. Note that for my case, any value bigger than 0, literally fucked my performance. 
