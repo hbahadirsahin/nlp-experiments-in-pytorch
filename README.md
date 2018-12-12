@@ -178,7 +178,7 @@ Note: Epoch is set to 20 for all experiments, until further notice (last update:
 |Turkish|49| Fasttext | zeros | nonstatic	| 56.0081  | 79.8634 |
 |Turkish|49| Fasttext | Fasttext | static	| 43.8025  | 68.8641 |
 |Turkish|49| Fasttext | Fasttext | nonstatic	| 60.4009  | 82.7879 |
-|English|25| Fasttext | zeros | static	| NaN (Training in GPU) | NaN (Training in GPU) |
+|English|25| Fasttext | zeros | static	| 56.2290 | 83.2425 |
 |English|25| Fasttext | zeros | nonstatic	| NaN (TBA) | NaN (TBA) |
 |English|25| Fasttext | Fasttext | static	|  NaN (TBA)  | NaN (TBA) |
 |English|25| Fasttext | Fasttext | nonstatic	| NaN (TBA)  | NaN (TBA) |
