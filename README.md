@@ -1,5 +1,10 @@
 # README 
 
+## An Up-to-date Announcement (14-12-2018)
+
+- Test results are updated slowly due to my laziness + lack of free computational resources (I can't leave my personal computer for training 7/24. I have daily quests to do in Guild Wars, lands to conquer in Total Warhammer 2, and trailers to deliver in Euro Truck Sim =)).
+- Additionally, due to some personal life issues (work related), repository updates will decrease for the following 3 weeks. But, I'll be back with a Transformer code that can generate texts, answer multiple choice questions, etc (which are already explained in various transformer papers). Obviously, the transformer code that I will add here will be able to categorize any Turkish/English sentence/document, too (nope, I didn't forget NER, but I'd rather ignore CRF part for a while).
+
 ## Intro
 
 Finally, I decided to do my all machine learning, NLP stuff by using PyTorch. The reason is simple actually, I like it more than Tensorflow =) 
@@ -45,7 +50,7 @@ the Local Reparameterization Trick](https://arxiv.org/pdf/1506.02557.pdf)~~
   - [x] ~~Multilayer CNN~~ (I removed this model and decided to continue with CharCNN and VDCNN instead).
   - [x] CharCNN
   - [x] VDCNN (Very Deep CNN)
-  - [ ] Transformers
+  - [ ] Transformer
   - [x] Conv-Deconv CNN
   - [ ] Encoder-Decoder GRU
   - [ ] Encoder-Decoder LSTM
@@ -55,7 +60,7 @@ the Local Reparameterization Trick](https://arxiv.org/pdf/1506.02557.pdf)~~
 - [ ] Different language models.
   - [ ] ELMO (pretrained Turkish/English embeddings)
   - [ ] BERT (pretrained Turkish/English embeddings)
-- [ ] Document length categorization/NER support (Conv-Deconv CNN implementation supports document-length tasks, but more support will come ELMO and BERT).
+- [ ] Document length categorization/NER support (Conv-Deconv CNN implementation supports document-length tasks, but more support will come with ELMO and BERT update).
      
 ## Project Skeleton
 
@@ -100,6 +105,8 @@ There are 3 dictionaries defined to hold run arguments.
   - vector_cache: The embedding file that torchtext creates the first time it runs with the defined embedding. To prevent it to download same file over and over again, you need to provide its path.
   - pretrained_embedding_path: This is the original, Gensim readable, embedding files (note that only use case for this is Fasttext-based OOV word generation).
   - checkpoint_path: The path for saved model file that you want to continue your training.
+  - saved_sentence_vocab: The path for saved vocabulary file that are created from words of the dataset.
+  - saved_category_vocab: The path for saved vocabulary file that are created from categories of the dataset.
   - oov_embedding_type: It can be "zeros", "ones", "random", "uniform" or "fasttext_oov" and specifies which method to use to generate OOV word vectors.
   - batch_size: Self-explanatory.
   
@@ -180,7 +187,7 @@ Note: Epoch is set to 20 for all experiments, until further notice (last update:
 |Turkish|49| Fasttext | Fasttext | nonstatic	| 60.4009  | 82.7879 |
 |English|25| Fasttext | zeros | static	| 56.2290 | 83.2425 |
 |English|25| Fasttext | zeros | nonstatic	| NaN (TBA) | NaN (TBA) |
-|English|25| Fasttext | Fasttext | static	|  NaN (TBA)  | NaN (TBA) |
+|English|25| Fasttext | Fasttext | static	|  NaN (Training)  | NaN (Training) |
 |English|25| Fasttext | Fasttext | nonstatic	| NaN (TBA)  | NaN (TBA) |
 |English|49| Fasttext | zeros | static	| NaN (TBA)  | NaN (TBA) |
 |English|49| Fasttext | zeros | nonstatic	| NaN (TBA)  | NaN (TBA) |
