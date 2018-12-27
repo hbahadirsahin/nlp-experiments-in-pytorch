@@ -1,9 +1,10 @@
 # README 
 
-## An Up-to-date Announcement (14-12-2018)
+## An Up-to-date Announcement (27-12-2018)
 
-- Test results are updated slowly due to my laziness + lack of free computational resources (I can't leave my personal computer for training 7/24. I have daily quests to do in Guild Wars, lands to conquer in Total Warhammer 2, and trailers to deliver in Euro Truck Sim =)).
-- Additionally, due to some personal life issues (work related), repository updates will decrease for the following 3 weeks. But, I'll be back with a Transformer code that can generate texts, answer multiple choice questions, etc (which are already explained in various transformer papers). Obviously, the transformer code that I will add here will be able to categorize any Turkish/English sentence/document, too (nope, I didn't forget NER, but I'd rather ignore CRF part for a while).
+- New model updates are coming (Transformer architectures of Google and OpenAI version).
+- About test results, the situation is same. The real problem is the size of the English version of the dataset. In CPU, "static" version can be able to pass 1 training epoch literally in 24 hours. Even though it is faster in GPU, I can't constantly make my laptop busy with training for personal reasons.
+- Nope, I won't use Google Colab, because I don't want to waste my precious time to build another environment which has limited GPU memory (which is less than my own laptop). But, if the luck gods send me a lottery with winning numbers, I can buy my own GPU farm =)
 
 ## Intro
 
@@ -206,3 +207,5 @@ Below repositories really helped me to write a decent and working code:
 - https://pytorch.org/tutorials/beginner/nlp/advanced_tutorial.html
 - https://github.com/allenai/allennlp/blob/master/allennlp/modules/conditional_random_field.py
 - https://github.com/ymym3412/textcnn-conv-deconv-pytorch/blob/master/model.py
+- http://nlp.seas.harvard.edu/2018/04/03/attention.html
+- https://github.com/huggingface/pytorch-openai-transformer-lm
