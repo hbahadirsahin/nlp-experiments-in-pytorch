@@ -1,9 +1,12 @@
+import copy
 import math
 import os
 import pickle
 import time
 
+import numpy as np
 import torch
+import torch.nn as nn
 
 
 def save_vocabulary(vocab, path):
@@ -85,3 +88,15 @@ def scheduled_annealing_strategy(epoch, max_epoch, max=1.0, min=0.01, gain=0.3):
     lower_alpha = (1 + torch.exp(gain * (epoch - (max_epoch // 2))))
     alpha = (upper_alpha / lower_alpha) + max
     return alpha
+
+
+def clones(module, num_of_clones):
+    return nn.ModuleList([copy.deepcopy(module) for _ in range(num_of_clones)])
+
+
+def subsequent_mask(size):
+    # Mask out subsequent positions. It is to prevent positions from attenting to subsequent positions
+    # For more detailed information:
+    # The Annotated Transformer = https://nlp.seas.hardvard.edu/2018/04/03.attention.html
+    sm = np.triu(np.ones((1, size, size)), k=1).astype("uint8")
+    return torch.from_numpy(sm) == 0
