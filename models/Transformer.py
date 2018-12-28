@@ -1,5 +1,8 @@
+import math
+
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 from utils.utils import clones
 
@@ -93,9 +96,64 @@ class DecoderLayerGoogle(nn.Module):
         return self.sublayer[2](x, self.feed_forward)
 
 
+class MultiHeadedAttentionGoogle(nn.Module):
+    def __init__(self, heads=8, d_model=512, dropout=0.1):
+        super(MultiHeadedAttentionGoogle, self).__init__()
+        self.d_k = d_model // heads
+        self.heads = heads
+        self.linears = clones(nn.Linear(d_model, d_model), 4)
+        self.attn = None
+        self.dropout = nn.Dropout(dropout)
+
+    def attention(self, query, key, value, mask=None, dropout=None):
+        # Dot product attention
+        d_k = query.size(-1)
+        scores = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(d_k)
+
+        if mask is not None:
+            scores = scores.masked_fill(mask == 0, -1e9)
+
+        p_attn = F.softmax(scores, dim=-1)
+
+        if dropout is not None:
+            p_attn = dropout(p_attn)
+
+        return torch.matmul(p_attn, value), p_attn
+
+    def forward(self, query, key, value, mask=None):
+        num_batches = query.size(0)
+        if mask is not None:
+            mask = mask.unsqueeze(1)
+
+        query, key, value = [linear(x).view(num_batches, -1, self.heads, self.d_k).transpose(1, 2)
+                             for linear, x in zip(self.linears, (query, key, value))]
+
+        x, self.attn = self.attention(query, key, value, mask=mask, dropout=self.dropout)
+
+        x = x.transpose(1, 2).contiguous().view(num_batches, -1, self.heads * self.d_k)
+
+        return self.linears[-1](x)
+
+
+class PositionalFeedForwardGoogle(nn.Module):
+    def __init__(self, d_model, d_ff, droput=0.1):
+        super(PositionalFeedForwardGoogle, self).__init__()
+        self.w_1 = nn.Linear(d_model, d_ff)
+        self.w_2 = nn.Linear(d_ff, d_model)
+        self.dropout = nn.Dropout(droput)
+        self.relu = nn.ReLU()
+
+    def forward(self, input):
+        return self.w_2(self.dropout(self.relu(self.w_1)))
+
+
+class PositionalEncodingGoogle(nn.Module):
+    def __init__(self, d_model, dropout, max_len=5000):
+        super(PositionalEncodingGoogle, self).__init__()
+
+
 class TransformerGoogle(nn.Module):
     def __init__(self, args):
         super(TransformerGoogle, self).__init__()
 
         self.args = args
-
