@@ -80,6 +80,7 @@ model_properties = {"use_pretrained_embed": True,
 training_properties = {"learner": "textcnn",
                        "optimizer": "Adam",
                        "learning_rate": 0.05,
+                       "scheduler_type": "cos",
                        "weight_decay": 0,
                        "momentum": 0.9,
                        "norm_ratio": 0.25,
@@ -99,7 +100,6 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 def initialize_model_and_trainer(model_properties, training_properties, datasetloader, device):
-    model, trainer = None, None
     print("Model type is", training_properties["learner"])
     if training_properties["learner"] == "textcnn":
         model = TextCnn(model_properties).to(device)
