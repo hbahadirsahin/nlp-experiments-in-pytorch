@@ -1,11 +1,5 @@
 # README 
 
-## An Up-to-date Announcement (27-12-2018)
-
-- New model updates are coming (Transformer architectures of Google and OpenAI version).
-- About test results, the situation is same. The real problem is the size of the English version of the dataset. In CPU, "static" version can be able to pass 1 training epoch literally in 24 hours. Even though it is faster in GPU, I can't constantly make my laptop busy with training for personal reasons.
-- Nope, I won't use Google Colab, because I don't want to waste my precious time to build another environment which has limited GPU memory (which is less than my own laptop). But, if the luck gods send me a lottery with winning numbers, I can buy my own GPU farm =)
-
 ## Intro
 
 Finally, I decided to do my all machine learning, NLP stuff by using PyTorch. The reason is simple actually, I like it more than Tensorflow =) 
@@ -80,6 +74,7 @@ I try to keep every part of the project clean and easy to follow. Even though th
 - `./evaluation/xyz_evaluator.py` methods are the evaluator functions for specified models.
 - `./model/xyz.py` contains network objects.
 - `./model/Util_xyz.py` contains custom-defined objects that are used in `xyz`.
+- `./optimizer/custom_optimizer.py` contains custom-defined optimizer objects.
 - `./training/trainer.py` is a class that returns the necessary trainer for the user's selected learning model
 - `./training/xyz_trainer.py` methods are the trainer functions for specified models.
 - `./utils/utils.py` contains both utility and common methods that are being used in several places in the project.
