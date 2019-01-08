@@ -12,6 +12,7 @@ from evaluation.evaluator import Evaluator
 from models.CNN import TextCnn, CharCNN, VDCNN, ConvDeconvCNN
 from models.GRU import GRU
 from models.LSTM import LSTM
+from models.Transformer import TransformerGoogle
 from training.trainer import Trainer
 from utils.utils import save_vocabulary
 
@@ -72,6 +73,17 @@ model_properties = {"use_pretrained_embed": True,
                     "rnn_num_layers": 1,
                     "rnn_bidirectional": False,
                     "rnn_bias": True,
+                    # Transformer (Google) related parameters
+                    "use_embed_sqrt_mul": False,
+                    "keep_prob_encoder": 0.1,
+                    "keep_prob_pe": 0.1,
+                    "keep_prob_pff": 0.1,
+                    "keep_prob_attn": 0.1,
+                    "transformer_type": "classifier",
+                    "heads": 8,
+                    "num_encoder_layers": 6,
+                    "num_hidden_pos_ff": 2048,
+                    "max_length": 5000,
                     # Run mode parameter
                     # "run_mode": "eval_interactive",
                     "run_mode": "train",
@@ -129,6 +141,10 @@ def initialize_model_and_trainer(model_properties, training_properties, datasetl
         trainer = Trainer.trainer_factory("multiple_model_trainer", training_properties, datasetloader.train_iter,
                                           datasetloader.val_iter, datasetloader.test_iter, device)
         model = [encoderCNN, decoderCNN, classifier]
+    elif training_properties["learner"] == "transformer-google":
+        model = TransformerGoogle(model_properties).model.to(device)
+        trainer = Trainer.trainer_factory("single_model_trainer", training_properties, datasetloader.train_iter,
+                                          datasetloader.val_iter, datasetloader.test_iter, device)
     else:
         raise ValueError("Model is not defined!")
 

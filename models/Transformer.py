@@ -49,23 +49,23 @@ class EncoderBlockGoogle(nn.Module):
 
 
 class ResidualConnectionGoogle(nn.Module):
-    def __init__(self, size, dropout):
+    def __init__(self, size, keep_prob):
         super(ResidualConnectionGoogle, self).__init__()
         self.norm = LayerNormGoogle(size)
         # TODO: Use dropout interface
-        self.dropout = nn.Dropout(dropout)
+        self.dropout = nn.Dropout(keep_prob)
 
     def forward(self, input, sublayer):
         return input + self.dropout(sublayer(self.norm(input)))
 
 
 class EncoderLayerGoogle(nn.Module):
-    def __init__(self, size, attention, feed_forward, dropout):
+    def __init__(self, size, attention, feed_forward, keep_prob):
         self.size = size
         self.attention = attention
         self.feed_forward = feed_forward
         # Each encoder layer has two sublayers
-        self.sublayer = clones(ResidualConnectionGoogle(size, dropout), 2)
+        self.sublayer = clones(ResidualConnectionGoogle(size, keep_prob), 2)
 
     def forward(self, x, mask):
         x = self.sublayer[0](x, lambda x: self.attention(x, x, x, mask))
@@ -105,13 +105,13 @@ class Classifier(nn.Module):
 
 
 class MultiHeadedAttentionGoogle(nn.Module):
-    def __init__(self, heads=8, d_model=512, dropout=0.1):
+    def __init__(self, heads=8, d_model=512, keep_prob=0.1):
         super(MultiHeadedAttentionGoogle, self).__init__()
         self.d_k = d_model // heads
         self.heads = heads
         self.linears = clones(nn.Linear(d_model, d_model), 4)
         self.attn = None
-        self.dropout = nn.Dropout(dropout)
+        self.dropout = nn.Dropout(keep_prob)
 
     def attention(self, query, key, value, mask=None):
         # Dot product attention
@@ -156,16 +156,21 @@ class PositionalFeedForwardGoogle(nn.Module):
 
 
 class Embeddings(nn.Module):
-    def __init__(self, embed_dim, vocab_size, padding_id, use_pretrained_embed, pretrained_weights):
+    def __init__(self, embed_dim, vocab_size, padding_id, use_pretrained_embed, pretrained_weights,
+                 optional_sqrt_mul=False):
         super(Embeddings, self).__init__()
         # Initialize embeddings
         self.embedding = nn.Embedding(vocab_size, embed_dim, padding_idx=padding_id).cpu()
         if use_pretrained_embed:
             self.embedding.from_pretrained(pretrained_weights)
         self.embed_dim = embed_dim
+        self.optional_sqrt_mul = optional_sqrt_mul
 
     def forward(self, input):
-        return self.embedding(input)
+        if self.optional_sqrt_mul:
+            return self.embedding(input) * math.sqrt(self.embed_dim)
+        else:
+            return self.embedding(input)
 
 
 class PositionalEncodingGoogle(nn.Module):
@@ -188,7 +193,7 @@ class PositionalEncodingGoogle(nn.Module):
         return self.dropout(input + Variable(self.pe[:, :input.size(1)], requires_grad=False))
 
 
-class TransformerGoogle(nn.Module):
+class TransformerGoogle():
     def __init__(self, args):
         super(TransformerGoogle, self).__init__()
 
@@ -204,33 +209,57 @@ class TransformerGoogle(nn.Module):
 
         # Condition parameters
         self.use_pretrained_embed = args["use_pretrained_embed"]
+        self.use_embed_sqrt_mul = args["use_embed_sqrt_mul"]
 
         # Pretrained embedding weights
         self.pretrained_weights = args["pretrained_weights"]
 
-        # Dropout probabilities
-        self.keep_prob = args["keep_prob"]
+        # Dropout probabilities for each individual part of the full model.
+        self.keep_prob_encoder = args["keep_prob_encoder"]
+        self.keep_prob_pe = args["keep_prob_pe"]
+        self.kee_prob_pff = args["keep_prob_pff"]
+        self.keep_prob_attn = args["keep_prob_attn"]
 
+        # Condition parameter for the transformer type (It only supports classification for now)
         self.transformer_type = args["transformer_type"]
 
-        if self.transformer_type == "classifier":
-            self.create_classifier_transformer()
+        # Number of parallel attention layers for MultiHeadedAttention
+        self.heads = args["heads"]
 
-    def create_classifier_transformer(self, heads=8, num_encoder_layers=6, d_ff=2048):
+        # Number of encoder layers
+        self.num_encoder_layers = args["num_encoder_layers"]
+
+        # Number of hidden count units for Position-Wise Feed-Forward Network
+        self.num_hidden_pos_ff = args["num_hidden_pos_ff"]
+
+        # Maximum length of an input
+        self.max_length = args["max_length"]
+
+        if self.transformer_type == "classifier":
+            self.model = self.create_classifier_transformer()
+        else:
+            raise ValueError("Transformer can be created as classifier for now!")
+
+    def create_classifier_transformer(self):
         c = copy.deepcopy()
 
-        # Initialize blocks for the full model
-        attention = MultiHeadedAttentionGoogle(h=heads, d_model=self.embed_dim)
-        ff = PositionalFeedForwardGoogle(d_model=self.embed_dim, d_ff=d_ff)
-        embeddings = Embeddings(self.embed_dim, self.vocab_size, self.padding_id, self.use_pretrained_embed,
-                                self.pretrained_weights)
-        positional_embeddings = PositionalEncodingGoogle(d_model=self.embed_dim)
+        # Initialize individual parts of the full model
+        attention = MultiHeadedAttentionGoogle(h=self.heads, d_model=self.embed_dim, keep_prob=self.keep_prob_attn)
 
-        # Initialize full model
+        ff = PositionalFeedForwardGoogle(d_model=self.embed_dim, d_ff=self.num_hidden_pos_ff,
+                                         keep_prob=self.kee_prob_pff)
+
+        embeddings = Embeddings(self.embed_dim, self.vocab_size, self.padding_id, self.use_pretrained_embed,
+                                self.pretrained_weights, optional_sqrt_mul=self.use_embed_sqrt_mul)
+
+        positional_embeddings = PositionalEncodingGoogle(d_model=self.embed_dim, keep_prob=self.keep_prob_pe,
+                                                         max_len=self.max_length)
+
+        # Initialize the full model
         model = EncoderClassifier(nn.Sequential(embeddings, c(positional_embeddings)),
                                   EncoderBlockGoogle(
-                                      EncoderLayerGoogle(self.embed_dim, c(attention), c(ff), self.keep_prob),
-                                      num_encoder_layers),
+                                      EncoderLayerGoogle(self.embed_dim, c(attention), c(ff), self.keep_prob_encoder),
+                                      self.num_encoder_layers),
                                   Classifier(self.embed_dim, d_hidden=self.embed_dim // 2, num_classes=self.num_class))
 
         # Initialize model parameters
@@ -238,9 +267,6 @@ class TransformerGoogle(nn.Module):
             if p.dim() > 1:
                 nn.init.xavier_uniform_(p)
         return model
-
-    def forward(self, x):
-        return x
 
 
 if __name__ == '__main__':
