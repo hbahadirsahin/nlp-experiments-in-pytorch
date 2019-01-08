@@ -143,8 +143,9 @@ There are 3 dictionaries defined to hold run arguments.
   
  - `training_properties` holds training-related arguments:
    - learner: Argument to choose which learning algorithm to use. It can be "textcnn", "gru", "lstm", "charcnn", "vdcnn" and "conv-deconv-cnn" (Update: 11 Dec 2018) 
-   - optimizer: It can be either "Adam" or "SGD".
+   - optimizer: It can be "Adam", "SGD", "OpenAIAdam" or "Noam".
    - learning_rate: Self-explanatory.
+   - scheduler_type: Argument to choose a scheduler for OpenAIAdam optimizer (it has no usage for others). It can be "cos", "constant" or "linear".
    - weight_decay: L2 normalization term. Note that for my case, any value bigger than 0, literally fucked my performance. 
    - momentum: Self-explanatory (note that if you use "Adam" it will be ignored, it is only for "SGD").
    - norm_ratio: Gradient clipping ratio.
