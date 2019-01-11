@@ -139,6 +139,16 @@ There are 3 dictionaries defined to hold run arguments.
    - encodercnn_strides: List of integers that defines the stride for all convolutional layers (For deconv part, this parameter is reversed).
    - deconv_temperature: An integer parameter to define temperature parameter of the Deconvolution stage of Conv-Deconv CNN model.
    - conv_deconv_hidden_layer_size: An integer parameter to define the number of hidden units in the Classifier stage of Conv-Deconv CNN model.
+   - use_embed_sqrt_mul: A boolean parameter to initialize embeddings by multiplying it with the square root of the model size. Initially, it is False.
+   - keep_prob_encoder: Dropout probability for encoder layers
+   - keep_prob_pe: Dropout probability for positional encoding.
+   - keep_prob_pff: Dropout probability for position-wise feed-forward network.
+   - keep_prob_attn: Dropout probability for multiheaded attention.
+   - transformer_type: A string parameter to select transformer's task. It can be only "classifier".
+   - heads: An integer parameter to define number of parallel attention layers.
+   - num_encoder_layers: An integer parameter to define number of encoder layers.
+   - num_hidden_pos_ff: An integer parameter to define number of hidden units in position-wise feed-forward network.
+   - max_length: An integer parameter to define maximum length of the input for positional encoding.
    - run_mode: Can be "train" to start training process or "eval_interactive" to test your saved model(s) interactively. 
   
  - `training_properties` holds training-related arguments:
