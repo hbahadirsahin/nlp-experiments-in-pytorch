@@ -1,6 +1,17 @@
 # README 
 
-## Intro
+## Update 11-01-2019
+
+I stopped being a lazy guy and changed the current code execution stuff:
+
+- All hard-coded property holder dictionaries inside main.py is removed.
+- Instead, a "config.json" file is created and the main code will ask this file's path (as argument) from you to run the project, properly. 
+- Detailed description of this file will be added into this readme. 
+- With respect to new kind of property handling, I changed every related variable/argument initialization in the main and the model file. 
+- A complete README.MD overhaul is coming on its way.
+- Still, I have not tested Transformer code. Don't be mad at me if you c/p it and can't get results for your homework(s) =)
+  
+## Introduction
 
 Finally, I decided to do my all machine learning, NLP stuff by using PyTorch. The reason is simple actually, I like it more than Tensorflow =) 
 Eventually, I won't update the other text_categorization repository, but I will continue to develop same ideas in here. 
