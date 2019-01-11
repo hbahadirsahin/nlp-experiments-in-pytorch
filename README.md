@@ -4,12 +4,13 @@
 
 I stopped being a lazy guy and changed the current code execution stuff:
 
-- All hard-coded property holder dictionaries inside main.py is removed.
+- All hard-coded, property holding dictionaries inside main.py are removed.
 - Instead, a "config.json" file is created and the main code will ask this file's path (as argument) from you to run the project, properly. 
-- Detailed description of this file will be added into this readme. 
-- With respect to new kind of property handling, I changed every related variable/argument initialization in the main and the model file. 
+- Detailed description of this file will be added into this readme (but until I write it, you can always open the file. Believe me, it is not too complicate =)). 
+- With respect to new kind of property handling, I changed every related variable/argument initialization in the main and model files. 
 - A complete README.MD overhaul is coming on its way.
 - Still, I have not tested Transformer code. Don't be mad at me if you c/p it and can't get results for your homework(s) =)
+- Tests are really really slow in CPU workstation and I still play games in my daily-life computer instead of running experiments.
   
 ## Introduction
 
