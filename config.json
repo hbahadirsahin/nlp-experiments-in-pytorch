@@ -118,7 +118,7 @@
     }
   },
   "training_properties": {
-    "learner": "textcnn",
+    "learner": "text_cnn",
     "optimizer": "Adam",
     "learning_rate": 0.05,
     "scheduler_type": "cos",

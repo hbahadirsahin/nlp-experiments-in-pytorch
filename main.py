@@ -23,7 +23,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def initialize_model_and_trainer(model_properties, training_properties, datasetloader, device):
     print("Model type is", training_properties["learner"])
-    if training_properties["learner"] == "textcnn":
+    if training_properties["learner"] == "text_cnn":
         model = TextCnn(model_properties).to(device)
         trainer = Trainer.trainer_factory("single_model_trainer", training_properties, datasetloader.train_iter,
                                           datasetloader.val_iter, datasetloader.test_iter, device)
@@ -35,7 +35,7 @@ def initialize_model_and_trainer(model_properties, training_properties, datasetl
         model = LSTM(model_properties).to(device)
         trainer = Trainer.trainer_factory("single_model_trainer", training_properties, datasetloader.train_iter,
                                           datasetloader.val_iter, datasetloader.test_iter, device)
-    elif training_properties["learner"] == "charcnn":
+    elif training_properties["learner"] == "char_cnn":
         model = CharCNN(model_properties).to(device)
         trainer = Trainer.trainer_factory("single_model_trainer", training_properties, datasetloader.train_iter,
                                           datasetloader.val_iter, datasetloader.test_iter, device)
@@ -43,7 +43,7 @@ def initialize_model_and_trainer(model_properties, training_properties, datasetl
         model = VDCNN(model_properties).to(device)
         trainer = Trainer.trainer_factory("single_model_trainer", training_properties, datasetloader.train_iter,
                                           datasetloader.val_iter, datasetloader.test_iter, device)
-    elif training_properties["learner"] == "conv-deconv-cnn":
+    elif training_properties["learner"] == "conv_deconv_cnn":
         convDeconveCNN = ConvDeconvCNN(model_properties)
         encoderCNN = convDeconveCNN.encoder.to(device)
         decoderCNN = convDeconveCNN.decoder.to(device)
@@ -51,12 +51,13 @@ def initialize_model_and_trainer(model_properties, training_properties, datasetl
         trainer = Trainer.trainer_factory("multiple_model_trainer", training_properties, datasetloader.train_iter,
                                           datasetloader.val_iter, datasetloader.test_iter, device)
         model = [encoderCNN, decoderCNN, classifier]
-    elif training_properties["learner"] == "transformer-google":
+    elif training_properties["learner"] == "transformer_google":
         model = TransformerGoogle(model_properties).model.to(device)
         trainer = Trainer.trainer_factory("single_model_trainer", training_properties, datasetloader.train_iter,
                                           datasetloader.val_iter, datasetloader.test_iter, device)
     else:
-        raise ValueError("Model is not defined!")
+        raise ValueError("Model is not defined! Available learner values are : 'text_cnn', 'char_cnn', 'vdcnn', 'gru', "
+                         "'lstm', 'conv_deconv_cnn' and 'transformer_google'")
 
     return model, trainer
 
