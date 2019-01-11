@@ -42,6 +42,7 @@ Before diving into details, the python and library versions are as follows:
 
 ## To-do 
 
+- [x] ~~Better configuration/property reading, handling, instead of hard-coded dictionaries~~ (Update: 11-Jan-2019)
 - [x] ~~Variational Dropout. Update: Variational and Gaussian dropout methods are added. Reference: [Variational Dropout and
 the Local Reparameterization Trick](https://arxiv.org/pdf/1506.02557.pdf)~~
 - [x] ~~Extend main flow and learning models with respect to new dropout models.~~ 
@@ -73,8 +74,6 @@ the Local Reparameterization Trick](https://arxiv.org/pdf/1506.02557.pdf)~~
 
 I try to keep every part of the project clean and easy to follow. Even though the folders are self explanatory for me, let me explain them for those who may have hard time to understand.
 
-- `./argument/argument_reader.py` contains arguments and their parsers. Default values are same with the hard coded variables in 
-`main.py`
 - `./crf/CRF.py` contains the conditional random field implementation (not finished yet). 
 - `./datahelper/dataset_reader.py` contains the "DatasetLoader" object that reads a text dataset, splits it into 3 subsets (train/vali/test), creates vocabulary and iterators. It is a little bit hard-coded for the dataset I am using now. However, it is easy to make changes to use it for your own dataset.
 - `./datahelper/embedding_helper.py` is a helper class to generate OOV word embeddings. To use Fasttext-based OOV embedding generation, it leverages Gensim!
@@ -90,7 +89,8 @@ I try to keep every part of the project clean and easy to follow. Even though th
 - `./training/trainer.py` is a class that returns the necessary trainer for the user's selected learning model
 - `./training/xyz_trainer.py` methods are the trainer functions for specified models.
 - `./utils/utils.py` contains both utility and common methods that are being used in several places in the project.
-- `./main.py` is the main code. Run arguments/parameters/configurations are at the top of this file.
+- `./main.py` is the main code. To execute this project, one needs to provide a valid `config.json` file which contains the necessary configuration properties.
+- `./config.json` is the configuration file.  
 
 ## How-to-run
 
@@ -102,89 +102,35 @@ I had to make some changes in the torchtext backend codes to be able to do sever
 - To be able to work with Turkish Fasttext embeddings, I added its respective alias.
 - To be able to apply Fasttext's CharNGram to OOV words to generate OOV embeddings, a minor change has been made to Vector object.
 
-### Run Arguments
+### Configuration JSON Format
 
-There are 3 dictionaries defined to hold run arguments. 
+To be able to run the main code, you need to provide a valid JSON file which contains 4 main properties. These are `dataset_properties`, `model_properties`, `training_properties`, and `evaluation_properties` (Check config.json for detailed view, I think definitions are pretty straightforward).
 
-- `dataset_properties` holds dataset related arguments:
-  - stop_word_path: The file you keep your language's stop words
-  - data_path: The original dataset file
-  - embedding_vector: Embedding alias that torchtext needs/uses while building vocabulary (predefined aliases can be found torchtext's vocab.py file).
-  - vector_cache: The embedding file that torchtext creates the first time it runs with the defined embedding. To prevent it to download same file over and over again, you need to provide its path.
-  - pretrained_embedding_path: This is the original, Gensim readable, embedding files (note that only use case for this is Fasttext-based OOV word generation).
-  - checkpoint_path: The path for saved model file that you want to continue your training.
-  - saved_sentence_vocab: The path for saved vocabulary file that are created from words of the dataset.
-  - saved_category_vocab: The path for saved vocabulary file that are created from categories of the dataset.
-  - oov_embedding_type: It can be "zeros", "ones", "random", "uniform" or "fasttext_oov" and specifies which method to use to generate OOV word vectors.
-  - batch_size: Self-explanatory.
+- `dataset_properties` contains dataset-related information such as path, embedding, batch information.
+- `model_properties` contains model-related parameters. Inside this property,
+  - `common_model_properties` contains common properties for all models like embeddings, vocabulary size, etc.
+  - `model_name` (like text_cnn, char_cnn, etc.) contains model-specific properties.
+- `training_properties` contains training-related properties.
+- `evaluation_properties` contains evaluation-related properties.
+
+### How to Run
+
+If you make the necessary changes described in "changes in torchtext.txt" and prepare "config.json", you have two ways to run the code.
+
+- If you are using an IDE, copy/paste your "config.json" file's path as an argument and press run button.
+- If you are an old-school command window lover, type "python main.py --config /path/to/config.json".
+
+### Training from Scratch/Training from Checkpoint/Interactive Evaluation
+
+You can train your model from 0th epoch until max_epoch, and/or continue your training from xth epoch to the end. You do not need to do anything extra for the first case; however, to be able to continue your training you need to make necessary changes in "config.json":
+
+- If `dataset_properties/checkpoint_path` is empty, the code will start a new training process. If you type your saved PyTorch model, the main flow will automatically load it and continue from where it left.
+  - Additionally, you can provide saved vocabulary files for words (`dataset_properties/saved_sentence_vocab` (don't ask why it is sentence)) and labels (`dataset_properties/saved_category_vocab`).
   
- - `model_properties` holds model/algorithm-related arguments:
-   - use_pretrained_embed: Can be "True" if you want to use known word embedding models, or "False" if you want to use random vectors.
-   - embed_train_type: Can be "static" if you want non-trainable, "nonstatic" if you want trainable or "multichannel" if you want multichannel embeddings as your inputs.
-   - use_padded_conv: A boolean argument that specifies whether convolution filters apply padding or not.
-   - dropout_type: Dropout type. Can be "bernoulli", "gaussian" or "variational".
-   - keep_prob: Dropout probability.
-   - use_batch_norm: A boolean argument to use batch normalization.
-   - batch_norm_momentum: Batch normalization's momentum parameter.
-   - batch_norm_affine: Batch normalization's affine parameter.
-   - rnn_hidden_dim: Hidden dimension for RNN/GRU/LSTM-based models.
-   - rnn_num_layers: Number of layers for RNN/GRU/LSTM-based models. 
-   - rnn_bidirectional: A boolean argument for RNN/GRU/LSTM-based models to define bidirectionality.
-   - rnn_bias: A boolean argument for RNN/GRU/LSTM-based models to use bias.
-   - filter_count: Number of filters for CNN-based models.
-   - filter_sizes: List of convolution filter sizes for CNN-based models(Example: [3, 4, 5]).
-   - max_sequence_length: An integer parameter for char-level CNN models. Initial value is set to 1014 (same as the original papers) 
-   - feature_size: Network size parameter for CharCNN. It can be "large" (conv_filter_size=1024, linear_unit_count=2048), "small" (conv_filter_size=256, linear_unit_count=1024) or ""(empty string). 
-   - charcnn_filter_count: If feature_size is empty, all convolution layers will use this parameter as it is filter_count parameter.
-   - charcnn_filter_sizes: If feature size is empty, all convolution layers will use this parameter as it is filter_size parameter. It contains list of integer and list's length is equal to number of convolution layers.
-   - max_pool_kernels: List of max_pooling operations' kernel sizes. Initial list contains 3 integer values since the CharCNN architecture has 3 max_pooling operations.
-   - linear_unit_count: If feature size is empty, all linear units will use this parameter as it is their in and/or out feature size.
-   - depth: An integer parameter that defines the depth of a VDCNN model. It can take only 9, 17, 29, 49 as value.
-   - vdcnn_filter_counts: List of integers that defines the out channels of all convolutional layers.
-   - vdcnn_filter_size: An integer parameter that defines the kernel_size for all convolution operations.
-   - use_shortcut: A boolean parameter that defines whether using shortcut operation in VDCNN.
-   - downsampling_type: A string parameter that defines downsampling operation type. It can be "resnet", "vgg" or kmax".
-   - maxpool_kernel_size: An integer parameter that defines kernel size for all maxpooling operations.
-   - kmax: An integer parameter that defines "k" value for KMaxPooling operation. 
-   - encodercnn_filter_counts: List of integers that defines the out channels of all convolutional layers (For deconv part, this parameter is reversed).
-   - encodercnn_filter_sizes: List of integers that defines the kernel_size for all convolutional layers (For deconv part, this parameter is reversed).
-   - encodercnn_strides: List of integers that defines the stride for all convolutional layers (For deconv part, this parameter is reversed).
-   - deconv_temperature: An integer parameter to define temperature parameter of the Deconvolution stage of Conv-Deconv CNN model.
-   - conv_deconv_hidden_layer_size: An integer parameter to define the number of hidden units in the Classifier stage of Conv-Deconv CNN model.
-   - use_embed_sqrt_mul: A boolean parameter to initialize embeddings by multiplying it with the square root of the model size. Initially, it is False.
-   - keep_prob_encoder: Dropout probability for encoder layers
-   - keep_prob_pe: Dropout probability for positional encoding.
-   - keep_prob_pff: Dropout probability for position-wise feed-forward network.
-   - keep_prob_attn: Dropout probability for multiheaded attention.
-   - transformer_type: A string parameter to select transformer's task. It can be only "classifier".
-   - heads: An integer parameter to define number of parallel attention layers.
-   - num_encoder_layers: An integer parameter to define number of encoder layers.
-   - num_hidden_pos_ff: An integer parameter to define number of hidden units in position-wise feed-forward network.
-   - max_length: An integer parameter to define maximum length of the input for positional encoding.
-   - run_mode: Can be "train" to start training process or "eval_interactive" to test your saved model(s) interactively. 
-  
- - `training_properties` holds training-related arguments:
-   - learner: Argument to choose which learning algorithm to use. It can be "textcnn", "gru", "lstm", "charcnn", "vdcnn" and "conv-deconv-cnn" (Update: 11 Dec 2018) 
-   - optimizer: It can be "Adam", "SGD", "OpenAIAdam" or "Noam".
-   - learning_rate: Self-explanatory.
-   - scheduler_type: Argument to choose a scheduler for OpenAIAdam optimizer (it has no usage for others). It can be "cos", "constant" or "linear".
-   - weight_decay: L2 normalization term. Note that for my case, any value bigger than 0, literally fucked my performance. 
-   - momentum: Self-explanatory (note that if you use "Adam" it will be ignored, it is only for "SGD").
-   - norm_ratio: Gradient clipping ratio.
-   - topk: Tuple value for top-k accuracy calculations (Default: (1, 5)). It is tuple because I c/p related code from Pytorch's imagenet example without modifying it.  
-   - print_every_batch_step: Print loss and accuracy at every x step.
-   - save_every_epoch: Save the model at every epoch.
-   - eval_every: Run the trained model for validation set at every epoch.
- 
-  - `evaluation_properties` holds interactive evaluation related arguments:
-    - model_path: The path for the model file that you want to evaluate.
-    - sentence_vocab: Saved vocabulary (for words) file path.
-    - category_vocab: Saved vocabulary (for labels) file path.
+To be able to activate interactive evaluation, you need to make necessary changes in "config.json":
 
-### Training/Evaluation
-
-After you make the necessary changes in "changes_in_torchtext" and edit the hard coded paths in "main.py", it should not be a problem to start your own training/evaluation. 
-If you succesfully train and save a model, you can evaluate the saved model interactively by changing the "run_mode" parameter from "train" to "evaluate_interactive". 
+- Change `model_properties/common_model_properties/run_mode`'s value to "eval_interactive".
+- Provide your model's path to be evaluated and your saved vocabulary files' path by using `evaluation_properties`.
 
 ## Results
 
