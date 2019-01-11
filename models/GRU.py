@@ -2,45 +2,47 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
+
 from dropout_models.dropout import Dropout
 
 
 class GRU(nn.Module):
     def __init__(self, args):
         super(GRU, self).__init__()
-        self.args = args
+        self.args_common = args["common_model_properties"]
+        self.args_specific = args["gru"]
 
-        self.hidden_dim = args["rnn_hidden_dim"]
-        self.num_layers = args["rnn_num_layers"]
-        self.batch_size = args["batch_size"]
+        self.hidden_dim = self.args_common["hidden_dim"]
+        self.num_layers = self.args_common["num_layers"]
+        self.batch_size = self.args_common["batch_size"]
 
-        self.vocab = args["vocab"]
+        self.vocab = self.args_common["vocab"]
 
         # Device
-        self.device = args["device"]
+        self.device = self.args_common["device"]
 
         # Input/Output dimensions
-        self.embed_num = args["vocab_size"]
-        self.embed_dim = args["embed_dim"]
-        self.num_class = args["num_class"]
+        self.embed_num = self.args_common["vocab_size"]
+        self.embed_dim = self.args_common["embed_dim"]
+        self.num_class = self.args_common["num_class"]
 
         # Embedding parameters
-        self.padding_id = args["padding_id"]
+        self.padding_id = self.args_common["padding_id"]
 
         # Condition parameters
-        self.use_pretrained_embed = args["use_pretrained_embed"]
-        self.embed_train_type = args["embed_train_type"]
-        self.bidirectional = args["rnn_bidirectional"]
-        self.rnn_bias = args["rnn_bias"]
+        self.use_pretrained_embed = self.args_common["use_pretrained_embed"]
+        self.embed_train_type = self.args_common["embed_train_type"]
+        self.bidirectional = self.args_specific["bidirectional"]
+        self.rnn_bias = self.args_specific["bias"]
 
         # Pretrained embedding weights
-        self.pretrained_weights = args["pretrained_weights"]
+        self.pretrained_weights = self.args_common["pretrained_weights"]
 
         # Dropout type
-        self.dropout_type = args["dropout_type"]
+        self.dropout_type = self.args_specific["dropout_type"]
 
         # Dropout probabilities
-        self.keep_prob = args["keep_prob"]
+        self.keep_prob = self.args_specific["keep_prob"]
 
         self.embed = self.initialize_embeddings()
 

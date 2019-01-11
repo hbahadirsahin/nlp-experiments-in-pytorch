@@ -9,44 +9,45 @@ from dropout_models.dropout import Dropout
 class TextCnn(nn.Module):
     def __init__(self, args):
         super(TextCnn, self).__init__()
-        self.args = args
+        self.args_common = args["common_model_properties"]
+        self.args_specific = args["text_cnn"]
 
-        self.vocab = args["vocab"]
+        self.vocab = self.args_common["vocab"]
 
         # Device
-        self.device = args["device"]
+        self.device = self.args_common["device"]
 
         # Input/Output dimensions
-        self.embed_num = args["vocab_size"]
-        self.embed_dim = args["embed_dim"]
-        self.num_class = args["num_class"]
+        self.embed_num = self.args_common["vocab_size"]
+        self.embed_dim = self.args_common["embed_dim"]
+        self.num_class = self.args_common["num_class"]
 
         # Embedding parameters
-        self.padding_id = args["padding_id"]
+        self.padding_id = self.args_common["padding_id"]
 
         # Condition parameters
-        self.use_pretrained_embed = args["use_pretrained_embed"]
-        self.embed_train_type = args["embed_train_type"]
-        self.use_padded_conv = args["use_padded_conv"]
-        self.use_batch_norm = args["use_batch_norm"]
+        self.use_pretrained_embed = self.args_common["use_pretrained_embed"]
+        self.embed_train_type = self.args_common["embed_train_type"]
+        self.use_padded_conv = self.args_specific["use_padded_conv"]
+        self.use_batch_norm = self.args_common["use_batch_norm"]
 
         # Pretrained embedding weights
-        self.pretrained_weights = args["pretrained_weights"]
+        self.pretrained_weights = self.args_common["pretrained_weights"]
 
         # Dropout type
-        self.dropout_type = args["dropout_type"]
+        self.dropout_type = self.args_specific["dropout_type"]
 
         # Dropout probabilities
-        keep_prob = args["keep_prob"]
+        keep_prob = self.args_specific["keep_prob"]
 
         # Batch normalization parameters
-        self.batch_norm_momentum = args["batch_norm_momentum"]
-        self.batch_norm_affine = args["batch_norm_affine"]
+        self.batch_norm_momentum = self.args_common["batch_norm_momentum"]
+        self.batch_norm_affine = self.args_common["batch_norm_affine"]
 
         # Convolution parameters
         self.input_channel = 1
-        self.filter_count = args["filter_count"]
-        self.filter_sizes = args["filter_sizes"]
+        self.filter_count = self.args_specific["filter_count"]
+        self.filter_sizes = self.args_specific["filter_sizes"]
 
         # Embedding Layer Initialization
         if self.embed_train_type == "multichannel":
@@ -214,40 +215,41 @@ class CharCNN(nn.Module):
     def __init__(self, args):
         super(CharCNN, self).__init__()
 
-        self.args = args
+        self.args_common = args["common_model_properties"]
+        self.args_specific = args["char_cnn"]
 
         # Device
-        self.device = args["device"]
+        self.device = self.args_common["device"]
 
         # Input/Output dimensions
-        self.vocab_size = args["vocab_size"]
-        self.embed_dim = args["embed_dim"]
-        self.num_class = args["num_class"]
+        self.vocab_size = self.args_common["vocab_size"]
+        self.embed_dim = self.args_common["embed_dim"]
+        self.num_class = self.args_common["num_class"]
 
         # Embedding parameters
-        self.padding_id = args["padding_id"]
+        self.padding_id = self.args_common["padding_id"]
 
         # Dropout type
-        self.dropout_type = args["dropout_type"]
+        self.dropout_type = self.args_specific["dropout_type"]
 
         # Dropout probabilities
-        self.keep_prob = args["keep_prob"]
+        self.keep_prob = self.args_specific["keep_prob"]
 
         # CharCNN specific parameters
-        self.max_sequence_length = args["max_sequence_length"]
+        self.max_sequence_length = self.args_specific["max_sequence_length"]
 
-        if args["feature_size"] == "large":
+        if self.args_specific["feature_size"] == "large":
             self.filter_count = 1024
             self.linear_unit_count = 2048
-        elif args["feature_size"] == "small":
+        elif self.args_specific["feature_size"] == "small":
             self.filter_count = 256
             self.linear_unit_count = 1024
         else:
-            self.filter_count = args["charcnn_filter_count"]
-            self.linear_unit_count = args["linear_unit_count"]
+            self.filter_count = self.args_specific["filter_count"]
+            self.linear_unit_count = self.args_specific["linear_unit_count"]
 
-        self.filter_sizes = args["charcnn_filter_sizes"]
-        self.max_pool_kernels = args["max_pool_kernels"]
+        self.filter_sizes = self.args_specific["filter_sizes"]
+        self.max_pool_kernels = self.args_specific["max_pool_kernels"]
 
         # Embedding initialization
         # As the original CharCNN paper, I initialized char embeddings as one-hot vector.
@@ -351,46 +353,47 @@ class VDCNN(nn.Module):
     def __init__(self, args):
         super(VDCNN, self).__init__()
 
-        self.args = args
+        self.args_common = args["common_model_properties"]
+        self.args_specific = args["vdcnn"]
 
         # Device
-        self.device = args["device"]
+        self.device = self.args_common["device"]
 
         # Input/Output dimensions
-        self.vocab_size = args["vocab_size"]
-        self.embed_dim = args["embed_dim"]
-        self.num_class = args["num_class"]
+        self.vocab_size = self.args_common["vocab_size"]
+        self.embed_dim = self.args_common["embed_dim"]
+        self.num_class = self.args_common["num_class"]
 
         # Embedding parameters
-        self.padding_id = args["padding_id"]
+        self.padding_id = self.args_common["padding_id"]
 
         # Condition parameters
-        self.use_pretrained_embed = args["use_pretrained_embed"]
-        self.use_shortcut = args["use_shortcut"]
+        self.use_pretrained_embed = self.args_common["use_pretrained_embed"]
+        self.use_shortcut = self.args_specific["use_shortcut"]
 
         # Pretrained embedding weights
-        self.pretrained_weights = args["pretrained_weights"]
+        self.pretrained_weights = self.args_common["pretrained_weights"]
 
         # Dropout type
-        self.dropout_type = args["dropout_type"]
+        self.dropout_type = self.args_specific["dropout_type"]
 
         # Dropout probabilities
-        self.keep_prob = args["keep_prob"]
+        self.keep_prob = self.args_specific["keep_prob"]
 
         # Batch normalization parameters
-        self.batch_norm_momentum = args["batch_norm_momentum"]
-        self.batch_norm_affine = args["batch_norm_affine"]
+        self.batch_norm_momentum = self.args_common["batch_norm_momentum"]
+        self.batch_norm_affine = self.args_common["batch_norm_affine"]
 
         # Convolution parameters
-        self.depth = args["depth"]
+        self.depth = self.args_specific["depth"]
         assert self.depth in [9, 17, 29, 49]
-        self.filter_counts = args["vdcnn_filter_counts"]
-        self.filter_size = args["vdcnn_filter_size"]
+        self.filter_counts = self.args_specific["filter_counts"]
+        self.filter_size = self.args_specific["filter_size"]
 
         # Downsampling parameters
-        self.downsampling_type = args["downsampling_type"]
-        self.maxpool_filter_size = args["maxpool_filter_size"]
-        self.k = args["kmax"]
+        self.downsampling_type = self.args_specific["downsampling_type"]
+        self.maxpool_filter_size = self.args_specific["maxpool_filter_size"]
+        self.k = self.args_specific["kmax"]
 
         self.embedding = nn.Embedding(self.vocab_size, self.embed_dim, padding_idx=self.padding_id).cpu()
 
@@ -508,20 +511,20 @@ class ConvDeconvCNN():
     def __init__(self, args):
         super(ConvDeconvCNN, self).__init__()
 
-        self.args = args
+        self.args = args["common_model_properties"]
 
         # Input/Output dimensions
-        self.vocab_size = args["vocab_size"]
-        self.embed_dim = args["embed_dim"]
+        self.vocab_size = self.args["vocab_size"]
+        self.embed_dim = self.args["embed_dim"]
 
         # Embedding parameters
-        self.padding_id = args["padding_id"]
+        self.padding_id = self.args["padding_id"]
 
         # Condition parameters
-        self.use_pretrained_embed = args["use_pretrained_embed"]
+        self.use_pretrained_embed = self.args["use_pretrained_embed"]
 
         # Pretrained embedding weights
-        self.pretrained_weights = args["pretrained_weights"]
+        self.pretrained_weights = self.args["pretrained_weights"]
 
         # Initialize embeddings
         self.embedding = nn.Embedding(self.vocab_size, self.embed_dim, padding_idx=self.padding_id).cpu()
@@ -529,6 +532,6 @@ class ConvDeconvCNN():
             print("> Pre-trained Embeddings")
             self.embedding.from_pretrained(self.pretrained_weights)
 
-        self.encoder = ConvolutionEncoder(self.args, self.embedding)
-        self.decoder = DeconvolutionDecoder(self.args, self.embedding)
-        self.classifier = FullyConnectedClassifier(self.args)
+        self.encoder = ConvolutionEncoder(args, self.embedding)
+        self.decoder = DeconvolutionDecoder(args, self.embedding)
+        self.classifier = FullyConnectedClassifier(args)

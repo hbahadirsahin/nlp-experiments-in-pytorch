@@ -197,43 +197,44 @@ class TransformerGoogle():
     def __init__(self, args):
         super(TransformerGoogle, self).__init__()
 
-        self.args = args
+        self.args_common = args["common_model_properties"]
+        self.args_specific = args["transformer_google"]
 
         # Input/Output dimensions
-        self.vocab_size = args["vocab_size"]
-        self.embed_dim = args["embed_dim"]
-        self.num_class = args["num_class"]
+        self.vocab_size = self.args_common["vocab_size"]
+        self.embed_dim = self.args_common["embed_dim"]
+        self.num_class = self.args_common["num_class"]
 
         # Embedding parameters
-        self.padding_id = args["padding_id"]
+        self.padding_id = self.args_common["padding_id"]
 
         # Condition parameters
-        self.use_pretrained_embed = args["use_pretrained_embed"]
-        self.use_embed_sqrt_mul = args["use_embed_sqrt_mul"]
+        self.use_pretrained_embed = self.args_common["use_pretrained_embed"]
+        self.use_embed_sqrt_mul = self.args_specific["use_embed_sqrt_mul"]
 
         # Pretrained embedding weights
-        self.pretrained_weights = args["pretrained_weights"]
+        self.pretrained_weights = self.args_common["pretrained_weights"]
 
         # Dropout probabilities for each individual part of the full model.
-        self.keep_prob_encoder = args["keep_prob_encoder"]
-        self.keep_prob_pe = args["keep_prob_pe"]
-        self.kee_prob_pff = args["keep_prob_pff"]
-        self.keep_prob_attn = args["keep_prob_attn"]
+        self.keep_prob_encoder = self.args_specific["keep_prob_encoder"]
+        self.keep_prob_pe = self.args_specific["keep_prob_pe"]
+        self.kee_prob_pff = self.args_specific["keep_prob_pff"]
+        self.keep_prob_attn = self.args_specific["keep_prob_attn"]
 
         # Condition parameter for the transformer type (It only supports classification for now)
-        self.transformer_type = args["transformer_type"]
+        self.transformer_type = self.args_specific["transformer_type"]
 
         # Number of parallel attention layers for MultiHeadedAttention
-        self.heads = args["heads"]
+        self.heads = self.args_specific["heads"]
 
         # Number of encoder layers
-        self.num_encoder_layers = args["num_encoder_layers"]
+        self.num_encoder_layers = self.args_specific["num_encoder_layers"]
 
         # Number of hidden count units for Position-Wise Feed-Forward Network
-        self.num_hidden_pos_ff = args["num_hidden_pos_ff"]
+        self.num_hidden_pos_ff = self.args_specific["num_hidden_pos_ff"]
 
         # Maximum length of an input
-        self.max_length = args["max_length"]
+        self.max_length = self.args_specific["max_length"]
 
         if self.transformer_type == "classifier":
             self.model = self.create_classifier_transformer()

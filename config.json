@@ -1,0 +1,142 @@
+{
+  "dataset_properties": {
+    "data_path": "D:/PyTorchNLP/data/turkish_test.DUMP",
+    "batch_size": 32,
+    "stop_word_path": "D:/Anaconda3/nltk_data/corpora/stopwords/turkish",
+    "embedding_vector": "fasttext.tr.300d",
+    "vector_cache": "D:/PyTorchNLP/data/fasttext",
+    "pretrained_embedding_path": "D:/PyTorchNLP/data/fasttext/wiki.tr",
+    "checkpoint_path": "",
+    "saved_sentence_vocab": "D:/PyTorchNLP/saved/vocab/category_vocab.dat",
+    "saved_category_vocab": "D:/PyTorchNLP/saved/vocab/sentence_vocab.dat",
+    "oov_embedding_type": "zeros"
+  },
+  "model_properties": {
+    "common_model_properties": {
+      "run_mode": "train",
+      "use_pretrained_embed": true,
+      "embed_train_type": "static",
+      "use_batch_norm": true,
+      "batch_norm_momentum": 0.1,
+      "batch_norm_affine": false
+    },
+    "text_cnn": {
+      "use_padded_conv": true,
+      "dropout_type": "bernoulli",
+      "keep_prob": 0.5,
+      "filter_count": 64,
+      "filter_sizes": [
+        3,
+        4,
+        5
+      ]
+    },
+    "char_cnn": {
+      "dropout_type": "bernoulli",
+      "keep_prob": 0.5,
+      "max_sequence_length": 1014,
+      "feature_size": "large",
+      "filter_count": 1024,
+      "filter_sizes": [
+        7,
+        7,
+        3,
+        3,
+        3,
+        3
+      ],
+      "max_pool_kernels": [
+        3,
+        3,
+        3
+      ],
+      "linear_unit_count": 2048
+    },
+    "vdcnn": {
+      "dropout_type": "bernoulli",
+      "keep_prob": 0.5,
+      "depth": 9,
+      "filter_counts": [
+        64,
+        128,
+        256,
+        512
+      ],
+      "filter_size": 3,
+      "use_shortcut": true,
+      "downsampling_type": "resnet",
+      "maxpool_filter_size": 3,
+      "kmax": 8
+    },
+    "conv_deconv_cnn": {
+      "keep_prob": 0.5,
+      "filter_counts": [
+        300,
+        600,
+        500
+      ],
+      "filter_sizes": [
+        5,
+        5,
+        12
+      ],
+      "strides": [
+        2,
+        2,
+        1
+      ],
+      "temperature": 0.01,
+      "hidden_layer_size": 500
+    },
+    "gru": {
+      "dropout_type": "bernoulli",
+      "keep_prob": 0.5,
+      "hidden_dim": 300,
+      "num_layers": 1,
+      "bidirectional": false,
+      "bias": true
+    },
+    "lstm": {
+      "dropout_type": "bernoulli",
+      "keep_prob": 0.5,
+      "hidden_dim": 300,
+      "num_layers": 1,
+      "bidirectional": false,
+      "bias": true
+    },
+    "transformer_google": {
+      "use_embed_sqrt_mul": false,
+      "keep_prob_encoder": 0.1,
+      "keep_prob_pe": 0.1,
+      "keep_prob_pff": 0.1,
+      "keep_prob_attn": 0.1,
+      "transformer_type": "classifier",
+      "heads": 8,
+      "num_encoder_layers": 6,
+      "num_hidden_pos_ff": 2048,
+      "max_length": 5000
+    }
+  },
+  "training_properties": {
+    "learner": "textcnn",
+    "optimizer": "Adam",
+    "learning_rate": 0.05,
+    "scheduler_type": "cos",
+    "weight_decay": 0,
+    "momentum": 0.9,
+    "norm_ratio": 0.25,
+    "epoch": 20,
+    "print_every_batch_step": 250,
+    "save_every_epoch": 1,
+    "topk": [
+      5,
+      1
+    ],
+    "eval_every": 1
+  },
+  "evaluation_properties": {
+    "model_path": "D:/PyTorchNLP/saved/2018-12-06/",
+    "sentence_vocab": "D:/PyTorchNLP/saved/vocab/sentence_vocab.dat",
+    "category_vocab": "D:/PyTorchNLP/saved/vocab/category_vocab.dat"
+  }
+}

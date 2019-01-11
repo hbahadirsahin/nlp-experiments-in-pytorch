@@ -82,26 +82,27 @@ class LayerBlock(nn.Module):
 class ConvolutionEncoder(nn.Module):
     def __init__(self, args, embedding):
         super(ConvolutionEncoder, self).__init__()
-        self.args = args
+        self.args_common = args["common_model_properties"]
+        self.args_specific = args["conv_deconv_cnn"]
 
         # Device
-        self.device = args["device"]
+        self.device = self.args_common["device"]
 
         # Input/Output dimensions
-        self.embed_dim = args["embed_dim"]
+        self.embed_dim = self.args_common["embed_dim"]
 
         # Condition parameters
-        self.use_batch_norm = args["use_batch_norm"]
+        self.use_batch_norm = self.args_common["use_batch_norm"]
 
         # Batch normalization parameters
-        self.batch_norm_momentum = args["batch_norm_momentum"]
-        self.batch_norm_affine = args["batch_norm_affine"]
+        self.batch_norm_momentum = self.args_common["batch_norm_momentum"]
+        self.batch_norm_affine = self.args_common["batch_norm_affine"]
 
         # Convolution parameters
         self.input_channel = 1
-        self.filter_counts = args["encodercnn_filter_counts"]
-        self.filter_sizes = args["encodercnn_filter_sizes"]
-        self.strides = args["encodercnn_strides"]
+        self.filter_counts = self.args_specific["filter_counts"]
+        self.filter_sizes = self.args_specific["filter_sizes"]
+        self.strides = self.args_specific["strides"]
 
         self.embedding = embedding
 
@@ -155,26 +156,27 @@ class ConvolutionEncoder(nn.Module):
 class DeconvolutionDecoder(nn.Module):
     def __init__(self, args, embedding):
         super(DeconvolutionDecoder, self).__init__()
-        self.args = args
+        self.args_common = args["common_model_properties"]
+        self.args_specific = args["conv_deconv_cnn"]
 
         # Device
-        self.device = args["device"]
+        self.device = self.args_common["device"]
 
         # Input/Output dimensions
-        self.embed_dim = args["embed_dim"]
+        self.embed_dim = self.args_common["embed_dim"]
 
         # Condition parameters
-        self.use_batch_norm = args["use_batch_norm"]
+        self.use_batch_norm = self.args_common["use_batch_norm"]
 
         # Batch normalization parameters
-        self.batch_norm_momentum = args["batch_norm_momentum"]
-        self.batch_norm_affine = args["batch_norm_affine"]
+        self.batch_norm_momentum = self.args_common["batch_norm_momentum"]
+        self.batch_norm_affine = self.args_common["batch_norm_affine"]
 
         # Convolution parameters
         self.input_channel = 1
-        self.filter_counts = list(reversed(args["encodercnn_filter_counts"]))
-        self.filter_sizes = list(reversed(args["encodercnn_filter_sizes"]))
-        self.strides = list(reversed(args["encodercnn_strides"]))
+        self.filter_counts = list(reversed(self.args_specific["filter_counts"]))
+        self.filter_sizes = list(reversed(self.args_specific["filter_sizes"]))
+        self.strides = list(reversed(self.args_specific["strides"]))
         self.temperature = args["deconv_temperature"]
 
         self.embedding = embedding
@@ -234,13 +236,15 @@ class DeconvolutionDecoder(nn.Module):
 class FullyConnectedClassifier(nn.Module):
     def __init__(self, args):
         super(FullyConnectedClassifier, self).__init__()
+        self.args_common = args["common_model_properties"]
+        self.args_specific = args["conv_deconv_cnn"]
 
         # This block is not configurable for any network architecture!
         # It is designed for Conv-Deconv CNN, hence its input size is the output size of the Encoder CNN.
-        self.input_size = args["encodercnn_filter_counts"][2]
-        self.hidden_layer_size = args["conv_deconv_hidden_layer_size"]
-        self.num_class = args["num_class"]
-        self.keep_prob = args["keep_prob"]
+        self.input_size = self.args_specific["filter_counts"][2]
+        self.hidden_layer_size = self.args_specific["hidden_layer_size"]
+        self.num_class = self.args_common["num_class"]
+        self.keep_prob = self.args_common["keep_prob"]
 
         self.fc1 = nn.Linear(self.input_size, self.hidden_layer_size)
         self.fc2 = nn.Linear(self.hidden_layer_size, self.num_class)

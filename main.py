@@ -1,6 +1,8 @@
 from __future__ import print_function
 
+import argparse
 import datetime
+import json
 import os
 
 import torch
@@ -15,98 +17,6 @@ from models.LSTM import LSTM
 from models.Transformer import TransformerGoogle
 from training.trainer import Trainer
 from utils.utils import save_vocabulary
-
-dataset_properties = {"stop_word_path": "D:/Anaconda3/nltk_data/corpora/stopwords/english",
-                      # "stop_word_path": "D:/nlpdata/stopwords/turkish",
-                      # "data_path": "D:/nlpdata/tr_test.DUMP",
-                      "data_path": "D:/PyTorchNLP/data/EWNERTC_TC_Coarse Grained NER_No_NoiseReduction.DUMP",
-                      "embedding_vector": "fasttext.en.300d",
-                      # "vector_cache": "D:/nlpdata/fasttext",
-                      "vector_cache": "D:/PyTorchNLP/data/fasttext",
-                      # "pretrained_embedding_path": "D:/nlpdata/fasttext/wiki.tr",
-                      "pretrained_embedding_path": "D:/PyTorchNLP/data/fasttext/wiki.en",
-                      # "data_path": "D:/PyTorchNLP/data/EWNERTC_TC_Coarse Grained NER_No_NoiseReduction.DUMP",
-                      # "embedding_vector": "fasttext.en.300d",
-                      # "vector_cache": "D:/PyTorchNLP/data/fasttext",
-                      # "pretrained_embedding_path": "D:/PyTorchNLP/data/fasttext/wiki.en",
-                      "checkpoint_path": "",
-                      "saved_sentence_vocab": "D:/PyTorchNLP/saved/vocab/category_vocab.dat",
-                      "saved_category_vocab": "D:/PyTorchNLP/saved/vocab/sentence_vocab.dat",
-                      "oov_embedding_type": "fasttext_oov",
-                      "batch_size": 32
-                      }
-
-model_properties = {"use_pretrained_embed": True,
-                    "embed_train_type": "static",
-                    "use_padded_conv": True,
-                    "dropout_type": "bernoulli",
-                    "keep_prob": 0.5,
-                    "use_batch_norm": True,
-                    "batch_norm_momentum": 0.1,
-                    "batch_norm_affine": False,
-                    # ShallowCNN (Single Layer) related parameters
-                    "filter_count": 64,
-                    "filter_sizes": [3, 4, 5],
-                    # CharCNN related parameters
-                    "max_sequence_length": 1014,
-                    "feature_size": "large",
-                    "charcnn_filter_count": 1024,
-                    "charcnn_filter_sizes": [7, 7, 3, 3, 3, 3],
-                    "max_pool_kernels": [3, 3, 3],
-                    "linear_unit_count": 2048,
-                    # VDCNN related parameters
-                    "depth": 9,
-                    "vdcnn_filter_counts": [64, 128, 256, 512],
-                    "vdcnn_filter_size": 3,
-                    "use_shortcut": True,
-                    "downsampling_type": "resnet",
-                    "maxpool_filter_size": 3,
-                    "kmax": 8,
-                    # Conv-Deconv related parameters
-                    "encodercnn_filter_counts": [300, 600, 500],
-                    "encodercnn_filter_sizes": [5, 5, 12],
-                    "encodercnn_strides": [2, 2, 1],
-                    "deconv_temperature": 0.01,
-                    "conv_deconv_hidden_layer_size": 500,
-                    # RNN-GRU-LSTM related parameters
-                    "rnn_hidden_dim": 300,
-                    "rnn_num_layers": 1,
-                    "rnn_bidirectional": False,
-                    "rnn_bias": True,
-                    # Transformer (Google) related parameters
-                    "use_embed_sqrt_mul": False,
-                    "keep_prob_encoder": 0.1,
-                    "keep_prob_pe": 0.1,
-                    "keep_prob_pff": 0.1,
-                    "keep_prob_attn": 0.1,
-                    "transformer_type": "classifier",
-                    "heads": 8,
-                    "num_encoder_layers": 6,
-                    "num_hidden_pos_ff": 2048,
-                    "max_length": 5000,
-                    # Run mode parameter
-                    # "run_mode": "eval_interactive",
-                    "run_mode": "train",
-                    }
-
-training_properties = {"learner": "textcnn",
-                       "optimizer": "Adam",
-                       "learning_rate": 0.05,
-                       "scheduler_type": "cos",
-                       "weight_decay": 0,
-                       "momentum": 0.9,
-                       "norm_ratio": 0.25,
-                       "epoch": 20,
-                       "print_every_batch_step": 250,
-                       "save_every_epoch": 1,
-                       "topk": (5, 1),
-                       "eval_every": 1,
-                       }
-
-evaluation_properties = {"model_path": "D:/PyTorchNLP/saved/2018-12-06/",
-                         "sentence_vocab": "D:/PyTorchNLP/saved/vocab/sentence_vocab.dat",
-                         "category_vocab": "D:/PyTorchNLP/saved/vocab/category_vocab.dat"
-                         }
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -152,8 +62,22 @@ def initialize_model_and_trainer(model_properties, training_properties, datasetl
 
 
 if __name__ == '__main__':
-    assert model_properties["run_mode"] == "train" or \
-           model_properties["run_mode"] == "eval_interactive"
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("-c", "--config", default="D:/PyTorchNLP/config.json", type=str,
+                        help="config.json path. Caution! Default path is hard-coded, local path.")
+
+    args = parser.parse_args()
+
+    config = json.load(open(args.config))
+
+    dataset_properties = config["dataset_properties"]
+    model_properties = config["model_properties"]
+    training_properties = config["training_properties"]
+    evaluation_properties = config["evaluation_properties"]
+
+    assert model_properties["common_model_properties"]["run_mode"] == "train" or \
+           model_properties["common_model_properties"]["run_mode"] == "eval_interactive"
 
     print("Initial device is", device)
     if "cuda" == device:
@@ -196,7 +120,7 @@ if __name__ == '__main__':
                                 is_remove_punctuations=False,
                                 is_char_level=is_char_level)
 
-    if model_properties["run_mode"] == "train":
+    if model_properties["common_model_properties"]["run_mode"] == "train":
         print("Initialize OOVEmbeddingCreator")
         unkembedding = OOVEmbeddingCreator(type=oov_embedding_type,
                                            fasttext_model_path=fasttext_model_path)
@@ -217,23 +141,23 @@ if __name__ == '__main__':
         print("Loading embeddings")
         pretrained_embeddings = datasetloader.sentence_vocab_vectors
         print("Updating properties")
-        model_properties["device"] = device
+        model_properties["common_model_properties"]["device"] = device
 
         if training_properties["learner"] == "charcnn":
-            model_properties["vocab_size"] = len(sentence_vocab)
-            model_properties["embed_dim"] = len(sentence_vocab) - 1
+            model_properties["common_model_properties"]["vocab_size"] = len(sentence_vocab)
+            model_properties["common_model_properties"]["embed_dim"] = len(sentence_vocab) - 1
         elif training_properties["learner"] == "vdcnn":
-            model_properties["vocab_size"] = len(sentence_vocab)
-            model_properties["embed_dim"] = 16
+            model_properties["common_model_properties"]["vocab_size"] = len(sentence_vocab)
+            model_properties["common_model_properties"]["embed_dim"] = 16
         else:
-            model_properties["vocab_size"] = pretrained_embeddings.size()[0]
-            model_properties["embed_dim"] = pretrained_embeddings.size()[1]
+            model_properties["common_model_properties"]["vocab_size"] = pretrained_embeddings.size()[0]
+            model_properties["common_model_properties"]["embed_dim"] = pretrained_embeddings.size()[1]
 
-        model_properties["num_class"] = len(category_vocab)
-        model_properties["vocab"] = sentence_vocab
-        model_properties["padding_id"] = sentence_vocab.stoi["<pad>"]
-        model_properties["pretrained_weights"] = pretrained_embeddings
-        model_properties["batch_size"] = dataset_properties["batch_size"]
+        model_properties["common_model_properties"]["num_class"] = len(category_vocab)
+        model_properties["common_model_properties"]["vocab"] = sentence_vocab
+        model_properties["common_model_properties"]["padding_id"] = sentence_vocab.stoi["<pad>"]
+        model_properties["common_model_properties"]["pretrained_weights"] = pretrained_embeddings
+        model_properties["common_model_properties"]["batch_size"] = dataset_properties["batch_size"]
 
         print("Saving vocabulary files")
         save_vocabulary(sentence_vocab, os.path.abspath(os.path.join(save_dir_vocab, "sentence_vocab.dat")))
@@ -250,7 +174,7 @@ if __name__ == '__main__':
             print("Train process is reloading from epoch {}".format(checkpoint["epoch"]))
             trainer.train_iters(model, checkpoint)
 
-    elif model_properties["run_mode"] == "eval_interactive":
+    elif model_properties["common_model_properties"]["run_mode"] == "eval_interactive":
         interactive_evaluator = Evaluator.evaluator_factory("interactive_evaluator", "cpu")
 
         model_path = evaluation_properties["model_path"]
