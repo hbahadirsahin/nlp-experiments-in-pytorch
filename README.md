@@ -5,7 +5,7 @@
 - I started to work on transformer_google model. Obviously, it cannot be trained by its current version.
 - I have fixed several major bugs. 
   - Classifier block's keep_prob parameter was missing. Hence, it is added to config.json as well as the model flow.
-  - Nobody told me that in MultiHeadedAttention model dimension should be divisible by the number of heads (attention layers). This lack of knowledge costed me 2 hours, but it is fixed (and will be checked inside the model).
+  - Nobody told me that in MultiHeadedAttention, model dimension should be divisible by the number of heads (attention layers). This lack of knowledge costed me 2 hours, but it is fixed (and will be checked inside the model).
 - Tests are going on (not unit tests obviously)
 - README.MD changes.
 
@@ -167,7 +167,7 @@ I stopped being a lazy guy and changed the current code execution stuff:
 
 - All hard-coded, property holding dictionaries inside main.py are removed.
 - Instead, a "config.json" file is created and the main code will ask this file's path (as argument) from you to run the project, properly. 
-- Detailed description of this file will be added into this readme (but until I write it, you can always open the file. Believe me, it is not too complicate =)). 
+- Detailed description of this file will be added into this readme (but until I write it, you can always open the file. Believe me, it is not too complicated =)). 
 - With respect to new kind of property handling, I changed every related variable/argument initialization in the main and model files. 
 - ~~A complete README.MD overhaul is coming on its way~~. (Done!)
 - Still, I have not tested Transformer code. Don't be mad at me if you c/p it and can't get results for your homework(s) =)
