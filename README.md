@@ -8,6 +8,7 @@
   - Nobody told me that in MultiHeadedAttention, model dimension should be divisible by the number of heads (attention layers). This lack of knowledge costed me 2 hours, but it is fixed (and will be checked inside the model).
 - Tests are going on (not unit tests obviously)
 - README.MD changes.
+- MIT Licence is added.
 
 ## Introduction
 
