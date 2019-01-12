@@ -110,15 +110,16 @@
       "keep_prob_pe": 0.1,
       "keep_prob_pff": 0.1,
       "keep_prob_attn": 0.1,
+      "keep_prob_clf": 0.5,
       "transformer_type": "classifier",
-      "heads": 8,
+      "heads": 6,
       "num_encoder_layers": 6,
       "num_hidden_pos_ff": 2048,
       "max_length": 5000
     }
   },
   "training_properties": {
-    "learner": "text_cnn",
+    "learner": "transformer_google",
     "optimizer": "Adam",
     "learning_rate": 0.05,
     "scheduler_type": "cos",

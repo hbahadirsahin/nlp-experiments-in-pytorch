@@ -61,6 +61,7 @@ class ResidualConnectionGoogle(nn.Module):
 
 class EncoderLayerGoogle(nn.Module):
     def __init__(self, size, attention, feed_forward, keep_prob):
+        super(EncoderLayerGoogle, self).__init__()
         self.size = size
         self.attention = attention
         self.feed_forward = feed_forward
@@ -81,6 +82,9 @@ class EncoderClassifier(nn.Module):
         self.is_average = is_average
 
     def forward(self, x, mask=None):
+        # Initial x.size() = [length, batch_size]
+        x = x.permute(1, 0)
+        # After permute x.size = [batch_size, length]
         x = self.embedding(x)
         x = self.encoder(x, mask)
         if self.is_average:
@@ -107,6 +111,7 @@ class Classifier(nn.Module):
 class MultiHeadedAttentionGoogle(nn.Module):
     def __init__(self, heads=8, d_model=512, keep_prob=0.1):
         super(MultiHeadedAttentionGoogle, self).__init__()
+        assert d_model % heads == 0
         self.d_k = d_model // heads
         self.heads = heads
         self.linears = clones(nn.Linear(d_model, d_model), 4)
@@ -133,11 +138,14 @@ class MultiHeadedAttentionGoogle(nn.Module):
         if mask is not None:
             mask = mask.unsqueeze(1)
 
+        # Apply linear projection on the input sequence and split the heads.
         query, key, value = [linear(x).view(num_batches, -1, self.heads, self.d_k).transpose(1, 2)
                              for linear, x in zip(self.linears, (query, key, value))]
 
+        # Apply attention on the projected and splitted vectors
         x, self.attn = self.attention(query, key, value, mask=mask)
 
+        #  Concat vectors and apply linear
         x = x.transpose(1, 2).contiguous().view(num_batches, -1, self.heads * self.d_k)
 
         return self.linears[-1](x)
@@ -220,6 +228,7 @@ class TransformerGoogle():
         self.keep_prob_pe = self.args_specific["keep_prob_pe"]
         self.kee_prob_pff = self.args_specific["keep_prob_pff"]
         self.keep_prob_attn = self.args_specific["keep_prob_attn"]
+        self.keep_prob_clf = self.args_specific["keep_prob_clf"]
 
         # Condition parameter for the transformer type (It only supports classification for now)
         self.transformer_type = self.args_specific["transformer_type"]
@@ -242,10 +251,10 @@ class TransformerGoogle():
             raise ValueError("Transformer can be created as classifier for now!")
 
     def create_classifier_transformer(self):
-        c = copy.deepcopy()
+        c = copy.deepcopy
 
         # Initialize individual parts of the full model
-        attention = MultiHeadedAttentionGoogle(h=self.heads, d_model=self.embed_dim, keep_prob=self.keep_prob_attn)
+        attention = MultiHeadedAttentionGoogle(heads=self.heads, d_model=self.embed_dim, keep_prob=self.keep_prob_attn)
 
         ff = PositionalFeedForwardGoogle(d_model=self.embed_dim, d_ff=self.num_hidden_pos_ff,
                                          keep_prob=self.kee_prob_pff)
@@ -261,7 +270,8 @@ class TransformerGoogle():
                                   EncoderBlockGoogle(
                                       EncoderLayerGoogle(self.embed_dim, c(attention), c(ff), self.keep_prob_encoder),
                                       self.num_encoder_layers),
-                                  Classifier(self.embed_dim, d_hidden=self.embed_dim // 2, num_classes=self.num_class))
+                                  Classifier(self.embed_dim, d_hidden=self.embed_dim // 2, num_classes=self.num_class,
+                                             keep_prob=self.keep_prob_clf))
 
         # Initialize model parameters
         for p in model.parameters():
