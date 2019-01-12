@@ -1,22 +1,19 @@
 # README 
 
-## Update 11-01-2019
+## Update 12-01-2019
 
-I stopped being a lazy guy and changed the current code execution stuff:
+- I started to work on transformer_google model. Obviously, it cannot be trained by its current version.
+- I have fixed several major bugs. 
+  - Classifier block's keep_prob parameter was missing. Hence, it is added to config.json as well as the model flow.
+  - Nobody told me that in MultiHeadedAttention model dimension should be divisible by the number of heads (attention layers). This lack of knowledge costed me 2 hours, but it is fixed (and will be checked inside the model).
+- Tests are going on (not unit tests obviously)
+- README.MD changes.
 
-- All hard-coded, property holding dictionaries inside main.py are removed.
-- Instead, a "config.json" file is created and the main code will ask this file's path (as argument) from you to run the project, properly. 
-- Detailed description of this file will be added into this readme (but until I write it, you can always open the file. Believe me, it is not too complicate =)). 
-- With respect to new kind of property handling, I changed every related variable/argument initialization in the main and model files. 
-- ~~A complete README.MD overhaul is coming on its way~~. (Done!)
-- Still, I have not tested Transformer code. Don't be mad at me if you c/p it and can't get results for your homework(s) =)
-- Tests are really really slow in CPU workstation and I still play games in my daily-life computer instead of running experiments.
-
-  
 ## Introduction
 
-Finally, I decided to do my all machine learning, NLP stuff by using PyTorch. The reason is simple actually, I like it more than Tensorflow =) 
-Eventually, I won't update the other text_categorization repository, but I will continue to develop same ideas in here. 
+This is my personal, pet project which I apply machine learning and natural language processing stuffs by using PyTorch. I stopped working with Tensorflow after some hellish times that I could not do some basic extentions (such fasttext based oov embeddings, details are below). Also, Tensorflow's updates and functionality deprecation rate is annoying for me. 
+
+In this repository, I implement popular learning models and extend them with different minor adjustments (like variational dropouts). Even though it is really slow, I execute experiments by using these models on a dataset which me and my old colleagues in Huawei constructed (details are below, again) and try to announce experiment results.
 
 ## Versions
 
@@ -159,6 +156,22 @@ Note: Epoch is set to 20 for all experiments, until further notice (last update:
 |English|49| Fasttext | zeros | nonstatic	| NaN (TBA)  | NaN (TBA) |
 |English|49| Fasttext | Fasttext | static	| NaN (TBA)  | NaN (TBA) |
 |English|49| Fasttext | Fasttext | nonstatic	| NaN (TBA)  | NaN (TBA) |
+
+## Previous Updates
+
+In this title, I will save the previous updates for me and the visitors to keep track.
+
+### Update 11-01-2019
+
+I stopped being a lazy guy and changed the current code execution stuff:
+
+- All hard-coded, property holding dictionaries inside main.py are removed.
+- Instead, a "config.json" file is created and the main code will ask this file's path (as argument) from you to run the project, properly. 
+- Detailed description of this file will be added into this readme (but until I write it, you can always open the file. Believe me, it is not too complicate =)). 
+- With respect to new kind of property handling, I changed every related variable/argument initialization in the main and model files. 
+- ~~A complete README.MD overhaul is coming on its way~~. (Done!)
+- Still, I have not tested Transformer code. Don't be mad at me if you c/p it and can't get results for your homework(s) =)
+- Tests are really really slow in CPU workstation and I still play games in my daily-life computer instead of running experiments.
 
 
 ### References for code development: 
