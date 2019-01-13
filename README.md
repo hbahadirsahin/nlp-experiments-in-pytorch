@@ -1,15 +1,13 @@
 # README 
 
-## Update 12-01-2019
+## Update 13-01-2019
 
-- I started to work on transformer_google model. Obviously, it cannot be trained by its current version.
-- I have fixed several major bugs. 
-  - Classifier block's keep_prob parameter was missing. Hence, it is added to config.json as well as the model flow.
-  - Nobody told me that in MultiHeadedAttention, model dimension should be divisible by the number of heads (attention layers). This lack of knowledge costed me 2 hours, but it is fixed (and will be checked inside the model).
-- Tests are going on (not unit tests obviously)
-- README.MD changes.
-- MIT Licence is added.
-
+- Final fixes are applied in transformer model, and it is trainable.
+- However, depending on the parameters and model size, it can produce CUDA OOM (out of memory) error pretty easily.
+  - Related to the memory error, somehow PyTorch seems can't handle CUDA memory as good as Tensorflow. I will do some research about it to optimizer GPU memory in the following days (using `torch.cuda.empty_cache()` for this purpose in training steps isn't enough).
+- There are some minor updates in training process (both in single and multiple trainers).
+  - Since NoamOptimizer does not inherit the PyTorch optimization, I put an if check in the for this optimizer whenever ".zero_grad()", ".step()", ".save()" and ".load()" functions are called for the optimization object.
+  
 ## Introduction
 
 This is my personal, pet project which I apply machine learning and natural language processing stuffs by using PyTorch. I stopped working with Tensorflow after some hellish times that I could not do some basic extentions (such fasttext based oov embeddings, details are below). Also, Tensorflow's updates and functionality deprecation rate is annoying for me. 
@@ -57,7 +55,9 @@ the Local Reparameterization Trick](https://arxiv.org/pdf/1506.02557.pdf)~~
   - [x] ~~Multilayer CNN~~ (I removed this model and decided to continue with CharCNN and VDCNN instead).
   - [x] CharCNN
   - [x] VDCNN (Very Deep CNN)
-  - [ ] Transformer
+  - [x] Transformer (*Attention is All You Need* version)
+  - [ ] Transformer (*Improving Language Understanding by Generative Pre-Training* version)
+  - [ ] Transformer-XL (*Transformer-XL: Attentive Language Models Beyond a Fixed-Length Context* version)
   - [x] Conv-Deconv CNN
   - [ ] Encoder-Decoder GRU
   - [ ] Encoder-Decoder LSTM
@@ -161,6 +161,16 @@ Note: Epoch is set to 20 for all experiments, until further notice (last update:
 ## Previous Updates
 
 In this title, I will save the previous updates for me and the visitors to keep track.
+
+## Update 12-01-2019
+
+- I started to work on transformer_google model. Obviously, it cannot be trained by its current version.
+- I have fixed several major bugs. 
+  - Classifier block's keep_prob parameter was missing. Hence, it is added to config.json as well as the model flow.
+  - Nobody told me that in MultiHeadedAttention, model dimension should be divisible by the number of heads (attention layers). This lack of knowledge costed me 2 hours, but it is fixed (and will be checked inside the model).
+- Tests are going on (not unit tests obviously)
+- README.MD changes.
+- MIT Licence is added.
 
 ### Update 11-01-2019
 
