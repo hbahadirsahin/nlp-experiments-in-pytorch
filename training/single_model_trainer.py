@@ -4,7 +4,6 @@ import time
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import torch.optim.lr_scheduler as lr_scheduler
 
 from custom_optimizer import OpenAIAdam, NoamOptimizer
 from evaluation.evaluator import Evaluator
@@ -48,7 +47,7 @@ class SingleModelTrainer(object):
             return OpenAIAdam(model.parameters(), lr=self.learning_rate, schedule=self.openAIAdamSchedulerType,
                               warmup=0.002, t_total=len(self.train_iter) * self.epoch)
         elif self.optimizer_type == "Noam":
-            return NoamOptimizer(model.embedding.embed_dim, 1, 400,
+            return NoamOptimizer(300, 1, 400,
                                  optim.Adam(model.parameters(), lr=0, betas=(0.9, 0.98), eps=1e-9))
         else:
             raise ValueError("Invalid optimizer type! Choose Adam or SGD!")
@@ -56,7 +55,7 @@ class SingleModelTrainer(object):
     def train_iters(self, model, checkpoint=None):
         optimizer = self.init_optimizer(model)
 
-        scheduler = lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.1)
+        # scheduler = lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.1)
 
         if isinstance(model, GRU):
             criterion = nn.NLLLoss().to(self.device)
@@ -72,7 +71,10 @@ class SingleModelTrainer(object):
 
         if checkpoint is not None:
             model.load_state_dict(checkpoint["model_state_dict"])
-            optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+            if self.optimizer_type == "Noam":
+                optimizer.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+            else:
+                optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
             start_epoch = checkpoint["epoch"] + 1
             best_vali_acc = checkpoint["best_vali_acc"]
             best_vali_loss = checkpoint["best_vali_loss"]
@@ -107,14 +109,25 @@ class SingleModelTrainer(object):
                 out_path = os.path.abspath(os.path.join(self.save_path, filename))
                 if old_path is not None:
                     os.remove(old_path)
-                torch.save({
-                    "epoch": e,
-                    "best_vali_acc": best_vali_acc,
-                    "best_vali_loss": best_vali_loss,
-                    "best_vali_acc_topk": best_vali_acc_topk,
-                    'model_state_dict': model.state_dict(),
-                    'optimizer_state_dict': optimizer.state_dict(),
-                }, out_path)
+                if self.optimizer_type == "Noam":
+                    torch.save({
+                        "epoch": e,
+                        "best_vali_acc": best_vali_acc,
+                        "best_vali_loss": best_vali_loss,
+                        "best_vali_acc_topk": best_vali_acc_topk,
+                        'model_state_dict': model.state_dict(),
+                        'optimizer_state_dict': optimizer.optimizer.state_dict(),
+                    }, out_path)
+                else:
+                    torch.save({
+                        "epoch": e,
+                        "best_vali_acc": best_vali_acc,
+                        "best_vali_loss": best_vali_loss,
+                        "best_vali_acc_topk": best_vali_acc_topk,
+                        'model_state_dict': model.state_dict(),
+                        'optimizer_state_dict': optimizer.state_dict(),
+                    }, out_path)
+
                 old_path = out_path
 
         test_loss, test_accuracy, test_accuracy_topk = self.test_evaluator.evaluate_iter(model=model,
@@ -134,7 +147,10 @@ class SingleModelTrainer(object):
         model.train()
 
         for batch in self.train_iter:
-            optimizer.zero_grad()
+            if self.optimizer_type == "Noam":
+                optimizer.optimizer.zero_grad()
+            else:
+                optimizer.zero_grad()
             if isinstance(model, GRU):
                 model.hidden = model.init_hidden()
 
@@ -154,7 +170,10 @@ class SingleModelTrainer(object):
             if 0.0 < self.norm_ratio:
                 nn.utils.clip_grad_norm_(model.parameters(), self.norm_ratio)
 
-            optimizer.step()
+            if self.optimizer_type == "Noam":
+                optimizer.optimizer.step()
+            else:
+                optimizer.step()
 
             if scheduler is not None and step % 500 == 0:
                 scheduler.step(step)

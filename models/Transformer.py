@@ -74,24 +74,29 @@ class EncoderLayerGoogle(nn.Module):
 
 
 class EncoderClassifier(nn.Module):
-    def __init__(self, embedding, encoder, classifier, is_average=True):
+    def __init__(self, embedding, encoder, classifier, device, is_average=True):
         super(EncoderClassifier, self).__init__()
         self.embedding = embedding
         self.encoder = encoder
         self.classifier = classifier
+        self.device = device
         self.is_average = is_average
 
     def forward(self, x, mask=None):
+        kl_loss = torch.Tensor([0.0])
         # Initial x.size() = [length, batch_size]
         x = x.permute(1, 0)
         # After permute x.size = [batch_size, length]
         x = self.embedding(x)
+        if "cuda" in str(self.device):
+            x = x.cuda()
+            kl_loss = kl_loss.cuda()
         x = self.encoder(x, mask)
         if self.is_average:
             # Averaged sentence representation
-            x = torch.mean(x)
+            x = torch.mean(x, dim=1)
         x = self.classifier(x)
-        return x
+        return x, kl_loss
 
 
 class Classifier(nn.Module):
@@ -208,6 +213,9 @@ class TransformerGoogle():
         self.args_common = args["common_model_properties"]
         self.args_specific = args["transformer_google"]
 
+        # Device
+        self.device = self.args_common["device"]
+
         # Input/Output dimensions
         self.vocab_size = self.args_common["vocab_size"]
         self.embed_dim = self.args_common["embed_dim"]
@@ -271,7 +279,8 @@ class TransformerGoogle():
                                       EncoderLayerGoogle(self.embed_dim, c(attention), c(ff), self.keep_prob_encoder),
                                       self.num_encoder_layers),
                                   Classifier(self.embed_dim, d_hidden=self.embed_dim // 2, num_classes=self.num_class,
-                                             keep_prob=self.keep_prob_clf))
+                                             keep_prob=self.keep_prob_clf),
+                                  device=self.device)
 
         # Initialize model parameters
         for p in model.parameters():

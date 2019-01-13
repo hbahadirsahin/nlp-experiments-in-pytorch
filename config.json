@@ -1,14 +1,14 @@
 {
   "dataset_properties": {
-    "data_path": "D:/PyTorchNLP/data/turkish_test.DUMP",
+    "data_path": "./data/TWNERTC_TC_Coarse Grained NER_No_NoiseReduction.DUMP",
     "batch_size": 32,
     "stop_word_path": "D:/Anaconda3/nltk_data/corpora/stopwords/turkish",
     "embedding_vector": "fasttext.tr.300d",
-    "vector_cache": "D:/PyTorchNLP/data/fasttext",
-    "pretrained_embedding_path": "D:/PyTorchNLP/data/fasttext/wiki.tr",
+    "vector_cache": "./data/fasttext",
+    "pretrained_embedding_path": "./data/fasttext/wiki.tr",
     "checkpoint_path": "",
-    "saved_sentence_vocab": "D:/PyTorchNLP/saved/vocab/category_vocab.dat",
-    "saved_category_vocab": "D:/PyTorchNLP/saved/vocab/sentence_vocab.dat",
+    "saved_sentence_vocab": "./saved/vocab/category_vocab.dat",
+    "saved_category_vocab": "./saved/vocab/sentence_vocab.dat",
     "oov_embedding_type": "zeros"
   },
   "model_properties": {
@@ -120,7 +120,7 @@
   },
   "training_properties": {
     "learner": "transformer_google",
-    "optimizer": "Adam",
+    "optimizer": "Noam",
     "learning_rate": 0.05,
     "scheduler_type": "cos",
     "weight_decay": 0,
