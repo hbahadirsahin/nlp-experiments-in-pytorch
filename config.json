@@ -123,6 +123,8 @@
     "optimizer": "Noam",
     "learning_rate": 0.05,
     "scheduler_type": "cos",
+    "amsgrad": true,
+    "partial_adam": 0.25,
     "weight_decay": 0,
     "momentum": 0.9,
     "norm_ratio": 0.25,

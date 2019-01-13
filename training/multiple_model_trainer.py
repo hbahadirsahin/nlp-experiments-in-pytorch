@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-from custom_optimizer import OpenAIAdam
+from custom_optimizer import OpenAIAdam, Padam
 from evaluation.evaluator import Evaluator
 from utils.utils import time_since, calculate_accuracy, save_best_model, calculate_topk_accuracy, \
     scheduled_annealing_strategy
@@ -25,6 +25,8 @@ class MultipleModelTrainer(object):
         self.save_path = training_properties["save_path"]
 
         self.openAIAdamSchedulerType = training_properties["scheduler_type"]
+        self.amsgrad = training_properties["amsgrad"]
+        self.partial_adam = training_properties["partial_adam"]
 
         self.train_iter = train_iter
         self.dev_iter = dev_iter
@@ -45,8 +47,11 @@ class MultipleModelTrainer(object):
         elif self.optimizer_type == "OpenAIAdam":
             return OpenAIAdam(model.parameters(), lr=self.learning_rate, schedule=self.openAIAdamSchedulerType,
                               warmup=0.002, t_total=len(self.train_iter) * self.epoch)
+        elif self.optimizer_type == "Padam":
+            return Padam(model.parameters(), lr=self.learning_rate, amsgrad=self.amsgrad, partial=self.partial_adam,
+                         weight_decay=self.weight_decay)
         else:
-            raise ValueError("Invalid optimizer type! Choose Adam or SGD!")
+            raise ValueError("Invalid optimizer type! Choose Adam, SGD, Padam or OpenAIAdam!")
 
     def train_iters_multi_model(self, models, checkpoint=None):
         # Under the assumption of models is a list that contains encoder, decoder and classifier in order.

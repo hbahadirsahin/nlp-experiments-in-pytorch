@@ -130,6 +130,82 @@ class OpenAIAdam(Optimizer):
         return loss
 
 
+class Padam(Optimizer):
+    """Partially Adaptive Momentum Estimation algorithm"""
+
+    def __init__(self, params, lr, amsgrad, e=1e-8, b1=0.9, b2=0.999, partial=0.25, weight_decay=0, max_grad_norm=-1,
+                 **kwargs):
+        assert 0 < lr
+        assert 0 < b1 <= 1.0
+        assert 0 < b2 <= 1.0
+        assert 0 < e
+        assert 0 < partial <= 0.5
+        defaults = dict(lr=lr, b1=b1, b2=b2, e=e, amsgrad=amsgrad, partial=partial, weight_decay=weight_decay,
+                        max_grad_norm=max_grad_norm)
+        super(Padam, self).__init__(params, defaults)
+
+    def step(self, closure=None):
+        # Performs a single optimization step
+        loss = None
+        if closure is not None:
+            loss = closure()
+
+        for group in self.param_groups:
+            for p in group['params']:
+                if p.grad is None:
+                    continue
+                grad = p.grad.data
+                if grad.is_sparse:
+                    raise RuntimeError("Sparse gradients. Use SparseAdam")
+
+                amsgrad = group['amsgrad']
+                partial = group['partial']
+
+                state = self.state[p]
+
+                # State initialization
+                if len(state) == 0:
+                    state['step'] = 0
+                    # Exponential moving average of gradient values
+                    state['exp_avg'] = torch.zeros_like(p.data)
+                    # Exponential moving average of squared gradient values
+                    state['exp_avg_sq'] = torch.zeros_like(p.data)
+                    if amsgrad:
+                        # Maintains max of all exp. moving avg. of sq. grad. values
+                        state['max_exp_avg_sq'] = torch.zeros_like(p.data)
+
+                exp_avg, exp_avg_sq = state["exp_avg"], state["exp_avg_sq"]
+                beta1, beta2 = group["b1"], group["b2"]
+                if amsgrad:
+                    max_exp_avg_sq = state['max_exp_avg_sq']
+                state["step"] += 1
+
+                # Add grad clipping
+                if group["max_grad_norm"] > 0:
+                    clip_grad_norm_(p, group["max_grad_norm"])
+
+                if group['weight_decay'] != 0:
+                    grad = grad.add(group['weight_decay'], p.data)
+
+                # Decay the first and second moment running average coefficient
+                exp_avg.mul_(beta1).add_(1 - beta1, grad)
+                exp_avg_sq.mul_(beta2).addcmul_(1 - beta2, grad, grad)
+                if amsgrad:
+                    # Maintains the maximum of all 2nd moment running avg. till now
+                    torch.max(max_exp_avg_sq, exp_avg_sq, out=max_exp_avg_sq)
+                    # Use the max. for normalizing running avg. of gradient
+                    denom = max_exp_avg_sq.sqrt().add_(group['e'])
+                else:
+                    denom = exp_avg_sq.sqrt().add_(group["e"])
+
+                bias_correction1 = 1 - beta1 ** state["step"]
+                bias_correction2 = 1 - beta2 ** state["step"]
+                step_size = group['lr'] * math.sqrt(bias_correction2) / bias_correction1
+
+                p.data.addcdiv_(-step_size, exp_avg, denom ** (partial * 2))
+        return loss
+
+
 if __name__ == '__main__':
     opts = [NoamOptimizer(512, 1, 4000, None),
             NoamOptimizer(512, 1, 8000, None),

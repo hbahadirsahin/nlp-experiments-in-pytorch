@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-from custom_optimizer import OpenAIAdam, NoamOptimizer
+from custom_optimizer import OpenAIAdam, NoamOptimizer, Padam
 from evaluation.evaluator import Evaluator
 from models.GRU import GRU
 from utils.utils import time_since, calculate_accuracy, calculate_topk_accuracy, save_best_model
@@ -26,6 +26,8 @@ class SingleModelTrainer(object):
         self.save_path = training_properties["save_path"]
 
         self.openAIAdamSchedulerType = training_properties["scheduler_type"]
+        self.amsgrad = training_properties["amsgrad"]
+        self.partial_adam = training_properties["partial_adam"]
 
         self.train_iter = train_iter
         self.dev_iter = dev_iter
@@ -49,8 +51,11 @@ class SingleModelTrainer(object):
         elif self.optimizer_type == "Noam":
             return NoamOptimizer(300, 1, 400,
                                  optim.Adam(model.parameters(), lr=0, betas=(0.9, 0.98), eps=1e-9))
+        elif self.optimizer_type == "Padam":
+            return Padam(model.parameters(), lr=self.learning_rate, amsgrad=self.amsgrad, partial=self.partial_adam,
+                         weight_decay=self.weight_decay)
         else:
-            raise ValueError("Invalid optimizer type! Choose Adam or SGD!")
+            raise ValueError("Invalid optimizer type! Choose Adam, SGD, Padam, NoamOptimizer or OpenAIAdam!")
 
     def train_iters(self, model, checkpoint=None):
         optimizer = self.init_optimizer(model)
