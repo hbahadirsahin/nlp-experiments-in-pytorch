@@ -6,7 +6,7 @@
 - However, depending on the parameters and model size, it can produce CUDA OOM (out of memory) error pretty easily.
   - Related to the memory error, somehow PyTorch seems can't handle CUDA memory as good as Tensorflow. I will do some research about it to optimizer GPU memory in the following days (using `torch.cuda.empty_cache()` for this purpose in training steps isn't enough).
 - There are some minor updates in training process (both in single and multiple trainers).
-  - Since NoamOptimizer does not inherit the PyTorch optimization, I put an if check in the for this optimizer whenever ".zero_grad()", ".step()", ".save()" and ".load()" functions are called for the optimization object.
+  - Since NoamOptimizer does not inherit the PyTorch optimization, I put checkers into the trainers for this optimizer whenever ".zero_grad()", ".step()", ".save()" and ".load()" functions are called for the optimization object.
 
   
 ## Introduction
