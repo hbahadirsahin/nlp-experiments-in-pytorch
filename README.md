@@ -7,6 +7,7 @@
   - Related to the memory error, somehow PyTorch seems can't handle CUDA memory as good as Tensorflow. I will do some research about it to optimizer GPU memory in the following days (using `torch.cuda.empty_cache()` for this purpose in training steps isn't enough).
 - There are some minor updates in training process (both in single and multiple trainers).
   - Since NoamOptimizer does not inherit the PyTorch optimization, I put an if check in the for this optimizer whenever ".zero_grad()", ".step()", ".save()" and ".load()" functions are called for the optimization object.
+
   
 ## Introduction
 
@@ -55,7 +56,7 @@ the Local Reparameterization Trick](https://arxiv.org/pdf/1506.02557.pdf)~~
   - [x] ~~Multilayer CNN~~ (I removed this model and decided to continue with CharCNN and VDCNN instead).
   - [x] CharCNN
   - [x] VDCNN (Very Deep CNN)
-  - [x] Transformer (*Attention is All You Need* version)
+  - [x] Transformer (*Attention is All You Need* version) (**Modified for Text Classification/NER!**) 
   - [ ] Transformer (*Improving Language Understanding by Generative Pre-Training* version)
   - [ ] Transformer-XL (*Transformer-XL: Attentive Language Models Beyond a Fixed-Length Context* version)
   - [x] Conv-Deconv CNN
