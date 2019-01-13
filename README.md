@@ -162,7 +162,7 @@ Note: Epoch is set to 20 for all experiments, until further notice (last update:
 
 In this title, I will save the previous updates for me and the visitors to keep track.
 
-## Update 12-01-2019
+### Update 12-01-2019
 
 - I started to work on transformer_google model. Obviously, it cannot be trained by its current version.
 - I have fixed several major bugs. 
