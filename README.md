@@ -7,6 +7,8 @@
   - Related to the memory error, somehow PyTorch seems can't handle CUDA memory as good as Tensorflow. I will do some research about it to optimizer GPU memory in the following days (using `torch.cuda.empty_cache()` for this purpose in training steps isn't enough).
 - There are some minor updates in training process (both in single and multiple trainers).
   - Since NoamOptimizer does not inherit the PyTorch optimization, I put checkers into the trainers for this optimizer whenever ".zero_grad()", ".step()", ".save()" and ".load()" functions are called for the optimization object.
+- A new optimizer is added into custom_optimizer: "Padam". The reference paper is [Closing the Generalization Gap of Adaptive Gradient Methods in Training Deep Neural Networks](https://arxiv.org/pdf/1806.06763.pdf).
+  - Yesterday, I was reading reddit/ML about Adam-related problems and saw this paper. I have not tested it, in terms of optimality/training-test results, but I will give it a shot.
 
   
 ## Introduction
