@@ -1,15 +1,11 @@
 # README 
 
-## Update 13-01-2019
+## 14-01-2019
 
-- Final fixes are applied in transformer model, and it is trainable.
-- However, depending on the parameters and model size, it can produce CUDA OOM (out of memory) error pretty easily.
-  - Related to the memory error, somehow PyTorch seems can't handle CUDA memory as good as Tensorflow. I will do some research about it to optimizer GPU memory in the following days (using `torch.cuda.empty_cache()` for this purpose in training steps isn't enough).
-- There are some minor updates in training process (both in single and multiple trainers).
-  - Since NoamOptimizer does not inherit the PyTorch optimization, I put checkers into the trainers for this optimizer whenever ".zero_grad()", ".step()", ".save()" and ".load()" functions are called for the optimization object.
-- A new optimizer is added into custom_optimizer: "Padam". The reference paper is [Closing the Generalization Gap of Adaptive Gradient Methods in Training Deep Neural Networks](https://arxiv.org/pdf/1806.06763.pdf).
-  - Yesterday, I was reading reddit/ML about Adam-related problems and saw this paper. I have not tested it, in terms of optimality/training-test results, but I will give it a shot.
-
+- After I find out vocabulary caching has bugs and could not fix it, I removed vocabulary caching functionality from code (both save/load parts). 
+  - Even though saving is not a problem, to be able to load a Vocab object, one needs to do too much workaround. I wasted my 6 hours to make it work, but no chance (Vocab objects can be loaded by pickle, but all dataset iterators also want to hold a Vocab object inside which can be done by using `build_vocab()` method in normal dataset reading process. If one loads external, cached vocabularies, you jump this step and can't feed these iterators with vocab objects, a.k.a. can't train due to missing Vocab objects in iterator).
+  - I will wait for torchtext to provide native support to vocabulary saving/loading.
+- I will spend some time on monitoring and optimizing my models/training flows for GPU memory optimization. In my laptop, I am bounded with 3GB GPU memory, and I cannot train big models (I have to say that I did not face such problems in Tensorflow for same model/dataset/parameter sets)
   
 ## Introduction
 
@@ -164,6 +160,16 @@ Note: Epoch is set to 20 for all experiments, until further notice (last update:
 ## Previous Updates
 
 In this title, I will save the previous updates for me and the visitors to keep track.
+
+### Update 13-01-2019
+
+- Final fixes are applied in transformer model, and it is trainable.
+- However, depending on the parameters and model size, it can produce CUDA OOM (out of memory) error pretty easily.
+  - Related to the memory error, somehow PyTorch seems can't handle CUDA memory as good as Tensorflow. I will do some research about it to optimize GPU memory in the following days (using `torch.cuda.empty_cache()` for this purpose in training steps isn't enough).
+- There are some minor updates in training process (both in single and multiple trainers).
+  - Since NoamOptimizer does not inherit the PyTorch optimization, I put checkers into the trainers for this optimizer whenever ".zero_grad()", ".step()", ".save()" and ".load()" functions are called for the optimization object.
+- A new optimizer is added into custom_optimizer: "Padam". The reference paper is [Closing the Generalization Gap of Adaptive Gradient Methods in Training Deep Neural Networks](https://arxiv.org/pdf/1806.06763.pdf).
+  - Yesterday, I was reading reddit/ML about Adam-related problems and saw this paper. I have not tested it, in terms of optimality/training-test results, but I will give it a shot.
 
 ### Update 12-01-2019
 
