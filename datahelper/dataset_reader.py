@@ -6,14 +6,12 @@ from torchtext import data
 
 from datahelper.preprocessor import Preprocessor
 from embedding_helper import OOVEmbeddingCreator
-from utils.utils import load_vocabulary
 
 SEED = 1234
 
 
 class DatasetLoader(object):
-    def __init__(self, data_path, vector, sentence_vocab_path=None, category_vocab_path=None, level="word",
-                 unk_init=None, preprocessor=None, vector_cache=None):
+    def __init__(self, data_path, vector, level="word", unk_init=None, preprocessor=None, vector_cache=None):
         assert data_path is not None and vector is not None
         self.data_path = data_path
         self.vector = vector
@@ -24,12 +22,6 @@ class DatasetLoader(object):
 
         self.sentence_vocab = None
         self.category_vocab = None
-        self.sentence_vocab_path = None
-        self.category_vocab_path = None
-        if sentence_vocab_path:
-            self.sentence_vocab_path = sentence_vocab_path
-        if category_vocab_path:
-            self.category_vocab_path = category_vocab_path
         self.ner_vocab = None
 
         self.sentence_vocab_vectors = None
@@ -102,21 +94,17 @@ class DatasetLoader(object):
         return dataset.split(split_ratio=split_ratio, random_state=random.seed(SEED))
 
     def create_vocabs(self, train, sentence_field, category_label_field, min_freq=1):
-        if self.sentence_vocab_path is None:
-            if self.level == "word":
-                sentence_field.build_vocab(train, vectors=self.vector, vectors_cache=self.vector_cache,
-                                           unk_init=self.unk_init, min_freq=min_freq)
-            else:
-                sentence_field.build_vocab(train)
-            category_label_field.build_vocab(train)
-
-            self.sentence_vocab = sentence_field.vocab
-            self.category_vocab = category_label_field.vocab
-            self.sentence_vocab_vectors = sentence_field.vocab.vectors
+        print("No vocabulary cache has been found! Vocabularies are being createad!")
+        if self.level == "word":
+            sentence_field.build_vocab(train, vectors=self.vector, vectors_cache=self.vector_cache,
+                                       unk_init=self.unk_init, min_freq=min_freq)
         else:
-            self.sentence_vocab = load_vocabulary(self.sentence_vocab_path)
-            self.category_vocab = load_vocabulary(self.category_vocab_path)
-            self.sentence_vocab_vectors = self.sentence_vocab.vectors
+            sentence_field.build_vocab(train)
+        category_label_field.build_vocab(train)
+
+        self.sentence_vocab = sentence_field.vocab
+        self.category_vocab = category_label_field.vocab
+        self.sentence_vocab_vectors = sentence_field.vocab.vectors
 
     def create_iterator(self, train, val, test, batch_size):
         self.train_iter, self.val_iter, self.test_iter = data.BucketIterator.splits(datasets=(train, val, test),

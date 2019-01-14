@@ -16,7 +16,6 @@ from models.GRU import GRU
 from models.LSTM import LSTM
 from models.Transformer import TransformerGoogle
 from training.trainer import Trainer
-from utils.utils import save_vocabulary
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -132,7 +131,8 @@ if __name__ == '__main__':
                                       preprocessor=preprocessor.preprocess,
                                       level=level,
                                       vector_cache=vector_cache,
-                                      unk_init=unkembedding.create_oov_embedding)
+                                      unk_init=unkembedding.create_oov_embedding,
+                                      )
 
         print("Loading train, validation and test sets")
         train, val, test = datasetloader.read_dataset(batch_size=batch_size)
@@ -159,10 +159,6 @@ if __name__ == '__main__':
         model_properties["common_model_properties"]["padding_id"] = sentence_vocab.stoi["<pad>"]
         model_properties["common_model_properties"]["pretrained_weights"] = pretrained_embeddings
         model_properties["common_model_properties"]["batch_size"] = dataset_properties["batch_size"]
-
-        print("Saving vocabulary files")
-        save_vocabulary(sentence_vocab, os.path.abspath(os.path.join(save_dir_vocab, "sentence_vocab.dat")))
-        save_vocabulary(category_vocab, os.path.abspath(os.path.join(save_dir_vocab, "category_vocab.dat")))
 
         print("Initialize model and trainer")
         model, trainer = initialize_model_and_trainer(model_properties, training_properties, datasetloader, device)

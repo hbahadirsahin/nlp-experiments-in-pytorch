@@ -166,14 +166,14 @@ class TextCnn(nn.Module):
                                      momentum=self.batch_norm_momentum,
                                      affine=self.batch_norm_affine)
 
-    def forward(self, batch):
+    def forward(self, x):
         kl_loss = torch.Tensor([0.0])
         # Input shape: [sentence_length, batch_size]
-        batch_permuted = batch.permute(1, 0)
+        x = x.permute(1, 0)
         # X shape: [batch_size, sentence_length]
-        x = self.embed(batch_permuted)
+        x = self.embed(x)
         if self.embed_train_type == "multichannel":
-            x_static = self.embed_static(batch_permuted)
+            x_static = self.embed_static(x)
             x = torch.stack[(x_static, x), 1]
         if "cuda" in str(self.device):
             x = x.cuda()
