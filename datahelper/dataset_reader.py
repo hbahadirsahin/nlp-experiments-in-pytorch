@@ -44,7 +44,7 @@ class DatasetLoader(object):
         tokenized_sentence = list(preprocessed_sentence)
         return tokenized_sentence
 
-    def create_fields(self, seq_input=True, seq_ner=True, seq_cat=False, fix_length=None):
+    def create_fields(self, seq_input=True, seq_ner=True, seq_cat=False, fix_length=50):
         if self.level == "word":
             sentence_field = data.Field(sequential=seq_input, preprocessing=self.preprocessor, pad_first=True,
                                         fix_length=fix_length)
@@ -93,8 +93,7 @@ class DatasetLoader(object):
     def create_splits(dataset, split_ratio):
         return dataset.split(split_ratio=split_ratio, random_state=random.seed(SEED))
 
-    def create_vocabs(self, train, sentence_field, category_label_field, min_freq=1):
-        print("No vocabulary cache has been found! Vocabularies are being createad!")
+    def create_vocabs(self, train, sentence_field, category_label_field, min_freq=5):
         if self.level == "word":
             sentence_field.build_vocab(train, vectors=self.vector, vectors_cache=self.vector_cache,
                                        unk_init=self.unk_init, min_freq=min_freq)

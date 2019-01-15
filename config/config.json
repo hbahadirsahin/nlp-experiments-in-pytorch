@@ -51,7 +51,6 @@
       "linear_unit_count": 2048
     },
     "vdcnn": {
-      "dropout_type": "bernoulli",
       "keep_prob": 0.5,
       "depth": 9,
       "filter_counts": [
@@ -119,7 +118,7 @@
   "training_properties": {
     "learner": "text_cnn",
     "optimizer": "Padam",
-    "learning_rate": 0.05,
+    "learning_rate": 0.01,
     "scheduler_type": "cos",
     "amsgrad": true,
     "partial_adam": 0.25,

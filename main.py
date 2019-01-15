@@ -16,6 +16,7 @@ from models.GRU import GRU
 from models.LSTM import LSTM
 from models.Transformer import TransformerGoogle
 from training.trainer import Trainer
+from utils.utils import save_vocabulary
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -64,7 +65,7 @@ def initialize_model_and_trainer(model_properties, training_properties, datasetl
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("-c", "--config", default="D:/PyTorchNLP/config.json", type=str,
+    parser.add_argument("-c", "--config", default="D:/PyTorchNLP/config/config.json", type=str,
                         help="config.json path. Caution! Default path is hard-coded, local path.")
 
     args = parser.parse_args()
@@ -159,6 +160,10 @@ if __name__ == '__main__':
         model_properties["common_model_properties"]["padding_id"] = sentence_vocab.stoi["<pad>"]
         model_properties["common_model_properties"]["pretrained_weights"] = pretrained_embeddings
         model_properties["common_model_properties"]["batch_size"] = dataset_properties["batch_size"]
+
+        print("Saving vocabulary files")
+        save_vocabulary(sentence_vocab, os.path.abspath(os.path.join(save_dir_vocab, "sentence_vocab.dat")))
+        save_vocabulary(category_vocab, os.path.abspath(os.path.join(save_dir_vocab, "category_vocab.dat")))
 
         print("Initialize model and trainer")
         model, trainer = initialize_model_and_trainer(model_properties, training_properties, datasetloader, device)

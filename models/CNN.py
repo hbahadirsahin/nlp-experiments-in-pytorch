@@ -374,11 +374,10 @@ class VDCNN(nn.Module):
         # Pretrained embedding weights
         self.pretrained_weights = self.args_common["pretrained_weights"]
 
-        # Dropout type
-        self.dropout_type = self.args_specific["dropout_type"]
-
         # Dropout probabilities
         self.keep_prob = self.args_specific["keep_prob"]
+        # Dropout type
+        self.dropout_type = nn.Dropout(self.keep_prob)
 
         # Batch normalization parameters
         self.batch_norm_momentum = self.args_common["batch_norm_momentum"]

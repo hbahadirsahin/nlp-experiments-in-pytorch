@@ -151,6 +151,11 @@ class SingleModelTrainer(object):
         step = 1
         model.train()
 
+        loss = None
+        accuracy = None
+        accuracy_topk = None
+        total_loss = None
+
         for batch in self.train_iter:
             if self.optimizer_type == "Noam":
                 optimizer.optimizer.zero_grad()
