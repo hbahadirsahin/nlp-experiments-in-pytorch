@@ -1,11 +1,12 @@
 # README 
 
-## 14-01-2019
+## 15-01-2019
 
-- After I find out vocabulary caching has bugs and could not fix it, I removed vocabulary caching functionality from code (both save/load parts). 
-  - Even though saving is not a problem, to be able to load a Vocab object, one needs to do too much workaround. I wasted my 6 hours to make it work, but no chance (Vocab objects can be loaded by pickle, but all dataset iterators also want to hold a Vocab object inside which can be done by using `build_vocab()` method in normal dataset reading process. If one loads external, cached vocabularies, you jump this step and can't feed these iterators with vocab objects, a.k.a. can't train due to missing Vocab objects in iterator).
-  - I will wait for torchtext to provide native support to vocabulary saving/loading.
-- I will spend some time on monitoring and optimizing my models/training flows for GPU memory optimization. In my laptop, I am bounded with 3GB GPU memory, and I cannot train big models (I have to say that I did not face such problems in Tensorflow for same model/dataset/parameter sets)
+- I created a README for the config.json. It can be found in newly created config folder.
+- Last night, I did some research, basic math (to calculate model size) and experiments about possible memory leaks to prevent CUDA OOM errors. Basically, I could not find any memory leak in normal memory and GPU memory. In conclusion, my model (for English) is too big to train in my own GPU. 
+  - Eventually, I did not want to play with model parameters to reduce the size, but I decided to reduce it by dataset level.
+  - I have not fixed any sentence length and used all words in my vocabularies (min_freq=1). In Turkish experiments, since the dataset is not big, I did not face any problems, its a total different story in English. 
+  - I am currently testing the fixed_length and min_freq parameters to control my model size. Until now, tests are going well. Depending on the results, I will put this two parameters into the config.json.
   
 ## Introduction
 
@@ -88,7 +89,7 @@ I try to keep every part of the project clean and easy to follow. Even though th
 - `./training/xyz_trainer.py` methods are the trainer functions for specified models.
 - `./utils/utils.py` contains both utility and common methods that are being used in several places in the project.
 - `./main.py` is the main code. To execute this project, one needs to provide a valid `config.json` file which contains the necessary configuration properties.
-- `./config.json` is the configuration file.  
+- `./config/config.json` is the configuration file.  
 
 ## How-to-run
 
@@ -102,7 +103,7 @@ I had to make some changes in the torchtext backend codes to be able to do sever
 
 ### Configuration JSON Format
 
-To be able to run the main code, you need to provide a valid JSON file which contains 4 main properties. These are `dataset_properties`, `model_properties`, `training_properties`, and `evaluation_properties` (Check config.json for detailed view, I think definitions are pretty straightforward).
+To be able to run the main code, you need to provide a valid JSON file which contains 4 main properties. These are `dataset_properties`, `model_properties`, `training_properties`, and `evaluation_properties`:
 
 - `dataset_properties` contains dataset-related information such as path, embedding, batch information.
 - `model_properties` contains model-related parameters. Inside this property,
@@ -110,6 +111,8 @@ To be able to run the main code, you need to provide a valid JSON file which con
   - `model_name` (like text_cnn, char_cnn, etc.) contains model-specific properties.
 - `training_properties` contains training-related properties.
 - `evaluation_properties` contains evaluation-related properties.
+
+Details of the `config.json` can be found in "/config/README.md" folder.
 
 ### How to Run
 
@@ -160,6 +163,13 @@ Note: Epoch is set to 20 for all experiments, until further notice (last update:
 ## Previous Updates
 
 In this title, I will save the previous updates for me and the visitors to keep track.
+
+## 14-01-2019
+
+- After I find out vocabulary caching has bugs and could not fix it, I removed vocabulary caching functionality from code (both save/load parts). 
+  - Even though saving is not a problem, to be able to load a Vocab object, one needs to do too much workaround. I wasted my 6 hours to make it work, but no chance (Vocab objects can be loaded by pickle, but all dataset iterators also want to hold a Vocab object inside which can be done by using `build_vocab()` method in normal dataset reading process. If one loads external, cached vocabularies, you jump this step and can't feed these iterators with vocab objects, a.k.a. can't train due to missing Vocab objects in iterator).
+  - I will wait for torchtext to provide native support to vocabulary saving/loading.
+- I will spend some time on monitoring and optimizing my models/training flows for GPU memory optimization. In my laptop, I am bounded with 3GB GPU memory, and I cannot train big models (I have to say that I did not face such problems in Tensorflow for same model/dataset/parameter sets)
 
 ### Update 13-01-2019
 
