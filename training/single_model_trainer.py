@@ -85,6 +85,10 @@ class SingleModelTrainer(object):
             best_vali_loss = checkpoint["best_vali_loss"]
             best_vali_acc_topk = checkpoint["best_vali_acc_topk"]
 
+        # Memory problems of PyTorch is giving me headaches...
+        del checkpoint
+        torch.cuda.empty_cache()
+
         print("Training...")
         for e in range(start_epoch, self.epoch + 1):
             total_loss, cross_entropy_loss, kl_loss, accuracy, accuracy_topk = self.train(model=model,
@@ -151,11 +155,6 @@ class SingleModelTrainer(object):
         step = 1
         model.train()
 
-        loss = None
-        accuracy = None
-        accuracy_topk = None
-        total_loss = None
-
         for batch in self.train_iter:
             if self.optimizer_type == "Noam":
                 optimizer.optimizer.zero_grad()
@@ -167,38 +166,47 @@ class SingleModelTrainer(object):
             batch_x = batch.sentence.to(self.device)
             batch_y = batch.category_labels.to(self.device)
 
-            predictions, kl_loss = model(batch_x)
+            try:
+                predictions, kl_loss = model(batch_x)
 
-            loss = criterion(predictions, batch_y)
-            accuracy = calculate_accuracy(predictions, batch_y)
-            accuracy_topk = calculate_topk_accuracy(predictions, batch_y, topk=self.topk)
+                loss = criterion(predictions, batch_y)
+                accuracy = calculate_accuracy(predictions, batch_y)
+                accuracy_topk = calculate_topk_accuracy(predictions, batch_y, topk=self.topk)
 
-            total_loss = loss + kl_loss / 10
+                total_loss = loss + kl_loss / 10
 
-            total_loss.backward()
+                total_loss.backward()
 
-            if 0.0 < self.norm_ratio:
-                nn.utils.clip_grad_norm_(model.parameters(), self.norm_ratio)
+                if 0.0 < self.norm_ratio:
+                    nn.utils.clip_grad_norm_(model.parameters(), self.norm_ratio)
 
-            if self.optimizer_type == "Noam":
-                optimizer.optimizer.step()
-            else:
-                optimizer.step()
+                if self.optimizer_type == "Noam":
+                    optimizer.optimizer.step()
+                else:
+                    optimizer.step()
 
-            if scheduler is not None and step % 500 == 0:
-                scheduler.step(step)
+                if scheduler is not None and step % 500 == 0:
+                    scheduler.step(step)
 
-            step += 1
+                step += 1
 
-            epoch_loss += loss.item()
-            epoch_kl_loss += kl_loss.item()
-            epoch_total_acc += accuracy
-            epoch_total_acc_topk += accuracy_topk[0].item()
+                epoch_loss += loss.item()
+                epoch_kl_loss += kl_loss.item()
+                epoch_total_acc += accuracy
+                epoch_total_acc_topk += accuracy_topk[0].item()
 
-            if step % self.print_every == 0:
-                self.print_step(step, loss, kl_loss, accuracy, accuracy_topk)
+                if step % self.print_every == 0:
+                    self.print_step(step, loss.item(), kl_loss.item(), accuracy, accuracy_topk[0].item())
 
-            torch.cuda.empty_cache()
+                torch.cuda.empty_cache()
+
+            except RuntimeError as e:
+                if 'out of memory' in str(e):
+                    print('| WARNING: ran out of memory, skipping batch', step)
+                    optimizer.zero_grad()
+                    torch.cuda.empty_cache()
+                else:
+                    raise e
 
         epoch_total_loss = epoch_loss + epoch_kl_loss
         return epoch_total_loss / len(self.train_iter), epoch_loss / len(self.train_iter), epoch_kl_loss / len(
@@ -212,10 +220,10 @@ class SingleModelTrainer(object):
               "Batch Accuracy Top-{} {:.4f}".format(step,
                                                     len(self.train_iter),
                                                     loss,
-                                                    kl_loss.item(),
+                                                    kl_loss,
                                                     accuracy,
                                                     self.topk[0],
-                                                    accuracy_topk[0].item()))
+                                                    accuracy_topk))
 
     def print_epoch(self, start, e, cross_entropy_loss, kl_loss, total_loss, accuracy, accuracy_topk):
         print("{} - "

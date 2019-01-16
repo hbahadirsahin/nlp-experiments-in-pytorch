@@ -7,7 +7,9 @@
     "vector_cache": "./data/fasttext",
     "pretrained_embedding_path": "./data/fasttext/wiki.en",
     "checkpoint_path": "",
-    "oov_embedding_type": "zeros"
+    "oov_embedding_type": "zeros",
+    "fixed_length": 50,
+    "min_freq": 5
   },
   "model_properties": {
     "common_model_properties": {
@@ -117,7 +119,7 @@
   },
   "training_properties": {
     "learner": "text_cnn",
-    "optimizer": "Padam",
+    "optimizer": "SGD",
     "learning_rate": 0.01,
     "scheduler_type": "cos",
     "amsgrad": true,

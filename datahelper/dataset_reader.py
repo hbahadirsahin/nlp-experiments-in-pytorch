@@ -11,8 +11,10 @@ SEED = 1234
 
 
 class DatasetLoader(object):
-    def __init__(self, data_path, vector, level="word", unk_init=None, preprocessor=None, vector_cache=None):
+    def __init__(self, data_path, vector, fix_length=0, min_freq=0, level="word", unk_init=None, preprocessor=None,
+                 vector_cache=None):
         assert data_path is not None and vector is not None
+
         self.data_path = data_path
         self.vector = vector
         self.preprocessor = preprocessor
@@ -30,6 +32,13 @@ class DatasetLoader(object):
         self.val_iter = None
         self.test_iter = None
 
+        self.min_freq = min_freq
+        self.fix_length = fix_length
+        if min_freq <= 0:
+            self.min_freq = 1
+        if fix_length <= 0:
+            self.fix_length = None
+
     '''
         This method is for character-level stuff.
         Since, torchtext do not let me do preprocess before tokenization in its normal flow (it always applies tokenization
@@ -44,10 +53,10 @@ class DatasetLoader(object):
         tokenized_sentence = list(preprocessed_sentence)
         return tokenized_sentence
 
-    def create_fields(self, seq_input=True, seq_ner=True, seq_cat=False, fix_length=50):
+    def create_fields(self, seq_input=True, seq_ner=True, seq_cat=False):
         if self.level == "word":
             sentence_field = data.Field(sequential=seq_input, preprocessing=self.preprocessor, pad_first=True,
-                                        fix_length=fix_length)
+                                        fix_length=self.fix_length)
         elif self.level == "char":
             sentence_field = data.Field(sequential=seq_input, tokenize=self.evil_workaround_tokenizer, fix_length=1014)
             # sentence_field = data.NestedField(nested_field)
@@ -93,10 +102,10 @@ class DatasetLoader(object):
     def create_splits(dataset, split_ratio):
         return dataset.split(split_ratio=split_ratio, random_state=random.seed(SEED))
 
-    def create_vocabs(self, train, sentence_field, category_label_field, min_freq=5):
+    def create_vocabs(self, train, sentence_field, category_label_field):
         if self.level == "word":
             sentence_field.build_vocab(train, vectors=self.vector, vectors_cache=self.vector_cache,
-                                       unk_init=self.unk_init, min_freq=min_freq)
+                                       unk_init=self.unk_init, min_freq=self.min_freq)
         else:
             sentence_field.build_vocab(train)
         category_label_field.build_vocab(train)

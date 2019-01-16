@@ -95,6 +95,8 @@ if __name__ == '__main__':
 
     oov_embedding_type = dataset_properties["oov_embedding_type"]
     batch_size = dataset_properties["batch_size"]
+    min_freq = dataset_properties["min_freq"]
+    fix_length = dataset_properties["fixed_length"]
 
     embedding_vector = dataset_properties["embedding_vector"]
 
