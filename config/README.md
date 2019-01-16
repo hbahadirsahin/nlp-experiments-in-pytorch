@@ -15,7 +15,7 @@ decay rate, and so on.
 
 ### Dataset Properties
 
-There are 8 properties under this `dataset_properties`:
+There are 10 properties under this `dataset_properties`:
 
 - `data_path`: The original dataset file path (The current version of the code splits a full dataset to train/validation/test sets. But does not allow you to use an already splitted version).
 - `stop_word_path`: The stop word file path.
