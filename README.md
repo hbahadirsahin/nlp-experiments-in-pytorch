@@ -1,12 +1,13 @@
 # README 
 
-## 15-01-2019
+## 16-01-2019
 
-- I created a README for the config.json. It can be found in newly created config folder.
-- Last night, I did some research, basic math (to calculate model size) and experiments about possible memory leaks to prevent CUDA OOM errors. Basically, I could not find any memory leak in normal memory and GPU memory. In conclusion, my model (for English) is too big to train in my own GPU. 
-  - Eventually, I did not want to play with model parameters to reduce the size, but I decided to reduce it by dataset level.
-  - I have not fixed any sentence length and used all words in my vocabularies (min_freq=1). In Turkish experiments, since the dataset is not big, I did not face any problems, its a total different story in English. 
-  - I am currently testing the fixed_length and min_freq parameters to control my model size. Until now, tests are going well. Depending on the results, I will put this two parameters into the config.json.
+- I added two new properties to `config.json/dataset_properties` (min_freq and fixed_length) to reduce memory consumption. You are still able to use dynamic input size and assign every seen word in your vocabulary if you have enough memory. Check `config/README.md` for detailed information.
+- Sadly, I encountered the worst problem in PyTorch related to CUDA OOM error, which is model reloading increases the memory consumption =/ In short, I could start a training process (English dataset/non-static/zeroes oov/text_cnn) and it iterated for 2 epochs without any problem (stable memory consumption with 1.5GB of free GPU memory). Then, I saved the model to continue the process later. However, after I loaded the model, the code directly raised CUDA OOM error. I tried to apply things that I've read in PyTorch's forums; however, those so called fixes did not help me. Things that I've found and tried:
+  - I tried to delete the checkpoint reference after model loading (https://discuss.pytorch.org/t/gpu-memory-usage-increases-by-90-after-torch-load/9213)
+  - I tried to catch OOM error and free some memory after it (https://discuss.pytorch.org/t/how-to-clean-gpu-memory-after-a-runtimeerror/28781/2?u=ptrblck)
+- In conclusion, if you have a spare computer that can do your training until the end, I am %100 sure that this repository does not have memory leak. As long as your input and model sizes are reasonable, it will train. However, if you do not have such a luxury, I can't do anything about it. But if you have any suggestions, I'd be really happy to listen/apply =) 
+
   
 ## Introduction
 
@@ -163,6 +164,14 @@ Note: Epoch is set to 20 for all experiments, until further notice (last update:
 ## Previous Updates
 
 In this title, I will save the previous updates for me and the visitors to keep track.
+
+### 15-01-2019
+
+- I created a README for the config.json. It can be found in newly created config folder.
+- Last night, I did some research, basic math (to calculate model size) and experiments about possible memory leaks to prevent CUDA OOM errors. Basically, I could not find any memory leak in normal memory and GPU memory. In conclusion, my model (for English) is too big to train in my own GPU. 
+  - Eventually, I did not want to play with model parameters to reduce the size, but I decided to reduce it by dataset level.
+  - I have not fixed any sentence length and used all words in my vocabularies (min_freq=1). In Turkish experiments, since the dataset is not big, I did not face any problems, its a total different story in English. 
+  - I am currently testing the fixed_length and min_freq parameters to control my model size. Until now, tests are going well. Depending on the results, I will put this two parameters into the config.json.
 
 ## 14-01-2019
 
