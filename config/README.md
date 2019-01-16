@@ -25,6 +25,8 @@ There are 8 properties under this `dataset_properties`:
 - `checkpoint_path`: The path for saved model file that you want to continue your training.
 - `oov_embedding_type`: The property to define how to handle out-of-vocabulary word embeddings. It takes a string and can be "zeros", "ones", "random", "uniform" or "fasttext_oov".
 - `batch_size`: Self-explanatory.
+- `fixed_length`: Integer parameter to define the maximum length of an input string (lets say for a sentence, it limits the number of words). For values lower than or equal to 0, the dataset loader uses dynamic input size. It is for reducing the memory consumption.
+- `min_freq`: Integer parameter to define the minimum frequency condition on words to be appear in vocabulary. For values lower than or equal to 0, the dataset loader will assign every seen word (min_freq=1) in vocabulary. It is for reducing the memory consumption.
 
 ### Training Properties
 
