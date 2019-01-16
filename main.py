@@ -135,6 +135,8 @@ if __name__ == '__main__':
                                       level=level,
                                       vector_cache=vector_cache,
                                       unk_init=unkembedding.create_oov_embedding,
+                                      min_freq=min_freq,
+                                      fix_length=fix_length
                                       )
 
         print("Loading train, validation and test sets")
