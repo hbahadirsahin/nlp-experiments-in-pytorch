@@ -5,7 +5,7 @@
 - Finally, I got another test score (it took 1 month to finish 20 epoch in a workstation-strong CPU =)). 
 - Currently, I have no more development and/or fix update. 
 - Instead, I am trying to find a solution for my resource bottleneck. In last 3 days, I was struggling to understand Google Cloud and its compute engine for my mental goodness. After 3 painful, soul-crashing days (GPU quota problem, GPU quota ticket problem, ssh problem, python problem, library problem, pip problem, fucking no module "xyz" is found problem), I could start a training in a machine with Tesla V100 (every poor human being's dream card).
-  - Hopefully, by opening lots of new google accounts (to leverage initial $300 credit), I will be able to get my test results faster.  
+  - Hopefully, by opening lots of new google accounts (to leverage initial $300 credit, until my unique credit cards diminish), I will be able to get several test results faster.  
   
 ## Introduction
 
