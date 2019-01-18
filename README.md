@@ -1,13 +1,11 @@
 # README 
 
-## 16-01-2019
+## 19-01-2019
 
-- I added two new properties to `config.json/dataset_properties` (min_freq and fixed_length) to reduce memory consumption. You are still able to use dynamic input size and assign every seen word in your vocabulary if you have enough memory. Check `config/README.md` for detailed information.
-- Sadly, I encountered the worst problem in PyTorch related to CUDA OOM error, which is model reloading increases the memory consumption =/ In short, I could start a training process (English dataset/non-static/zeroes oov/text_cnn) and it iterated for 2 epochs without any problem (stable memory consumption with 1.5GB of free GPU memory). Then, I saved the model to continue the process later. However, after I loaded the model, the code directly raised CUDA OOM error. I tried to apply things that I've read in PyTorch's forums; however, those so called fixes did not help me. Things that I've found and tried:
-  - I tried to delete the checkpoint reference after model loading (https://discuss.pytorch.org/t/gpu-memory-usage-increases-by-90-after-torch-load/9213)
-  - I tried to catch OOM error and free some memory after it (https://discuss.pytorch.org/t/how-to-clean-gpu-memory-after-a-runtimeerror/28781/2?u=ptrblck)
-- In conclusion, if you have a spare computer that can do your training until the end, I am %100 sure that this repository does not have memory leak. As long as your input and model sizes are reasonable, it will train. However, if you do not have such a luxury, I can't do anything about it. But if you have any suggestions, I'd be really happy to listen/apply =) 
-
+- Finally, I got another test score (it took 1 month to finish 20 epoch in a workstation-strong CPU =)). 
+- Currently, I have no more development and/or fix update. 
+- Instead, I am trying to find a solution for my resource bottleneck. In last 3 days, I was struggling to understand Google Cloud and its compute engine for my mental goodness. After 3 painful, soul-crashing days (GPU quota problem, GPU quota ticket problem, ssh problem, python problem, library problem, pip problem, fucking no module "xyz" is found problem), I could start a training in a machine with Tesla V100 (every poor human being's dream card).
+  - Hopefully, by opening lots of new google accounts (to leverage initial $300 credit), I will be able to get my test results faster.  
   
 ## Introduction
 
@@ -164,6 +162,14 @@ Note: Epoch is set to 20 for all experiments, until further notice (last update:
 ## Previous Updates
 
 In this title, I will save the previous updates for me and the visitors to keep track.
+
+## 16-01-2019
+
+- I added two new properties to `config.json/dataset_properties` (min_freq and fixed_length) to reduce memory consumption. You are still able to use dynamic input size and assign every seen word in your vocabulary if you have enough memory. Check `config/README.md` for detailed information.
+- Sadly, I encountered the worst problem in PyTorch related to CUDA OOM error, which is model reloading increases the memory consumption =/ In short, I could start a training process (English dataset/non-static/zeroes oov/text_cnn) and it iterated for 2 epochs without any problem (stable memory consumption with 1.5GB of free GPU memory). Then, I saved the model to continue the process later. However, after I loaded the model, the code directly raised CUDA OOM error. I tried to apply things that I've read in PyTorch's forums; however, those so called fixes did not help me. Things that I've found and tried:
+  - I tried to delete the checkpoint reference after model loading (https://discuss.pytorch.org/t/gpu-memory-usage-increases-by-90-after-torch-load/9213)
+  - I tried to catch OOM error and free some memory after it (https://discuss.pytorch.org/t/how-to-clean-gpu-memory-after-a-runtimeerror/28781/2?u=ptrblck)
+- In conclusion, if you have a spare computer that can do your training until the end, I am %100 sure that this repository does not have memory leak. As long as your input and model sizes are reasonable, it will train. However, if you do not have such a luxury, I can't do anything about it. But if you have any suggestions, I'd be really happy to listen/apply =) 
 
 ### 15-01-2019
 
