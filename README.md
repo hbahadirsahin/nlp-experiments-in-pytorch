@@ -1,11 +1,12 @@
 # README 
 
-## 19-01-2019
+## 20-01-2019
 
-- Finally, I got another test score (it took 1 month to finish 20 epoch in a workstation-strong CPU =)). 
-- Currently, I have no development and/or fix update. 
-- Instead, I am trying to find a solution for my resource bottleneck. In last 3 days, I was struggling to understand Google Cloud and its compute engine for my mental goodness. After 3 painful, soul-crashing days (GPU quota problem, GPU quota ticket problem, ssh problem, python problem, library problem, pip problem, fucking no module "xyz" is found problem), I could start a training in a machine with Tesla V100 (every poor human being's dream card).
-  - Hopefully, by opening lots of new google accounts (to leverage initial $300 credit, until my unique credit cards diminish), I will be able to get several test results faster.  
+- Thanks to Tesla V100, I got the latest experiment results in 20 hours (yay!). 
+- I find out that "Padam" optimizer works flawless w.r.t. usual Adam. It is more robust through each step and have not encountered any weird, numerical problems (which I've seen a lot while using Adam). So, if you are reading this and forking/copy-pasting this library to train your own models, I strongly suggest you to use Padam as your optimizer.
+- I do not have any development/fix updates. 
+  - However, I am working on CRF and plug-in/out CRF-Layer codes (Did I mention I hate CRF?).
+  - Also, replacing "print()" oriented logs with "logging" library.
   
 ## Introduction
 
@@ -67,7 +68,7 @@ the Local Reparameterization Trick](https://arxiv.org/pdf/1506.02557.pdf)~~
   - [ ] ELMO (pretrained Turkish/English embeddings)
   - [ ] BERT (pretrained Turkish/English embeddings)
 - [ ] Document length categorization/NER support (Conv-Deconv CNN implementation supports document-length tasks, but more support will come with ELMO and BERT update).
-     
+
 ## Project Skeleton
 
 I try to keep every part of the project clean and easy to follow. Even though the folders are self explanatory for me, let me explain them for those who may have hard time to understand.
@@ -163,7 +164,14 @@ Note: Epoch is set to 20 for all experiments, until further notice (last update:
 
 In this title, I will save the previous updates for me and the visitors to keep track.
 
-## 16-01-2019
+### 19-01-2019
+
+- Finally, I got another test score (it took 1 month to finish 20 epoch in a workstation-strong CPU =)). 
+- Currently, I have no development and/or fix update. 
+- Instead, I am trying to find a solution for my resource bottleneck. In last 3 days, I was struggling to understand Google Cloud and its compute engine for my mental goodness. After 3 painful, soul-crashing days (GPU quota problem, GPU quota ticket problem, ssh problem, python problem, library problem, pip problem, fucking no module "xyz" is found problem), I could start a training in a machine with Tesla V100 (every poor human being's dream card).
+  - Hopefully, by opening lots of new google accounts (to leverage initial $300 credit, until my unique credit cards diminish), I will be able to get several test results faster.  
+
+### 16-01-2019
 
 - I added two new properties to `config.json/dataset_properties` (min_freq and fixed_length) to reduce memory consumption. You are still able to use dynamic input size and assign every seen word in your vocabulary if you have enough memory. Check `config/README.md` for detailed information.
 - Sadly, I encountered the worst problem in PyTorch related to CUDA OOM error, which is model reloading increases the memory consumption =/ In short, I could start a training process (English dataset/non-static/zeroes oov/text_cnn) and it iterated for 2 epochs without any problem (stable memory consumption with 1.5GB of free GPU memory). Then, I saved the model to continue the process later. However, after I loaded the model, the code directly raised CUDA OOM error. I tried to apply things that I've read in PyTorch's forums; however, those so called fixes did not help me. Things that I've found and tried:
