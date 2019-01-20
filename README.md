@@ -187,7 +187,7 @@ In this title, I will save the previous updates for me and the visitors to keep 
   - I have not fixed any sentence length and used all words in my vocabularies (min_freq=1). In Turkish experiments, since the dataset is not big, I did not face any problems, its a total different story in English. 
   - I am currently testing the fixed_length and min_freq parameters to control my model size. Until now, tests are going well. Depending on the results, I will put this two parameters into the config.json.
 
-## 14-01-2019
+### 14-01-2019
 
 - After I find out vocabulary caching has bugs and could not fix it, I removed vocabulary caching functionality from code (both save/load parts). 
   - Even though saving is not a problem, to be able to load a Vocab object, one needs to do too much workaround. I wasted my 6 hours to make it work, but no chance (Vocab objects can be loaded by pickle, but all dataset iterators also want to hold a Vocab object inside which can be done by using `build_vocab()` method in normal dataset reading process. If one loads external, cached vocabularies, you jump this step and can't feed these iterators with vocab objects, a.k.a. can't train due to missing Vocab objects in iterator).
