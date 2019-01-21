@@ -1,13 +1,12 @@
 # README 
 
-## 16-01-2019
+## 20-01-2019
 
-- I added two new properties to `config.json/dataset_properties` (min_freq and fixed_length) to reduce memory consumption. You are still able to use dynamic input size and assign every seen word in your vocabulary if you have enough memory. Check `config/README.md` for detailed information.
-- Sadly, I encountered the worst problem in PyTorch related to CUDA OOM error, which is model reloading increases the memory consumption =/ In short, I could start a training process (English dataset/non-static/zeroes oov/text_cnn) and it iterated for 2 epochs without any problem (stable memory consumption with 1.5GB of free GPU memory). Then, I saved the model to continue the process later. However, after I loaded the model, the code directly raised CUDA OOM error. I tried to apply things that I've read in PyTorch's forums; however, those so called fixes did not help me. Things that I've found and tried:
-  - I tried to delete the checkpoint reference after model loading (https://discuss.pytorch.org/t/gpu-memory-usage-increases-by-90-after-torch-load/9213)
-  - I tried to catch OOM error and free some memory after it (https://discuss.pytorch.org/t/how-to-clean-gpu-memory-after-a-runtimeerror/28781/2?u=ptrblck)
-- In conclusion, if you have a spare computer that can do your training until the end, I am %100 sure that this repository does not have memory leak. As long as your input and model sizes are reasonable, it will train. However, if you do not have such a luxury, I can't do anything about it. But if you have any suggestions, I'd be really happy to listen/apply =) 
-
+- Thanks to Tesla V100, I got the latest experiment results in 20 hours (yay!). 
+- I find out that "Padam" optimizer works flawless w.r.t. usual Adam. It is more robust through each step and have not encountered any weird, numerical problems (which I've seen a lot while using Adam). So, if you are reading this and forking/copy-pasting this library to train your own models, I strongly suggest you to use Padam as your optimizer.
+- I do not have any development/fix updates. 
+  - However, I am working on CRF and plug-in/out CRF-Layer codes (Did I mention I hate CRF?).
+  - Also, replacing "print()" oriented logs with "logging" library.
   
 ## Introduction
 
@@ -30,12 +29,12 @@ Before diving into details, the python and library versions are as follows:
 ## Code Details
 
 - As the other Tensorflow-based repository, I will use the dataset that me and my old colleagues constructed 3 years ago. "English/Turkish Wikipedia Named-Entity Recognition and Text Categorization Dataset" is publicly available: https://data.mendeley.com/datasets/cdcztymf4k/1
-- Initial commit introduces basic Text CNN (from 2014 paper). More models will be added.
+- Text CNN, CharCNN, VDCNN, Conv-Deconv CNN, basic LSTM/GRU and Transformer (Google version) models are currently available to train and evaluate in the repository. More models will be added. 
 - Fasttext embeddings are used (by default but it can be changed). Eventually, one can use Torchtext to download the "pre-defined" embedding files. However, since Turkish embeddings were not included in, I manually edit the Torchtext backend codes (please check the "changes in the torchtext.txt" file). Also note that, everytime you update Torchtext, you need to re-add those changes again.
 - Embeddings (whether random or pretrained) can be "static", "nonstatic", or "multichannel".
 - For OOV words, OOVEmbeddingCreator is developed (under datahelper/embedding_helper). There are 5 different basic approaches defined to generate OOV embeddings: (1) zeros vector, (2) ones vector, (3) random vector (between 0, 1), (4) (r1, r2) ranged uniformly random vector, (5) Fasttext CharNgram-based vectors.
 - Even though I am focusing on Turkish versions of the dataset, I believe "Preprocessor" can work for English dataset, too. In future, I may add more language specific methods. 
-- Due to laziness, I defined all my necessary arguments/configs/properties in "main.py". However, I also implemented argparse versions of the same properties but it may lack recent updated properties (Sorry for hard-coded paths). 
+- Main code loads properties from config.json (inside config folder). 
 - I tested all training, evaluation, model/vocabulary saving/loading aspects of the code for several epochs without any problem (except out of memory errors =)).
 
 ## To-do 
@@ -69,7 +68,7 @@ the Local Reparameterization Trick](https://arxiv.org/pdf/1506.02557.pdf)~~
   - [ ] ELMO (pretrained Turkish/English embeddings)
   - [ ] BERT (pretrained Turkish/English embeddings)
 - [ ] Document length categorization/NER support (Conv-Deconv CNN implementation supports document-length tasks, but more support will come with ELMO and BERT update).
-     
+
 ## Project Skeleton
 
 I try to keep every part of the project clean and easy to follow. Even though the folders are self explanatory for me, let me explain them for those who may have hard time to understand.
@@ -153,8 +152,8 @@ Note: Epoch is set to 20 for all experiments, until further notice (last update:
 |Turkish|49| Fasttext | Fasttext | static	| 43.8025  | 68.8641 |
 |Turkish|49| Fasttext | Fasttext | nonstatic	| 60.4009  | 82.7879 |
 |English|25| Fasttext | zeros | static	| 56.2290 | 83.2425 |
-|English|25| Fasttext | zeros | nonstatic	| NaN (TBA) | NaN (TBA) |
-|English|25| Fasttext | Fasttext | static	|  NaN (Training)  | NaN (Training) |
+|English|25| Fasttext | zeros | nonstatic	| 64.2642 | 89.2115 |
+|English|25| Fasttext | Fasttext | static	| 56.5313 | 83.9873 |
 |English|25| Fasttext | Fasttext | nonstatic	| NaN (TBA)  | NaN (TBA) |
 |English|49| Fasttext | zeros | static	| NaN (TBA)  | NaN (TBA) |
 |English|49| Fasttext | zeros | nonstatic	| NaN (TBA)  | NaN (TBA) |
@@ -165,6 +164,21 @@ Note: Epoch is set to 20 for all experiments, until further notice (last update:
 
 In this title, I will save the previous updates for me and the visitors to keep track.
 
+### 19-01-2019
+
+- Finally, I got another test score (it took 1 month to finish 20 epoch in a workstation-strong CPU =)). 
+- Currently, I have no development and/or fix update. 
+- Instead, I am trying to find a solution for my resource bottleneck. In last 3 days, I was struggling to understand Google Cloud and its compute engine for my mental goodness. After 3 painful, soul-crashing days (GPU quota problem, GPU quota ticket problem, ssh problem, python problem, library problem, pip problem, fucking no module "xyz" is found problem), I could start a training in a machine with Tesla V100 (every poor human being's dream card).
+  - Hopefully, by opening lots of new google accounts (to leverage initial $300 credit, until my unique credit cards diminish), I will be able to get several test results faster.  
+
+### 16-01-2019
+
+- I added two new properties to `config.json/dataset_properties` (min_freq and fixed_length) to reduce memory consumption. You are still able to use dynamic input size and assign every seen word in your vocabulary if you have enough memory. Check `config/README.md` for detailed information.
+- Sadly, I encountered the worst problem in PyTorch related to CUDA OOM error, which is model reloading increases the memory consumption =/ In short, I could start a training process (English dataset/non-static/zeroes oov/text_cnn) and it iterated for 2 epochs without any problem (stable memory consumption with 1.5GB of free GPU memory). Then, I saved the model to continue the process later. However, after I loaded the model, the code directly raised CUDA OOM error. I tried to apply things that I've read in PyTorch's forums; however, those so called fixes did not help me. Things that I've found and tried:
+  - I tried to delete the checkpoint reference after model loading (https://discuss.pytorch.org/t/gpu-memory-usage-increases-by-90-after-torch-load/9213)
+  - I tried to catch OOM error and free some memory after it (https://discuss.pytorch.org/t/how-to-clean-gpu-memory-after-a-runtimeerror/28781/2?u=ptrblck)
+- In conclusion, if you have a spare computer that can do your training until the end, I am %100 sure that this repository does not have memory leak. As long as your input and model sizes are reasonable, it will train. However, if you do not have such a luxury, I can't do anything about it. But if you have any suggestions, I'd be really happy to listen/apply =) 
+
 ### 15-01-2019
 
 - I created a README for the config.json. It can be found in newly created config folder.
@@ -173,7 +187,7 @@ In this title, I will save the previous updates for me and the visitors to keep 
   - I have not fixed any sentence length and used all words in my vocabularies (min_freq=1). In Turkish experiments, since the dataset is not big, I did not face any problems, its a total different story in English. 
   - I am currently testing the fixed_length and min_freq parameters to control my model size. Until now, tests are going well. Depending on the results, I will put this two parameters into the config.json.
 
-## 14-01-2019
+### 14-01-2019
 
 - After I find out vocabulary caching has bugs and could not fix it, I removed vocabulary caching functionality from code (both save/load parts). 
   - Even though saving is not a problem, to be able to load a Vocab object, one needs to do too much workaround. I wasted my 6 hours to make it work, but no chance (Vocab objects can be loaded by pickle, but all dataset iterators also want to hold a Vocab object inside which can be done by using `build_vocab()` method in normal dataset reading process. If one loads external, cached vocabularies, you jump this step and can't feed these iterators with vocab objects, a.k.a. can't train due to missing Vocab objects in iterator).
