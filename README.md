@@ -1,12 +1,10 @@
 # README 
 
-## 20-01-2019
+## 21-01-2019
 
-- Thanks to Tesla V100, I got the latest experiment results in 20 hours (yay!). 
-- I find out that "Padam" optimizer works flawless w.r.t. usual Adam. It is more robust through each step and have not encountered any weird, numerical problems (which I've seen a lot while using Adam). So, if you are reading this and forking/copy-pasting this library to train your own models, I strongly suggest you to use Padam as your optimizer.
-- I do not have any development/fix updates. 
-  - However, I am working on CRF and plug-in/out CRF-Layer codes (Did I mention I hate CRF?).
-  - Also, replacing "print()" oriented logs with "logging" library.
+- All print-oriented logs are converted to logging library-based loggers.
+- `/config/config.logger` file is added as a logger configuration file.
+
   
 ## Introduction
 
@@ -163,6 +161,14 @@ Note: Epoch is set to 20 for all experiments, until further notice (last update:
 ## Previous Updates
 
 In this title, I will save the previous updates for me and the visitors to keep track.
+
+### 20-01-2019
+
+- Thanks to Tesla V100, I got the latest experiment results in 20 hours (yay!). 
+- I find out that "Padam" optimizer works flawless w.r.t. usual Adam. It is more robust through each step and have not encountered any weird, numerical problems (which I've seen a lot while using Adam). So, if you are reading this and forking/copy-pasting this library to train your own models, I strongly suggest you to use Padam as your optimizer.
+- I do not have any development/fix updates. 
+  - However, I am working on CRF and plug-in/out CRF-Layer codes (Did I mention I hate CRF?).
+  - Also, replacing "print()" oriented logs with "logging" library.
 
 ### 19-01-2019
 
