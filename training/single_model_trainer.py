@@ -1,3 +1,4 @@
+import logging.config
 import os
 import time
 
@@ -9,6 +10,9 @@ from custom_optimizer import OpenAIAdam, NoamOptimizer, Padam
 from evaluation.evaluator import Evaluator
 from models.GRU import GRU
 from utils.utils import time_since, calculate_accuracy, calculate_topk_accuracy, save_best_model
+
+logging.config.fileConfig(fname='./config/config.logger', disable_existing_loggers=False)
+logger = logging.getLogger("Trainer")
 
 
 class SingleModelTrainer(object):
@@ -38,7 +42,7 @@ class SingleModelTrainer(object):
         self.dev_evaluator, self.test_evaluator = Evaluator().evaluator_factory("single_model_evaluator", self.device)
 
     def init_optimizer(self, model):
-        print("Optimizer type is {} !".format(self.optimizer_type))
+        logger.info("Optimizer type is %s!", self.optimizer_type)
 
         if self.optimizer_type == "Adam":
             return optim.Adam(model.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)
@@ -89,7 +93,7 @@ class SingleModelTrainer(object):
         del checkpoint
         torch.cuda.empty_cache()
 
-        print("Training...")
+        logger.info("Training...")
         for e in range(start_epoch, self.epoch + 1):
             total_loss, cross_entropy_loss, kl_loss, accuracy, accuracy_topk = self.train(model=model,
                                                                                           optimizer=optimizer,
@@ -155,6 +159,11 @@ class SingleModelTrainer(object):
         step = 1
         model.train()
 
+        loss = None
+        total_loss = None
+        accuracy = None
+        accuracy_topk = None
+
         for batch in self.train_iter:
             if self.optimizer_type == "Noam":
                 optimizer.optimizer.zero_grad()
@@ -164,7 +173,7 @@ class SingleModelTrainer(object):
                 model.hidden = model.init_hidden()
 
             batch_x = batch.sentence.to(self.device)
-            batch_y = batch.category_labels.to(self.device)
+            batch_y = batch.category_labels.to(self.device, non_blocking=True)
 
             try:
                 predictions, kl_loss = model(batch_x)
@@ -202,7 +211,7 @@ class SingleModelTrainer(object):
 
             except RuntimeError as e:
                 if 'out of memory' in str(e):
-                    print('| WARNING: ran out of memory, skipping batch', step)
+                    logger.warning('Ran out of memory, skipping batch %d', step)
                     optimizer.zero_grad()
                     torch.cuda.empty_cache()
                 else:
@@ -213,52 +222,51 @@ class SingleModelTrainer(object):
             self.train_iter), epoch_total_acc / len(self.train_iter), epoch_total_acc_topk / len(self.train_iter)
 
     def print_step(self, step, loss, kl_loss, accuracy, accuracy_topk):
-        print("Batch {}/{} - "
-              "Batch Loss: {:.4f} - "
-              "Batch KL Loss: {:.4f} - "
-              "Batch Accuracy: {:.4f} - "
-              "Batch Accuracy Top-{} {:.4f}".format(step,
-                                                    len(self.train_iter),
-                                                    loss,
-                                                    kl_loss,
-                                                    accuracy,
-                                                    self.topk[0],
-                                                    accuracy_topk))
+        logger.info("Batch {}/{} - "
+                    "Batch Loss: {:.4f} - "
+                    "Batch KL Loss: {:.4f} - "
+                    "Batch Accuracy: {:.4f} - "
+                    "Batch Accuracy Top-{} {:.4f}".format(step,
+                                                          len(self.train_iter),
+                                                          loss,
+                                                          kl_loss,
+                                                          accuracy,
+                                                          self.topk[0],
+                                                          accuracy_topk))
 
     def print_epoch(self, start, e, cross_entropy_loss, kl_loss, total_loss, accuracy, accuracy_topk):
-        print("{} - "
-              "Epoch {}/{} - "
-              "Cross Entropy Loss: {:.4f} - "
-              "KL Loss: {:.4f} - "
-              "Loss: {:.4f} - "
-              "Accuracy: {:.4f} - "
-              "Accuracy Top-{}: {:.4f}".format(time_since(start, e / self.epoch),
-                                               e,
-                                               self.epoch,
-                                               cross_entropy_loss,
-                                               kl_loss,
-                                               total_loss,
-                                               accuracy,
-                                               self.topk[0],
-                                               accuracy_topk))
+        logger.info("{} - "
+                    "Epoch {}/{} - "
+                    "Cross Entropy Loss: {:.4f} - "
+                    "KL Loss: {:.4f} - "
+                    "Loss: {:.4f} - "
+                    "Accuracy: {:.4f} - "
+                    "Accuracy Top-{}: {:.4f}".format(time_since(start, e / self.epoch),
+                                                     e,
+                                                     self.epoch,
+                                                     cross_entropy_loss,
+                                                     kl_loss,
+                                                     total_loss,
+                                                     accuracy,
+                                                     self.topk[0],
+                                                     accuracy_topk))
 
     def print_validation(self, vali_loss, best_vali_loss, vali_accuracy, best_vali_acc, vali_accuracy_topk,
                          best_vali_acc_topk):
-        print(
-            "Validation Loss: {:.4f} (Best: {:.4f}) - "
-            "Validation Accuracy: {:.4f} (Best: {:.4f}) - "
-            "Validation Accuracy Top-{}: {:.4f} (Best: {:.4f})".format(vali_loss,
-                                                                       best_vali_loss,
-                                                                       vali_accuracy,
-                                                                       best_vali_acc,
-                                                                       self.topk[0],
-                                                                       vali_accuracy_topk,
-                                                                       best_vali_acc_topk))
+        logger.info("Validation Loss: {:.4f} (Best: {:.4f}) - "
+                    "Validation Accuracy: {:.4f} (Best: {:.4f}) - "
+                    "Validation Accuracy Top-{}: {:.4f} (Best: {:.4f})".format(vali_loss,
+                                                                               best_vali_loss,
+                                                                               vali_accuracy,
+                                                                               best_vali_acc,
+                                                                               self.topk[0],
+                                                                               vali_accuracy_topk,
+                                                                               best_vali_acc_topk))
 
     def print_test(self, test_loss, test_accuracy, test_accuracy_topk):
-        print("Test Loss: {:.4f} - "
-              "Test Accuracy: {:.4f} - "
-              "Test Accuracy Top-{}: {:.4f}".format(test_loss,
-                                                    test_accuracy,
-                                                    self.topk[0],
-                                                    test_accuracy_topk))
+        logger.info("Test Loss: {:.4f} - "
+                    "Test Accuracy: {:.4f} - "
+                    "Test Accuracy Top-{}: {:.4f}".format(test_loss,
+                                                          test_accuracy,
+                                                          self.topk[0],
+                                                          test_accuracy_topk))

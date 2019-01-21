@@ -1,7 +1,11 @@
+import logging.config
+
 import torch
 
 from utils.utils import calculate_accuracy, calculate_topk_accuracy, load_best_model
 
+logging.config.fileConfig(fname='./config/config.logger', disable_existing_loggers=False)
+logger = logging.getLogger("Evaluator")
 
 class SingleModelEvaluator(object):
     def __init__(self, device, is_vali):
@@ -14,10 +18,10 @@ class SingleModelEvaluator(object):
         total_acc_topk = 0
 
         if not self.is_vali:
-            print("Test mode!")
+            logger.info("Test mode!")
             model = load_best_model(save_path)
         else:
-            print("Validation mode!")
+            logger.info("Validation mode!")
         model.eval()
 
         with torch.no_grad():

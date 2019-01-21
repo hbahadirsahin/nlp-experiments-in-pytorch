@@ -1,9 +1,14 @@
+import logging.config
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
 from Util_CNN import KMaxPooling, LayerBlock, ConvolutionEncoder, DeconvolutionDecoder, FullyConnectedClassifier
 from dropout_models.dropout import Dropout
+
+logging.config.fileConfig(fname='./config/config.logger', disable_existing_loggers=False)
+logger = logging.getLogger("CNN")
 
 
 class TextCnn(nn.Module):
@@ -69,21 +74,21 @@ class TextCnn(nn.Module):
 
         # Batch Normalization initialization
         if self.use_batch_norm:
-            print("> Batch Normalization")
+            logger.info("> Batch Normalization")
             self.initialize_batch_normalization(num_flatten_feature)
 
         # Dropout initialization
         if self.dropout_type == "bernoulli" or self.dropout_type == "gaussian":
-            print("> Dropout - ", self.dropout_type)
+            logger.info("> Dropout - %s", self.dropout_type)
             self.dropout = Dropout(keep_prob=keep_prob, dimension=None, dropout_type=self.dropout_type).dropout
         elif self.dropout_type == "variational":
-            print("> Dropout - ", self.dropout_type)
+            logger.info("> Dropout - %s", self.dropout_type)
             self.dropout_before_flatten = Dropout(keep_prob=0.2, dimension=num_flatten_feature,
                                                   dropout_type=self.dropout_type).dropout
             self.dropout_fc1 = Dropout(keep_prob=keep_prob, dimension=num_flatten_feature // 2,
                                        dropout_type=self.dropout_type).dropout
         else:
-            print("> Dropout - Bernoulli (You provide undefined dropout type!)")
+            logger.info("> Dropout - Bernoulli (You provide undefined dropout type!)")
             self.dropout = Dropout(keep_prob=keep_prob, dimension=None, dropout_type="bernoulli").dropout
 
         # Fully Connected Layer 1 initialization
@@ -97,7 +102,7 @@ class TextCnn(nn.Module):
                              bias=True)
 
     def initialize_embeddings(self):
-        print("> Embeddings")
+        logger.info("> Embeddings")
         embed = nn.Embedding(num_embeddings=self.embed_num,
                              embedding_dim=self.embed_dim,
                              padding_idx=self.padding_id)
@@ -110,22 +115,22 @@ class TextCnn(nn.Module):
                                         padding_idx=self.padding_id)
 
         if self.use_pretrained_embed:
-            print("> Pre-trained Embeddings")
+            logger.info("> Pre-trained Embeddings")
             embed.from_pretrained(self.pretrained_weights)
             if self.embed_train_type == "multichannel":
                 embed_static.from_pretrained(self.pretrained_weights)
         else:
-            print("> Random Embeddings")
+            logger.info("> Random Embeddings")
             random_embedding_weights = torch.rand(self.embed_num, self.embed_dim)
             embed.from_pretrained(random_embedding_weights)
             if self.embed_train_type == "multichannel":
                 embed_static.from_pretrained(random_embedding_weights)
 
         if self.embed_train_type == "static":
-            print("> Static Embeddings")
+            logger.info("> Static Embeddings")
             embed.weight.requires_grad = False
         elif self.embed_train_type == "nonstatic":
-            print("> Non-Static Embeddings")
+            logger.info("> Non-Static Embeddings")
             embed.weight.requires_grad = True
         elif self.embed_train_type == "multichannel":
             embed.weight.requires_grad = True
@@ -136,7 +141,7 @@ class TextCnn(nn.Module):
 
     def initialize_conv_layer(self):
         if self.use_padded_conv:
-            print("> Padded convolution")
+            logger.info("> Padded convolution")
             return nn.ModuleList([nn.Conv2d(in_channels=self.input_channel,
                                             out_channels=self.filter_count,
                                             kernel_size=(filter_size, self.embed_dim),
@@ -144,7 +149,7 @@ class TextCnn(nn.Module):
                                             padding=(filter_size // 2, 0),
                                             bias=True) for filter_size in self.filter_sizes])
         else:
-            print("> Without-pad convolution")
+            logger.info("> Without-pad convolution")
             return nn.ModuleList([nn.Conv2d(in_channels=self.input_channel,
                                             out_channels=self.filter_count,
                                             kernel_size=(filter_size, self.embed_dim),
@@ -304,14 +309,14 @@ class CharCNN(nn.Module):
     def initialize_dropout(self, num_features):
         # Dropout initialization
         if self.dropout_type == "bernoulli" or self.dropout_type == "gaussian":
-            print("> Dropout - ", self.dropout_type)
+            logger.info("> Dropout - %s", self.dropout_type)
             self.dropout = Dropout(keep_prob=self.keep_prob, dimension=None, dropout_type=self.dropout_type).dropout
         elif self.dropout_type == "variational":
-            print("> Dropout - ", self.dropout_type)
+            logger.info("> Dropout - %s", self.dropout_type)
             self.dropout = Dropout(keep_prob=self.keep_prob, dimension=num_features,
                                    dropout_type=self.dropout_type).dropout
         else:
-            print("> Dropout - Bernoulli (You provide undefined dropout type!)")
+            logger.info("> Dropout - Bernoulli (You provide undefined dropout type!)")
             self.dropout = Dropout(keep_prob=self.keep_prob, dimension=None, dropout_type="bernoulli").dropout
 
     def forward(self, batch):
@@ -528,7 +533,7 @@ class ConvDeconvCNN():
         # Initialize embeddings
         self.embedding = nn.Embedding(self.vocab_size, self.embed_dim, padding_idx=self.padding_id).cpu()
         if self.use_pretrained_embed:
-            print("> Pre-trained Embeddings")
+            logger.info("> Pre-trained Embeddings")
             self.embedding.from_pretrained(self.pretrained_weights)
 
         self.encoder = ConvolutionEncoder(args, self.embedding)

@@ -1,7 +1,11 @@
+import logging.config
+
 import torch
 
 from utils.utils import calculate_accuracy, calculate_topk_accuracy, load_best_model
 
+logging.config.fileConfig(fname='./config/config.logger', disable_existing_loggers=False)
+logger = logging.getLogger("Evaluator")
 
 class MultipleModelEvaluator(object):
     def __init__(self, device, is_vali):
@@ -15,12 +19,12 @@ class MultipleModelEvaluator(object):
         total_acc_topk = 0
 
         if not self.is_vali:
-            print("Test mode!")
+            logger.info("Test mode!")
             encoder = load_best_model(save_path, filename="saved_best_encoder")
             decoder = load_best_model(save_path, filename="saved_best_decoder")
             classifier = load_best_model(save_path, filename="saved_best_classifier")
         else:
-            print("Validation mode!")
+            logger.info("Validation mode!")
 
         encoder.eval()
         decoder.eval()

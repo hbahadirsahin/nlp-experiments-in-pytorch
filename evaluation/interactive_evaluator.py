@@ -1,3 +1,5 @@
+import logging.config
+
 import pkg_resources
 
 try:
@@ -13,6 +15,9 @@ import torch
 import torch.nn.functional as F
 
 from utils.utils import load_best_model, load_vocabulary
+
+logging.config.fileConfig(fname='./config/config.logger', disable_existing_loggers=False)
+logger = logging.getLogger("Evaluator")
 
 
 class InteractiveEvaluator(object):
@@ -32,7 +37,7 @@ class InteractiveEvaluator(object):
                 try:
                     sentence = input("Enter a test sentence (Type q or quit to exit!):")
                 except ValueError:
-                    print("Invalid input. Try again! (Type q or quit to exit!)")
+                    logger.error("Invalid input. Try again! (Type q or quit to exit!)")
                     continue
 
                 if sentence.lower() != "q" and sentence.lower() != "quit":
@@ -72,17 +77,17 @@ class InteractiveEvaluator(object):
                         predicted_labels.append(category_vocab.itos[idx])
 
                     if topk == 1:
-                        print("Predicted category is {} with probability {}".format(predicted_labels[0],
-                                                                                    predicted_category_probs[0][
-                                                                                        0].item()))
+                        logger.info("Predicted category is {} with probability {}".format(predicted_labels[0],
+                                                                                          predicted_category_probs[0][
+                                                                                              0].item()))
                     else:
-                        print("Top-{} predicted labels are as follows in order:".format(topk))
+                        logger.info("Top-{} predicted labels are as follows in order:".format(topk))
                         for idx, label in enumerate(predicted_labels):
-                            print("> {} - Predicted category is {} with probability {:.4f}".format(idx + 1,
-                                                                                                   label,
-                                                                                                   predicted_category_probs[
-                                                                                                       0][
-                                                                                                       idx].item()))
+                            logger.info("> {} - Predicted category is {} with probability {:.4f}".format(idx + 1,
+                                                                                                         label,
+                                                                                                         predicted_category_probs[
+                                                                                                             0][
+                                                                                                             idx].item()))
                 else:
-                    print("Interactive evaluation ends!")
+                    logger.info("Interactive evaluation ends!")
                     break

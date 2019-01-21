@@ -1,6 +1,10 @@
+import logging.config
+
 import torch
 from gensim.models import FastText
 
+logging.config.fileConfig(fname='./config/config.logger', disable_existing_loggers=False)
+logger = logging.getLogger("Embedding Helper")
 
 class OOVEmbeddingCreator(object):
     def __init__(self, type="zeros", range=(-0.25, 0.25), fasttext_model_path="None"):
@@ -10,11 +14,11 @@ class OOVEmbeddingCreator(object):
         self.fasttext_model_path = fasttext_model_path
         self.random_emb = None
         self.uniform_emb = None
-        print("> OOV Embedding mode:", self.type)
+        logger.info("> OOV Embedding mode: %s", self.type)
         if self.type == "fasttext_oov":
             assert self.fasttext_model_path is not None
-            print(">> Fasttext model will be loaded and embeddings for OOV words will be calculated by using it!")
-            print(">> Beware that the process may take a while due to this process!")
+            logger.info(">> Fasttext model will be loaded and embeddings for OOV words will be calculated by using it!")
+            logger.info(">> Beware that the process may take a while due to this process!")
             self.model = FastText.load_fasttext_format(self.fasttext_model_path)
 
     def create_oov_embedding(self, vector, word=None):

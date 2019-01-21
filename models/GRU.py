@@ -1,9 +1,14 @@
+import logging.config
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
 
 from dropout_models.dropout import Dropout
+
+logging.config.fileConfig(fname='./config/config.logger', disable_existing_loggers=False)
+logger = logging.getLogger("GRU")
 
 
 class GRU(nn.Module):
@@ -70,36 +75,36 @@ class GRU(nn.Module):
             return Variable(torch.zeros((1, self.batch_size, self.hidden_dim)))
 
     def initialize_embeddings(self):
-        print("> Embeddings")
+        logger.info("> Embeddings")
         embed = nn.Embedding(num_embeddings=self.embed_num,
                              embedding_dim=self.embed_dim,
                              padding_idx=self.padding_id).cpu()
         if self.use_pretrained_embed:
-            print("> Pre-trained Embeddings")
+            logger.info("> Pre-trained Embeddings")
             embed.from_pretrained(self.pretrained_weights)
         else:
-            print("> Random Embeddings")
+            logger.info("> Random Embeddings")
             random_embedding_weights = torch.rand(self.embed_num, self.embed_dim)
             embed.from_pretrained(random_embedding_weights)
 
         if self.embed_train_type == "static":
-            print("> Static Embeddings")
+            logger.info("> Static Embeddings")
             embed.weight.requires_grad = False
         elif self.embed_train_type == "nonstatic":
-            print("> Non-Static Embeddings")
+            logger.info("> Non-Static Embeddings")
             embed.weight.requires_grad = True
         return embed
 
     def initialize_dropout(self):
         if self.dropout_type == "bernoulli" or self.dropout_type == "gaussian":
-            print("> Dropout - ", self.dropout_type)
+            logger.info("> Dropout - %s", self.dropout_type)
             return Dropout(keep_prob=self.keep_prob, dimension=None, dropout_type=self.dropout_type).dropout
         elif self.dropout_type == "variational":
-            print("> Dropout - ", self.dropout_type)
+            logger.info("> Dropout - %s", self.dropout_type)
             return Dropout(keep_prob=self.keep_prob, dimension=self.hidden_dim,
                            dropout_type=self.dropout_type).dropout
         else:
-            print("> Dropout - Bernoulli (You provide undefined dropout type!)")
+            logger.info("> Dropout - Bernoulli (You provide undefined dropout type!)")
             return Dropout(keep_prob=self.keep_prob, dimension=None, dropout_type="bernoulli").dropout
 
     def forward(self, batch):

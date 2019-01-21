@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+import logging.config
 import random
 
 from torchtext import data
@@ -9,6 +10,8 @@ from embedding_helper import OOVEmbeddingCreator
 
 SEED = 1234
 
+logging.config.fileConfig(fname='./config/config.logger', disable_existing_loggers=False)
+logger = logging.getLogger("Dataset Loader")
 
 class DatasetLoader(object):
     def __init__(self, data_path, vector, fix_length=0, min_freq=0, level="word", unk_init=None, preprocessor=None,
@@ -75,13 +78,13 @@ class DatasetLoader(object):
                                       fields=[("category_labels", clf),
                                               ("ner_labels", None),
                                               ("sentence", sf)])
-        print("Splitting dataset into train/dev/test")
+        logger.info("Splitting dataset into train/dev/test")
         train, val, test = self.create_splits(dataset, split_ratio)
-        print("Splitting done!")
-        print("Creating vocabulary")
+        logger.info("Splitting done!")
+        logger.info("Creating vocabulary")
         self.create_vocabs(train, sf, clf)
-        print("Vocabulary created!")
-        print("Creating iterators")
+        logger.info("Vocabulary created!")
+        logger.info("Creating iterators")
         self.create_iterator(train, val, test, batch_size)
         return train, val, test
 

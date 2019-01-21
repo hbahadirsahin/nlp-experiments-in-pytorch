@@ -1,7 +1,11 @@
+import logging.config
+
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
 
+logging.config.fileConfig(fname='./config/config.logger', disable_existing_loggers=False)
+logger = logging.getLogger("Dropout")
 
 class VariationalDropout(nn.Module):
     def __init__(self, prob, dimension=None):
@@ -13,8 +17,8 @@ class VariationalDropout(nn.Module):
         if prob <= 0.5:
             alpha = prob / (1 - prob)
         else:
-            print("Caution! With the current alpha value ({}), you may trapped in local optima!".format(prob))
-            print("It is suggested that probability value should be <= 0.5")
+            logger.warning("Caution! With the current alpha value ({}), you may trapped in local optima!".format(prob))
+            logger.warning("It is suggested that probability value should be <= 0.5")
             alpha = prob / (1 - 0.49)
         self.max_alpha = alpha
 
