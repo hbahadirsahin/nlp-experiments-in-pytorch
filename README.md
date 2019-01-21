@@ -21,7 +21,7 @@
   - [How to Run main.py](#how-to-run-main.py)
   - [Training from Scratch/Training from Checkpoint/Interactive Evaluation](#training-from-scratch/training-from-checkpoint/interactive-evaluation)
 - [Results](#results)
-  - [Test Results of 1-Layer CNN + FC (TextCNN)](#test-results-of-1-layer-cnn-+-fc-(textcNN))
+  - [Test Results of 1-Layer CNN + FC (TextCNN)](#test-results-of-1-layer-cnn-+-fc-(textcnn))
 - [Previous Updates](#previous-updates)
   - [January 2019](#january-2019)
 - [References for Code Development](#references-for-code-development)
