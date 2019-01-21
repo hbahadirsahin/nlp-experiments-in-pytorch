@@ -1,6 +1,6 @@
 # README 
 
-## 21-01-2019
+## Update 21-01-2019
 
 - All print-oriented logs are converted to logging library-based loggers.
 - `/config/config.logger` file is added as a logger configuration file.
