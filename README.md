@@ -18,10 +18,10 @@
 - [How-to-run](#how-to-run)
   - [Important Note Before Start](#important-note-before-start)
   - [Configuration JSON Format](#configuration-json-format)
-  - [How to Run main.py](#how-to-run-main.py)
-  - [Training from Scratch/Training from Checkpoint/Interactive Evaluation](#training-from-scratch/training-from-checkpoint/interactive-evaluation)
+  - [How to Run Main](#how-to-run-main)
+  - [Training from Scratch-Training from Checkpoint-Interactive Evaluation](#training-from-scratch-training-from-checkpoint-interactive-evaluation)
 - [Results](#results)
-  - [Test Results of 1-Layer CNN + FC (TextCNN)](#test-results-of-1-layer-cnn-+-fc-(textcnn))
+  - [Test Results for TextCNN](#test-results-for-textcnn)
 - [Previous Updates](#previous-updates)
   - [January 2019](#january-2019)
 - [References for Code Development](#references-for-code-development)
@@ -132,14 +132,14 @@ To be able to run the main code, you need to provide a valid JSON file which con
 
 Details of the `config.json` can be found in "/config/README.md" folder.
 
-### How to Run main.py
+### How to Run Main
 
 If you make the necessary changes described in "changes in torchtext.txt" and prepare "config.json", you have two ways to run the code.
 
 - If you are using an IDE, copy/paste your "config.json" file's path as an argument and press run button.
 - If you are an old-school command window lover, type `python main.py --config /path/to/config.json`.
 
-### Training from Scratch/Training from Checkpoint/Interactive Evaluation
+### Training from Scratch-Training from Checkpoint-Interactive Evaluation
 
 You can train your model from 0th epoch until max_epoch, and/or continue your training from xth epoch to the end. You do not need to do anything extra for the first case; however, to be able to continue your training you need to make necessary changes in "config.json":
 
@@ -157,7 +157,7 @@ This section presents the Top-1 and Top-5 test accuracies for **text categorizat
 
 Note: Epoch is set to 20 for all experiments, until further notice (last update: 31-10-2018). However, if I believe that results may improve, I let the experiment run for 10 more epochs (at most 30 epoch per experiments). 
 
-### Test Results of 1-Layer CNN + FC (TextCNN)
+### Test Results for TextCNN
 
 | Language | # Of Categories | Pre-trained Embedding | OOV Embedding | Embedding Training | Top-1 Test Accuracy | Top-5 Test Accuracy |   
 |----------|:-----------------------------:|-----------------------|---------------|--------------------|:-------------------:|:-------------------:|
