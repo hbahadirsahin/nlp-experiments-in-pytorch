@@ -4,6 +4,9 @@
 
 - All print-oriented logs are converted to logging library-based loggers.
 - `/config/config.logger` file is added as a logger configuration file.
+- README.md changes
+  - Table of contents added.
+  - Format changes (title revisions, section replacements, etc.).
 
 # Table Of Contents
 
@@ -179,7 +182,7 @@ Note: Epoch is set to 20 for all experiments, until further notice (last update:
 
 In this title, I will save the previous updates for me and the visitors to keep track.
 
-### Januray 2019
+### January 2019
 
 #### 20-01-2019
 
