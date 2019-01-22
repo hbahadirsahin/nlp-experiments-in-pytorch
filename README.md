@@ -176,7 +176,7 @@ Note: Epoch is set to 20 for all experiments, until further notice (last update:
 |English|49| Fasttext | zeros | static	| NaN (TBA)  | NaN (TBA) |
 |English|49| Fasttext | zeros | nonstatic	| NaN (TBA)  | NaN (TBA) |
 |English|49| Fasttext | Fasttext | static	| NaN (TBA)  | NaN (TBA) |
-|English|49| Fasttext | Fasttext | nonstatic	| NaN (TBA)  | NaN (TBA) |
+|English|49| Fasttext | Fasttext | nonstatic	| 55.3833  | 80.4958 |
 
 ## Previous Updates
 
