@@ -157,6 +157,8 @@ This section presents the Top-1 and Top-5 test accuracies for **text categorizat
 
 Note: Epoch is set to 20 for all experiments, until further notice (last update: 31-10-2018). However, if I believe that results may improve, I let the experiment run for 10 more epochs (at most 30 epoch per experiments). 
 
+Note 2 (**Update: 22-01-2019**): Most of the English-language experiments are executed in Google Cloud (by using 300$ initial credit). Since, I want to finish as many experiments as possible, I cannot increase the max_epoch from 20 to 30. In this experiments, I've seen that validation loss and accuracies were improving in every epoch until the 20th and I am pretty sure they can increase much more. Unfortunately, I chose number of experiments instead of best results in this trade-off. 
+
 ### Test Results for TextCNN
 
 | Language | # Of Categories | Pre-trained Embedding | OOV Embedding | Embedding Training | Top-1 Test Accuracy | Top-5 Test Accuracy |   
