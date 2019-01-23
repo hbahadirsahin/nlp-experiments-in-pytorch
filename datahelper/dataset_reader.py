@@ -14,7 +14,8 @@ logging.config.fileConfig(fname='./config/config.logger', disable_existing_logge
 logger = logging.getLogger("Dataset Loader")
 
 class DatasetLoader(object):
-    def __init__(self, data_path, vector, fix_length=0, min_freq=0, level="word", unk_init=None, preprocessor=None,
+    def __init__(self, data_path, vector, task, fix_length=0, min_freq=0, level="word", unk_init=None,
+                 preprocessor=None,
                  vector_cache=None):
         assert data_path is not None and vector is not None
 
@@ -24,6 +25,7 @@ class DatasetLoader(object):
         self.vector_cache = vector_cache
         self.unk_init = unk_init
         self.level = level
+        self.task = task
 
         self.sentence_vocab = None
         self.category_vocab = None
@@ -72,50 +74,54 @@ class DatasetLoader(object):
 
     def read_dataset(self, batch_size=128, split_ratio=0.7, format="tsv"):
         sf, nlf, clf = self.create_fields()
-        dataset = data.TabularDataset(path=self.data_path,
-                                      format=format,
-                                      skip_header=True,
-                                      fields=[("category_labels", clf),
-                                              ("ner_labels", None),
-                                              ("sentence", sf)])
+        if self.task == "classification":
+            dataset = data.TabularDataset(path=self.data_path,
+                                          format=format,
+                                          skip_header=True,
+                                          fields=[("category_labels", clf),
+                                                  ("ner_labels", None),
+                                                  ("sentence", sf)])
+        elif self.task == "ner":
+            dataset = data.TabularDataset(path=self.data_path,
+                                          format=format,
+                                          skip_header=True,
+                                          fields=[("category_labels", None),
+                                                  ("ner_labels", nlf),
+                                                  ("sentence", sf)])
+        else:
+            raise ValueError("Training task is not defined! It can be 'classification' or 'ner'")
+
         logger.info("Splitting dataset into train/dev/test")
         train, val, test = self.create_splits(dataset, split_ratio)
         logger.info("Splitting done!")
         logger.info("Creating vocabulary")
-        self.create_vocabs(train, sf, clf)
+        self.create_vocabs(train, sf, clf, nlf)
         logger.info("Vocabulary created!")
         logger.info("Creating iterators")
         self.create_iterator(train, val, test, batch_size)
         return train, val, test
 
-    def read_dataset_for_test(self, batch_size=128, format="tsv"):
-        sf, _, clf = self.create_fields()
-        test_dataset = data.TabularDataset(path=self.data_path,
-                                           format=format,
-                                           skip_header=True,
-                                           fields=[("category_labels", clf),
-                                                   ("ner_labels", None),
-                                                   ("sentence", sf)])
-        return data.BucketIterator.splits(datasets=test_dataset,
-                                          batch_size=batch_size,
-                                          sort_key=lambda x: len(x.sentence),
-                                          repeat=False)
-
     @staticmethod
     def create_splits(dataset, split_ratio):
         return dataset.split(split_ratio=split_ratio, random_state=random.seed(SEED))
 
-    def create_vocabs(self, train, sentence_field, category_label_field):
+    def create_vocabs(self, train, sentence_field, category_label_field, ner_label_field):
         if self.level == "word":
             sentence_field.build_vocab(train, vectors=self.vector, vectors_cache=self.vector_cache,
                                        unk_init=self.unk_init, min_freq=self.min_freq)
         else:
             sentence_field.build_vocab(train)
-        category_label_field.build_vocab(train)
 
         self.sentence_vocab = sentence_field.vocab
-        self.category_vocab = category_label_field.vocab
         self.sentence_vocab_vectors = sentence_field.vocab.vectors
+
+        if self.task == "classification":
+            category_label_field.build_vocab(train)
+            self.category_vocab = category_label_field.vocab
+        else:
+            ner_label_field.build_vocab(train)
+            self.ner_vocab = ner_label_field.build_vocab
+
 
     def create_iterator(self, train, val, test, batch_size):
         self.train_iter, self.val_iter, self.test_iter = data.BucketIterator.splits(datasets=(train, val, test),

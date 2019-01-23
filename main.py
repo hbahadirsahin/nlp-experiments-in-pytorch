@@ -8,6 +8,7 @@ import os
 
 import torch
 
+from crf.CRF import ConditionalRandomField
 from datahelper.dataset_reader import DatasetLoader
 from datahelper.embedding_helper import OOVEmbeddingCreator
 from datahelper.preprocessor import Preprocessor
@@ -58,6 +59,8 @@ def initialize_model_and_trainer(model_properties, training_properties, datasetl
         model = TransformerGoogle(model_properties).model.to(device)
         trainer = Trainer.trainer_factory("single_model_trainer", training_properties, datasetloader.train_iter,
                                           datasetloader.val_iter, datasetloader.test_iter, device)
+    elif training_properties["learner"] == "crf":
+        model = ConditionalRandomField().to(device)
     else:
         raise ValueError("Model is not defined! Available learner values are : 'text_cnn', 'char_cnn', 'vdcnn', 'gru', "
                          "'lstm', 'conv_deconv_cnn' and 'transformer_google'")
@@ -83,6 +86,8 @@ if __name__ == '__main__':
     assert model_properties["common_model_properties"]["run_mode"] == "train" or \
            model_properties["common_model_properties"]["run_mode"] == "eval_interactive"
 
+    assert training_properties["task"] == "classification" or training_properties["task"] == "ner"
+
     logger.info("Initial device is %s", device)
     if "cuda" == device:
         torch.backends.cudnn.benchmark = True
@@ -103,6 +108,8 @@ if __name__ == '__main__':
 
     embedding_vector = dataset_properties["embedding_vector"]
 
+    training_task = training_properties["task"]
+
     save_dir = os.path.abspath(os.path.join(os.curdir, "saved", datetime.datetime.today().strftime('%Y-%m-%d')))
     save_dir_vocab = os.path.abspath(os.path.join(os.curdir, "saved", "vocab"))
     if not os.path.isdir(save_dir):
@@ -120,7 +127,7 @@ if __name__ == '__main__':
         level = "char"
         is_char_level = True
 
-        logger.info("Initialize Preprocessor")
+    logger.info("Initialize Preprocessor")
     preprocessor = Preprocessor(stop_word_path,
                                 is_remove_digit=True,
                                 is_remove_punctuations=False,
@@ -147,6 +154,7 @@ if __name__ == '__main__':
         logger.info("Loading vocabularies")
         sentence_vocab = datasetloader.sentence_vocab
         category_vocab = datasetloader.category_vocab
+        ner_vocab = datasetloader.ner_vocab
         logger.info("Loading embeddings")
         pretrained_embeddings = datasetloader.sentence_vocab_vectors
         logger.info("Updating properties")
@@ -162,7 +170,11 @@ if __name__ == '__main__':
             model_properties["common_model_properties"]["vocab_size"] = pretrained_embeddings.size()[0]
             model_properties["common_model_properties"]["embed_dim"] = pretrained_embeddings.size()[1]
 
-        model_properties["common_model_properties"]["num_class"] = len(category_vocab)
+        if category_vocab is not None:
+            model_properties["common_model_properties"]["num_class"] = len(category_vocab)
+        if ner_vocab is not None:
+            model_properties["common_model_properties"]["num_tags"] = len(ner_vocab)
+
         model_properties["common_model_properties"]["vocab"] = sentence_vocab
         model_properties["common_model_properties"]["padding_id"] = sentence_vocab.stoi["<pad>"]
         model_properties["common_model_properties"]["pretrained_weights"] = pretrained_embeddings
@@ -170,7 +182,10 @@ if __name__ == '__main__':
 
         logger.info("Saving vocabulary files")
         save_vocabulary(sentence_vocab, os.path.abspath(os.path.join(save_dir_vocab, "sentence_vocab.dat")))
-        save_vocabulary(category_vocab, os.path.abspath(os.path.join(save_dir_vocab, "category_vocab.dat")))
+        if category_vocab is not None:
+            save_vocabulary(category_vocab, os.path.abspath(os.path.join(save_dir_vocab, "category_vocab.dat")))
+        if ner_vocab is not None:
+            save_vocabulary(ner_vocab, os.path.abspath(os.path.join(save_dir_vocab, "ner_vocab.dat")))
 
         logger.info("Initialize model and trainer")
         model, trainer = initialize_model_and_trainer(model_properties, training_properties, datasetloader, device)

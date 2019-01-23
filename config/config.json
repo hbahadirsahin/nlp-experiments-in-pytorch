@@ -1,11 +1,11 @@
 {
   "dataset_properties": {
-    "data_path": "./data/EWNERTC_TC_Coarse Grained NER_No_NoiseReduction.DUMP",
+    "data_path": "./data/turkish_test.DUMP",
     "batch_size": 32,
-    "stop_word_path": "D:/Anaconda3/nltk_data/corpora/stopwords/english",
-    "embedding_vector": "fasttext.en.300d",
+    "stop_word_path": "D:/Anaconda3/nltk_data/corpora/stopwords/turkish",
+    "embedding_vector": "fasttext.tr.300d",
     "vector_cache": "./data/fasttext",
-    "pretrained_embedding_path": "./data/fasttext/wiki.en",
+    "pretrained_embedding_path": "./data/fasttext/wiki.tr",
     "checkpoint_path": "",
     "oov_embedding_type": "zeros",
     "fixed_length": 50,
@@ -15,7 +15,7 @@
     "common_model_properties": {
       "run_mode": "train",
       "use_pretrained_embed": true,
-      "embed_train_type": "nonstatic",
+      "embed_train_type": "static",
       "use_batch_norm": true,
       "batch_norm_momentum": 0.1,
       "batch_norm_affine": false
@@ -118,9 +118,10 @@
     }
   },
   "training_properties": {
-    "learner": "text_cnn",
-    "optimizer": "SGD",
-    "learning_rate": 0.01,
+    "learner": "crf",
+    "task": "ner",
+    "optimizer": "Noam",
+    "learning_rate": 0.05,
     "scheduler_type": "cos",
     "amsgrad": true,
     "partial_adam": 0.25,

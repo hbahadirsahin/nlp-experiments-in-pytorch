@@ -5,103 +5,103 @@ from utils.utils import log_sum_exp
 
 
 class ConditionalRandomField(nn.Module):
-    def __init__(self, tag_size, start_tag_id, end_tag_id, use_start_end=True):
-        raise NotImplementedError()
+    def __init__(self, tag_size, start_id, end_id, pad_id, include_start_end_transitions=True,
+                 transition_constraints=None):
         super(ConditionalRandomField, self).__init__()
+
         self.tag_size = tag_size
-        self.use_start_end = use_start_end
-        self.start_tag_id = start_tag_id
-        self.end_tag_id = end_tag_id
+        self.start_id = start_id
+        self.end_id = end_id
+        self.pad_id = pad_id
 
-        # Matrix of transition parameters.
-        # Entry i,j is the score of  transitioning *to* i *from* j.
-        self.transitions = nn.Parameter(torch.Tensor(self.tagset_size, self.tagset_size))
+        # Matrix of transition parameters. Entry i,j is the score of transitioning *to* i *from* j
+        self.transition = nn.Parameter(torch.Tensor(tag_size, tag_size))
 
-        #
-        if use_start_end:
-            self.start_transitions = nn.Parameter(torch.Tensor(self.tag_size))
-            self.end_transitions = nn.Parameter(torch.Tensor(self.tag_size))
+        self.transition.data[start_id, :] = -10000.  # no transition to SOS
+        self.transition.data[:, end_id] = -10000.  # no transition from EOS except to PAD
+        self.transition.data[:, pad_id] = -10000.  # no transition from PAD except to PAD
+        self.transition.data[pad_id, :] = -10000.  # no transition to PAD except from EOS
+        self.transition.data[pad_id, end_id] = 0.
+        self.transition.data[pad_id, pad_id] = 0.
 
-        self.reset_parameters()
+        torch.nn.init.xavier_normal_(self.transitions)
 
-    def reset_parameters(self):
-        nn.init.xavier_normal_(self.transitions)
-        if self.use_start_end:
-            nn.init.xavier_normal_(self.start_transitions)
-            nn.init.xavier_normal_(self.end_transitions)
+    def _forward(self, x, mask):
+        # initialize forward variables in log space
+        batch_size, seq_length = x.size()
 
-    def denominator_log_likelihood(self, inputs, mask):
-        batch_size, seq_len, tag_size = inputs.size()
+        # Size of init_alphas = [Batch_size, Tag_size]
+        alpha = torch.full((batch_size, self.tag_size), -10000.)
+        alpha[:, self.start_id] = 0.
 
-        mask = mask.float().transpose(0, 1)
-        inputs = inputs.transpose(0, 1)
+        # Size of transition_scores = [1, Tag_size, Tag_size]
+        transition_scores = self.transition.unsqueeze(0)
 
-        if self.use_start_end:
-            alpha = self.start_transitions.view(1, tag_size) + inputs[0]
-        else:
-            alpha = inputs[0]
+        for i in range(seq_length):
+            mask_broadcast = mask[:, i].unsqueeze(1)
 
-        for i in range(1, seq_len):
-            emition_scores = inputs[i].view(batch_size, 1, tag_size)
-            transition_scores = self.transitions.view(1, tag_size, tag_size)
-            forward_alphas = alpha.view(batch_size, tag_size, 1)
+            # Size of emition_scores = [Batch_size, Tag_Size, 1]
+            emition_scores = x[:, i].unsqueeze(2)
 
-            next_tag_var = forward_alphas + emition_scores + transition_scores
+            # Size of alpha_broadcast: [Batch_Size, Tag_Size, Tag_Size]
+            alpha_broadcast = log_sum_exp(alpha.unsqueeze(1) + emition_scores + transition_scores)
 
-            alpha = log_sum_exp(next_tag_var) * mask[i].view(batch_size, 1) + alpha * (1 - mask[i]).view(batch_size, 1)
+            # Size of alpha: [Batch_size, Tag_Size]
+            alpha = alpha_broadcast * mask_broadcast + alpha * (1 - mask_broadcast)
+        return log_sum_exp(alpha + self.transition[self.end_id])
 
-        if self.use_start_end:
-            stops = alpha + self.end_transitions.view(1, tag_size)
-        else:
-            stops = alpha
+    def _score(self, x, tags, mask):
+        batch_size, seq_length = x.size()
 
-        return log_sum_exp(stops)
+        score = torch.zeros(batch_size)
 
-    def numerator_log_likelihood(self, inputs, tags, mask):
-        batch_size, seq_len, tag_size = inputs.size()
+        x = x.unsqueeze(3)
+        trans = self.transition.unsqueeze(2)
 
-        mask = mask.float().transpose(0, 1)
-        inputs = inputs.transpose(0, 1)
-        tags = tags.transpose(0, 1)
+        for t in range(seq_length):  # recursion through the sequence
+            mask_broadcast = mask[:, t]
+            emition_scores = torch.cat([x[t, y[t + 1]] for x, y in zip(x, y)])
+            transition_scores = torch.cat([trans[y[t + 1], y[t]] for y in y])
+            score += (emition_scores + transition_scores) * mask_broadcast
 
-        if self.use_start_end:
-            score = self.start_transitions[self.start_tag_id]
-        else:
-            score = torch.zeros(1)
-
-        for i in range(seq_len - 1):
-            emition_score = inputs[i].gather(1, tags[i].view(batch_size, 1)).squeeze(1)
-            transition_score = self.transitions[tags[i].view(-1), tags[i + 1].view(-1)]
-            score = score + transition_score * mask[i + 1] + emition_score * mask[i]
-
-        last_tag_indices = mask.long().sum(0) - 1
-        last_tags = tags.gather(0, last_tag_indices.view(1, -1)).squeeze(0)
-
-        if self.use_start_end:
-            last_tag_to_end_tag_transition_score = self.end_transitions[last_tags]
-        else:
-            last_tag_to_end_tag_transition_score = torch.zeros(1)
-
-        last_inputs = inputs[-1]
-        last_emition_score = last_inputs.gather(1, last_tags.view(-1, 1)).squeeze()
-
-        score = score + last_tag_to_end_tag_transition_score + last_emition_score * mask[-1]
-
+        last_tag = tags.gather(1, mask.sum(1).long().unsqueeze(1)).squeeze(1)
+        score += self.transition[self.end_id, last_tag]
         return score
 
-    def forward(self, input, tags, mask=None, use_sum=False):
-        if mask is None:
-            mask = torch.ones(tags.size())
+    def forward(self, input, tags, mask):
+        forward_score = self._forward(input, mask)
+        gold_score = self._score(input, tags, mask)
+        return forward_score - gold_score
 
-        loglikelihood = self.denominator_log_likelihood(input, mask) - self.numerator_log_likelihood(input, tags, mask)
+    def _viterbi_decode(self, x, mask):
+        batch_size, seq_length = x.size()
 
-        if use_sum:
-            return torch.sum(loglikelihood)
-        else:
-            return loglikelihood
+        backpointers = torch.Tensor()
+        # Initialize the viterbi variables in log space
+        path_score = torch.full((batch_size, self.tag_size), -10000.)
+        path_score[:, self.start_id] = 0.
 
-    def viterbi_decode(self, inputs, mask):
-        batch_size, seq_length, tag_size = inputs.size()
+        for next_tag in range(seq_length):
+            mask_broadcast = mask[:, next_tag].unsqueeze(1)
+            path_score_broadcast = path_score + self.transition
+            path_score_broadcast, backpointers_broadcast = torch.max(path_score_broadcast, 2)
+            path_score_broadcast += x[:, next_tag]
+            path_score = path_score_broadcast * mask_broadcast + path_score * (1 - mask_broadcast)
+            backpointers = torch.cat((backpointers, backpointers_broadcast.unsqueeze(1)), 1)
 
-        scores = []
-        backpointers = []
+        path_score += self.transition[self.end_id]
+        best_path_scores, best_tag_ids = torch.max(path_score, 1)
+
+        backpointers = backpointers.tolist()
+        best_paths = [[tag_id] for tag_id in best_tag_ids.tolist()]
+
+        for batch in range(batch_size):
+            best_tag = best_tag_ids[batch]
+            idx = int(mask[batch].sum().item())
+            for bptr_t in reversed(backpointers[batch][:idx]):
+                best_tag = bptr_t[best_tag]
+                best_paths[batch].append(best_tag)
+            best_paths[batch].pop()
+            best_paths[batch].reverse()
+
+        return best_path_scores, best_paths
