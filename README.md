@@ -1,12 +1,8 @@
 # README 
 
-## Update 21-01-2019
+## Update 23-01-2019
 
-- All print-oriented logs are converted to logging library-based loggers.
-- `/config/config.logger` file is added as a logger configuration file.
-- README.md changes
-  - Table of contents added.
-  - Format changes (title revisions, section replacements, etc.).
+- 
 
 # Table Of Contents
 
@@ -185,6 +181,14 @@ Note 2 (**Update: 22-01-2019**): Most of the English-language experiments are ex
 In this title, I will save the previous updates for me and the visitors to keep track.
 
 ### January 2019
+
+#### 21-01-2019
+
+- All print-oriented logs are converted to logging library-based loggers.
+- `/config/config.logger` file is added as a logger configuration file.
+- README.md changes
+  - Table of contents added.
+  - Format changes (title revisions, section replacements, etc.).
 
 #### 20-01-2019
 
