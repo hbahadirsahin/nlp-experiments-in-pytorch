@@ -25,6 +25,7 @@ logger = logging.getLogger("Main")
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+
 def initialize_model_and_trainer(model_properties, training_properties, datasetloader, device):
     logger.info("Model type is %s", training_properties["learner"])
     if training_properties["learner"] == "text_cnn":
@@ -146,7 +147,8 @@ if __name__ == '__main__':
                                       vector_cache=vector_cache,
                                       unk_init=unkembedding.create_oov_embedding,
                                       min_freq=min_freq,
-                                      fix_length=fix_length
+                                      fix_length=fix_length,
+                                      task=training_task
                                       )
 
         logger.info("Loading train, validation and test sets")

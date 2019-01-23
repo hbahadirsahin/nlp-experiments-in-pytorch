@@ -68,7 +68,7 @@ class DatasetLoader(object):
         else:
             raise KeyError("Sentence_field is undefined!")
 
-        ner_label_field = data.Field(sequential=seq_ner)
+        ner_label_field = data.Field(sequential=seq_ner, init_token="<start>", eos_token="<end>", unk_token=None)
         category_label_field = data.LabelField(sequential=seq_cat)
         return sentence_field, ner_label_field, category_label_field
 
@@ -120,8 +120,7 @@ class DatasetLoader(object):
             self.category_vocab = category_label_field.vocab
         else:
             ner_label_field.build_vocab(train)
-            self.ner_vocab = ner_label_field.build_vocab
-
+            self.ner_vocab = ner_label_field.vocab
 
     def create_iterator(self, train, val, test, batch_size):
         self.train_iter, self.val_iter, self.test_iter = data.BucketIterator.splits(datasets=(train, val, test),
