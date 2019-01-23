@@ -1,20 +1,34 @@
 # README 
 
-## 20-01-2019
+## Update 23-01-2019
 
-- Thanks to Tesla V100, I got the latest experiment results in 20 hours (yay!). 
-- I find out that "Padam" optimizer works flawless w.r.t. usual Adam. It is more robust through each step and have not encountered any weird, numerical problems (which I've seen a lot while using Adam). So, if you are reading this and forking/copy-pasting this library to train your own models, I strongly suggest you to use Padam as your optimizer.
-- I do not have any development/fix updates. 
-  - However, I am working on CRF and plug-in/out CRF-Layer codes (Did I mention I hate CRF?).
-  - Also, replacing "print()" oriented logs with "logging" library.
-  
+- 
+
+# Table Of Contents
+
+- [Introduction](#introduction)
+- [Library Dependencies](#library-dependencies)
+- [Project Skeleton](#project-skeleton)
+- [Project Details](#project-details)
+- [To-do](#to-do)
+- [How-to-run](#how-to-run)
+  - [Important Note Before Start](#important-note-before-start)
+  - [Configuration JSON Format](#configuration-json-format)
+  - [How to Run Main](#how-to-run-main)
+  - [Training from Scratch-Training from Checkpoint-Interactive Evaluation](#training-from-scratch-training-from-checkpoint-interactive-evaluation)
+- [Results](#results)
+  - [Test Results for TextCNN](#test-results-for-textcnn)
+- [Previous Updates](#previous-updates)
+  - [January 2019](#january-2019)
+- [References for Code Development](#references-for-code-development)
+
 ## Introduction
 
 This is my personal, pet project which I apply machine learning and natural language processing stuffs by using PyTorch. I stopped working with Tensorflow after some hellish times that I could not do some basic extentions (such fasttext based oov embeddings, details are below). Also, Tensorflow's updates and functionality deprecation rate is annoying for me. 
 
 In this repository, I implement popular learning models and extend them with different minor adjustments (like variational dropouts). Even though it is really slow, I execute experiments by using these models on a dataset which me and my old colleagues in Huawei constructed (details are below, again) and try to announce experiment results.
 
-## Versions
+## Library Dependencies
 
 Before diving into details, the python and library versions are as follows: 
 
@@ -26,7 +40,29 @@ Before diving into details, the python and library versions are as follows:
 - spacy 2.0.16 (for interactive evaluation only)
 - gensim 3.6.0 (for fasttext embeddings, as well as OOV Embedding generation.)
 
-## Code Details
+## Project Skeleton
+
+I try to keep every part of the project clean and easy to follow. Even though the folders are self explanatory for me, let me explain them for those who may have hard time to understand.
+
+- `./crf/CRF.py` contains the conditional random field implementation (not finished yet). 
+- `./datahelper/dataset_reader.py` contains the "DatasetLoader" object that reads a text dataset, splits it into 3 subsets (train/vali/test), creates vocabulary and iterators. It is a little bit hard-coded for the dataset I am using now. However, it is easy to make changes to use it for your own dataset.
+- `./datahelper/embedding_helper.py` is a helper class to generate OOV word embeddings. To use Fasttext-based OOV embedding generation, it leverages Gensim!
+- `./datahelper/preprocessor.py` contains the "Preprocessor" object and actions to apply on sentences. 
+- `./dropout_models/gaussian_dropout.py` contains the Gaussian Dropout object. 
+- `./dropout_models/variational_dropout.py` contains the Variational Dropout object. 
+- `./dropout_models/dropout.py` contains the Dropout object which you can select your dropout type among Bernoulli (basic), Gaussian and Variational dropout types. 
+- `./evaluation/evaluator.py` is the factory for evaluation objects that are used in model trainings as well as interactive evaluation.
+- `./evaluation/xyz_evaluator.py` methods are the evaluator functions for specified models.
+- `./model/xyz.py` contains network objects.
+- `./model/Util_xyz.py` contains custom-defined objects that are used in `xyz`.
+- `./optimizer/custom_optimizer.py` contains custom-defined optimizer objects.
+- `./training/trainer.py` is a class that returns the necessary trainer for the user's selected learning model
+- `./training/xyz_trainer.py` methods are the trainer functions for specified models.
+- `./utils/utils.py` contains both utility and common methods that are being used in several places in the project.
+- `./main.py` is the main code. To execute this project, one needs to provide a valid `config.json` file which contains the necessary configuration properties.
+- `./config/config.json` is the configuration file.  
+
+## Project Details
 
 - As the other Tensorflow-based repository, I will use the dataset that me and my old colleagues constructed 3 years ago. "English/Turkish Wikipedia Named-Entity Recognition and Text Categorization Dataset" is publicly available: https://data.mendeley.com/datasets/cdcztymf4k/1
 - Text CNN, CharCNN, VDCNN, Conv-Deconv CNN, basic LSTM/GRU and Transformer (Google version) models are currently available to train and evaluate in the repository. More models will be added. 
@@ -69,28 +105,6 @@ the Local Reparameterization Trick](https://arxiv.org/pdf/1506.02557.pdf)~~
   - [ ] BERT (pretrained Turkish/English embeddings)
 - [ ] Document length categorization/NER support (Conv-Deconv CNN implementation supports document-length tasks, but more support will come with ELMO and BERT update).
 
-## Project Skeleton
-
-I try to keep every part of the project clean and easy to follow. Even though the folders are self explanatory for me, let me explain them for those who may have hard time to understand.
-
-- `./crf/CRF.py` contains the conditional random field implementation (not finished yet). 
-- `./datahelper/dataset_reader.py` contains the "DatasetLoader" object that reads a text dataset, splits it into 3 subsets (train/vali/test), creates vocabulary and iterators. It is a little bit hard-coded for the dataset I am using now. However, it is easy to make changes to use it for your own dataset.
-- `./datahelper/embedding_helper.py` is a helper class to generate OOV word embeddings. To use Fasttext-based OOV embedding generation, it leverages Gensim!
-- `./datahelper/preprocessor.py` contains the "Preprocessor" object and actions to apply on sentences. 
-- `./dropout_models/gaussian_dropout.py` contains the Gaussian Dropout object. 
-- `./dropout_models/variational_dropout.py` contains the Variational Dropout object. 
-- `./dropout_models/dropout.py` contains the Dropout object which you can select your dropout type among Bernoulli (basic), Gaussian and Variational dropout types. 
-- `./evaluation/evaluator.py` is the factory for evaluation objects that are used in model trainings as well as interactive evaluation.
-- `./evaluation/xyz_evaluator.py` methods are the evaluator functions for specified models.
-- `./model/xyz.py` contains network objects.
-- `./model/Util_xyz.py` contains custom-defined objects that are used in `xyz`.
-- `./optimizer/custom_optimizer.py` contains custom-defined optimizer objects.
-- `./training/trainer.py` is a class that returns the necessary trainer for the user's selected learning model
-- `./training/xyz_trainer.py` methods are the trainer functions for specified models.
-- `./utils/utils.py` contains both utility and common methods that are being used in several places in the project.
-- `./main.py` is the main code. To execute this project, one needs to provide a valid `config.json` file which contains the necessary configuration properties.
-- `./config/config.json` is the configuration file.  
-
 ## How-to-run
 
 ### Important Note Before Start
@@ -114,14 +128,14 @@ To be able to run the main code, you need to provide a valid JSON file which con
 
 Details of the `config.json` can be found in "/config/README.md" folder.
 
-### How to Run
+### How to Run Main
 
 If you make the necessary changes described in "changes in torchtext.txt" and prepare "config.json", you have two ways to run the code.
 
 - If you are using an IDE, copy/paste your "config.json" file's path as an argument and press run button.
 - If you are an old-school command window lover, type `python main.py --config /path/to/config.json`.
 
-### Training from Scratch/Training from Checkpoint/Interactive Evaluation
+### Training from Scratch-Training from Checkpoint-Interactive Evaluation
 
 You can train your model from 0th epoch until max_epoch, and/or continue your training from xth epoch to the end. You do not need to do anything extra for the first case; however, to be able to continue your training you need to make necessary changes in "config.json":
 
@@ -139,7 +153,9 @@ This section presents the Top-1 and Top-5 test accuracies for **text categorizat
 
 Note: Epoch is set to 20 for all experiments, until further notice (last update: 31-10-2018). However, if I believe that results may improve, I let the experiment run for 10 more epochs (at most 30 epoch per experiments). 
 
-### Test Results of 1-Layer CNN + FC (TextCNN)
+Note 2 (**Update: 22-01-2019**): Most of the English-language experiments are executed in Google Cloud (by using 300$ initial credit). Since, I want to finish as many experiments as possible, I cannot increase the max_epoch from 20 to 30. In this experiments, I saw that validation loss and accuracies were improving in every epoch until the 20th, and I am pretty sure models can improve further. Unfortunately, I chose the maximum number of experiment runs instead of best results for each experiment in this trade-off. 
+
+### Test Results for TextCNN
 
 | Language | # Of Categories | Pre-trained Embedding | OOV Embedding | Embedding Training | Top-1 Test Accuracy | Top-5 Test Accuracy |   
 |----------|:-----------------------------:|-----------------------|---------------|--------------------|:-------------------:|:-------------------:|
@@ -154,24 +170,42 @@ Note: Epoch is set to 20 for all experiments, until further notice (last update:
 |English|25| Fasttext | zeros | static	| 56.2290 | 83.2425 |
 |English|25| Fasttext | zeros | nonstatic	| 64.2642 | 89.2115 |
 |English|25| Fasttext | Fasttext | static	| 56.5313 | 83.9873 |
-|English|25| Fasttext | Fasttext | nonstatic	| NaN (TBA)  | NaN (TBA) |
+|English|25| Fasttext | Fasttext | nonstatic	| 65.9558 | 91.1536 |
 |English|49| Fasttext | zeros | static	| NaN (TBA)  | NaN (TBA) |
 |English|49| Fasttext | zeros | nonstatic	| NaN (TBA)  | NaN (TBA) |
 |English|49| Fasttext | Fasttext | static	| NaN (TBA)  | NaN (TBA) |
-|English|49| Fasttext | Fasttext | nonstatic	| NaN (TBA)  | NaN (TBA) |
+|English|49| Fasttext | Fasttext | nonstatic	| 55.3833  | 80.4958 |
 
 ## Previous Updates
 
 In this title, I will save the previous updates for me and the visitors to keep track.
 
-### 19-01-2019
+### January 2019
+
+#### 21-01-2019
+
+- All print-oriented logs are converted to logging library-based loggers.
+- `/config/config.logger` file is added as a logger configuration file.
+- README.md changes
+  - Table of contents added.
+  - Format changes (title revisions, section replacements, etc.).
+
+#### 20-01-2019
+
+- Thanks to Tesla V100, I got the latest experiment results in 20 hours (yay!). 
+- I find out that "Padam" optimizer works flawless w.r.t. usual Adam. It is more robust through each step and have not encountered any weird, numerical problems (which I've seen a lot while using Adam). So, if you are reading this and forking/copy-pasting this library to train your own models, I strongly suggest you to use Padam as your optimizer.
+- I do not have any development/fix updates. 
+  - However, I am working on CRF and plug-in/out CRF-Layer codes (Did I mention I hate CRF?).
+  - Also, replacing "print()" oriented logs with "logging" library.
+
+#### 19-01-2019
 
 - Finally, I got another test score (it took 1 month to finish 20 epoch in a workstation-strong CPU =)). 
 - Currently, I have no development and/or fix update. 
 - Instead, I am trying to find a solution for my resource bottleneck. In last 3 days, I was struggling to understand Google Cloud and its compute engine for my mental goodness. After 3 painful, soul-crashing days (GPU quota problem, GPU quota ticket problem, ssh problem, python problem, library problem, pip problem, fucking no module "xyz" is found problem), I could start a training in a machine with Tesla V100 (every poor human being's dream card).
   - Hopefully, by opening lots of new google accounts (to leverage initial $300 credit, until my unique credit cards diminish), I will be able to get several test results faster.  
 
-### 16-01-2019
+#### 16-01-2019
 
 - I added two new properties to `config.json/dataset_properties` (min_freq and fixed_length) to reduce memory consumption. You are still able to use dynamic input size and assign every seen word in your vocabulary if you have enough memory. Check `config/README.md` for detailed information.
 - Sadly, I encountered the worst problem in PyTorch related to CUDA OOM error, which is model reloading increases the memory consumption =/ In short, I could start a training process (English dataset/non-static/zeroes oov/text_cnn) and it iterated for 2 epochs without any problem (stable memory consumption with 1.5GB of free GPU memory). Then, I saved the model to continue the process later. However, after I loaded the model, the code directly raised CUDA OOM error. I tried to apply things that I've read in PyTorch's forums; however, those so called fixes did not help me. Things that I've found and tried:
@@ -179,7 +213,7 @@ In this title, I will save the previous updates for me and the visitors to keep 
   - I tried to catch OOM error and free some memory after it (https://discuss.pytorch.org/t/how-to-clean-gpu-memory-after-a-runtimeerror/28781/2?u=ptrblck)
 - In conclusion, if you have a spare computer that can do your training until the end, I am %100 sure that this repository does not have memory leak. As long as your input and model sizes are reasonable, it will train. However, if you do not have such a luxury, I can't do anything about it. But if you have any suggestions, I'd be really happy to listen/apply =) 
 
-### 15-01-2019
+#### 15-01-2019
 
 - I created a README for the config.json. It can be found in newly created config folder.
 - Last night, I did some research, basic math (to calculate model size) and experiments about possible memory leaks to prevent CUDA OOM errors. Basically, I could not find any memory leak in normal memory and GPU memory. In conclusion, my model (for English) is too big to train in my own GPU. 
@@ -187,14 +221,14 @@ In this title, I will save the previous updates for me and the visitors to keep 
   - I have not fixed any sentence length and used all words in my vocabularies (min_freq=1). In Turkish experiments, since the dataset is not big, I did not face any problems, its a total different story in English. 
   - I am currently testing the fixed_length and min_freq parameters to control my model size. Until now, tests are going well. Depending on the results, I will put this two parameters into the config.json.
 
-### 14-01-2019
+#### 14-01-2019
 
 - After I find out vocabulary caching has bugs and could not fix it, I removed vocabulary caching functionality from code (both save/load parts). 
   - Even though saving is not a problem, to be able to load a Vocab object, one needs to do too much workaround. I wasted my 6 hours to make it work, but no chance (Vocab objects can be loaded by pickle, but all dataset iterators also want to hold a Vocab object inside which can be done by using `build_vocab()` method in normal dataset reading process. If one loads external, cached vocabularies, you jump this step and can't feed these iterators with vocab objects, a.k.a. can't train due to missing Vocab objects in iterator).
   - I will wait for torchtext to provide native support to vocabulary saving/loading.
 - I will spend some time on monitoring and optimizing my models/training flows for GPU memory optimization. In my laptop, I am bounded with 3GB GPU memory, and I cannot train big models (I have to say that I did not face such problems in Tensorflow for same model/dataset/parameter sets)
 
-### Update 13-01-2019
+#### 13-01-2019
 
 - Final fixes are applied in transformer model, and it is trainable.
 - However, depending on the parameters and model size, it can produce CUDA OOM (out of memory) error pretty easily.
@@ -204,7 +238,7 @@ In this title, I will save the previous updates for me and the visitors to keep 
 - A new optimizer is added into custom_optimizer: "Padam". The reference paper is [Closing the Generalization Gap of Adaptive Gradient Methods in Training Deep Neural Networks](https://arxiv.org/pdf/1806.06763.pdf).
   - Yesterday, I was reading reddit/ML about Adam-related problems and saw this paper. I have not tested it, in terms of optimality/training-test results, but I will give it a shot.
 
-### Update 12-01-2019
+#### 12-01-2019
 
 - I started to work on transformer_google model. Obviously, it cannot be trained by its current version.
 - I have fixed several major bugs. 
@@ -214,7 +248,7 @@ In this title, I will save the previous updates for me and the visitors to keep 
 - README.MD changes.
 - MIT Licence is added.
 
-### Update 11-01-2019
+#### 11-01-2019
 
 I stopped being a lazy guy and changed the current code execution stuff:
 
@@ -226,8 +260,8 @@ I stopped being a lazy guy and changed the current code execution stuff:
 - Still, I have not tested Transformer code. Don't be mad at me if you c/p it and can't get results for your homework(s) =)
 - Tests are really really slow in CPU workstation and I still play games in my daily-life computer instead of running experiments.
 
+## References for Code Development
 
-### References for code development: 
 Below repositories really helped me to write a decent and working code:
 - https://github.com/bamtercelboo/cnn-lstm-bilstm-deepcnn-clstm-in-pytorch
 - https://github.com/bentrevett/pytorch-sentiment-analysis
