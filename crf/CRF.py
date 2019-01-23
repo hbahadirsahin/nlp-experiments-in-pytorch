@@ -5,26 +5,27 @@ from utils.utils import log_sum_exp
 
 
 class ConditionalRandomField(nn.Module):
-    def __init__(self, tag_size, start_id, end_id, pad_id, include_start_end_transitions=True,
-                 transition_constraints=None):
+    def __init__(self, args):
         super(ConditionalRandomField, self).__init__()
 
-        self.tag_size = tag_size
-        self.start_id = start_id
-        self.end_id = end_id
-        self.pad_id = pad_id
+        self.args_common = args["common_model_properties"]
+
+        self.tag_size = self.args_common["num_tags"]
+        self.start_id = self.args_common["start_id"]
+        self.end_id = self.args_common["end_id"]
+        self.pad_id = self.args_common["crf_padding_id"]
 
         # Matrix of transition parameters. Entry i,j is the score of transitioning *to* i *from* j
-        self.transition = nn.Parameter(torch.Tensor(tag_size, tag_size))
+        self.transition = nn.Parameter(torch.Tensor(self.tag_size, self.tag_size))
 
-        self.transition.data[start_id, :] = -10000.  # no transition to SOS
-        self.transition.data[:, end_id] = -10000.  # no transition from EOS except to PAD
-        self.transition.data[:, pad_id] = -10000.  # no transition from PAD except to PAD
-        self.transition.data[pad_id, :] = -10000.  # no transition to PAD except from EOS
-        self.transition.data[pad_id, end_id] = 0.
-        self.transition.data[pad_id, pad_id] = 0.
+        self.transition.data[self.start_id, :] = -10000.  # no transition to SOS
+        self.transition.data[:, self.end_id] = -10000.  # no transition from EOS except to PAD
+        self.transition.data[:, self.pad_id] = -10000.  # no transition from PAD except to PAD
+        self.transition.data[self.pad_id, :] = -10000.  # no transition to PAD except from EOS
+        self.transition.data[self.pad_id, self.end_id] = 0.
+        self.transition.data[self.pad_id, self.pad_id] = 0.
 
-        torch.nn.init.xavier_normal_(self.transitions)
+        torch.nn.init.xavier_normal_(self.transition)
 
     def _forward(self, x, mask):
         # initialize forward variables in log space

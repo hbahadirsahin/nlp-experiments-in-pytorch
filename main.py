@@ -61,7 +61,8 @@ def initialize_model_and_trainer(model_properties, training_properties, datasetl
         trainer = Trainer.trainer_factory("single_model_trainer", training_properties, datasetloader.train_iter,
                                           datasetloader.val_iter, datasetloader.test_iter, device)
     elif training_properties["learner"] == "crf":
-        model = ConditionalRandomField().to(device)
+        model = ConditionalRandomField(model_properties).to(device)
+        trainer = None
     else:
         raise ValueError("Model is not defined! Available learner values are : 'text_cnn', 'char_cnn', 'vdcnn', 'gru', "
                          "'lstm', 'conv_deconv_cnn' and 'transformer_google'")
@@ -176,6 +177,9 @@ if __name__ == '__main__':
             model_properties["common_model_properties"]["num_class"] = len(category_vocab)
         if ner_vocab is not None:
             model_properties["common_model_properties"]["num_tags"] = len(ner_vocab)
+            model_properties["common_model_properties"]["start_id"] = ner_vocab.stoi["<start>"]
+            model_properties["common_model_properties"]["end_id"] = ner_vocab.stoi["<end>"]
+            model_properties["common_model_properties"]["crf_padding_id"] = ner_vocab.stoi["<pad>"]
 
         model_properties["common_model_properties"]["vocab"] = sentence_vocab
         model_properties["common_model_properties"]["padding_id"] = sentence_vocab.stoi["<pad>"]
