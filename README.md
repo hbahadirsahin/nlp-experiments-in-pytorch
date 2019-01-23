@@ -2,8 +2,12 @@
 
 ## Update 23-01-2019
 
-- 
-
+- Conditional Random Field (CRF) class is added into the project. I have not tested it yet. So, I am pretty sure it has lots of bugs =) (so wait for future updates).
+  - A new property "training_properties/task" is defined in config.json. Details are in "/config/README.md"
+  - Dataset reader code is updated to handle NER datasets. Previous version was reading the sentence and category columns of the dataset while ignoring ner column. Now, it reads NER column, assigns the column to the respective field, and builds NER vocabulary, if the "task" property is "ner".
+  - Eventually, I made some changes in main.py. I added CRF into the model creation method, but it is for testing purposes. I don't have any plans to keep it there. 
+- Again, CRF is not tested! In near future, I will spend some time on doing basic tests to idenfity bugs, missings and improvement possibilities.  
+  
 # Table Of Contents
 
 - [Introduction](#introduction)
