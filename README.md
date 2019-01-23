@@ -9,7 +9,9 @@
   - NER-counterparts of the category-related actions are added to main.py.
 - Again, CRF is not tested! In near future, I will spend some time on doing basic tests to idenfity bugs, missings and improvement possibilities.  
 - First, but not last, batch of bugfixes have been pushed.
-  - All problematic things related to DatasetLoader have been fixed (Check this [commit message](https://github.com/hbahadirsahin/nlp-experiments-in-pytorch/commit/1b66f424b59048245b3f046295590388d49cddca) for details).
+  - All problematic things related to DatasetLoader have been fixed (Check this [commit](https://github.com/hbahadirsahin/nlp-experiments-in-pytorch/commit/1b66f424b59048245b3f046295590388d49cddca) for details).
+- Second bugfix update of the day. Note that I continue to push such small bugfixes to be able to revert back easily.
+  - CRF initialization related bugs have been fixed (Check this [commit](https://github.com/hbahadirsahin/nlp-experiments-in-pytorch/commit/68b1f62a3eaae27215ab869a01b767b0db9eb6e4) for details).
   
 # Table Of Contents
 
