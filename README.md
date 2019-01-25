@@ -7,6 +7,7 @@
 - CRF's forward() method is updated, and a boolean "reduce" parameter is added. If it is true, then the "negative loglikelihood" return will be averaged. 
 - Due to difference between, classification and NER training flows, I am implementing a new trainer/evaluator. Also, I will implement performance metric calculators for NER (like precision, recall and F1 score).
   - My initial plan is to push new trainer/evaluator in a week.
+- This weekend (starting tonight), I will finalize the last 3 experiments on Google Cloud. 
   
 # Table Of Contents
 
