@@ -49,13 +49,9 @@ def initialize_model_and_trainer(model_properties, training_properties, datasetl
         trainer = Trainer.trainer_factory("single_model_trainer", training_properties, datasetloader.train_iter,
                                           datasetloader.val_iter, datasetloader.test_iter, device)
     elif training_properties["learner"] == "conv_deconv_cnn":
-        convDeconveCNN = ConvDeconvCNN(model_properties)
-        encoderCNN = convDeconveCNN.encoder.to(device)
-        decoderCNN = convDeconveCNN.decoder.to(device)
-        classifier = convDeconveCNN.classifier.to(device)
+        model = ConvDeconvCNN(model_properties)
         trainer = Trainer.trainer_factory("single_model_trainer", training_properties, datasetloader.train_iter,
                                           datasetloader.val_iter, datasetloader.test_iter, device)
-        model = [encoderCNN, decoderCNN, classifier]
     elif training_properties["learner"] == "transformer_google":
         model = TransformerGoogle(model_properties).model.to(device)
         trainer = Trainer.trainer_factory("single_model_trainer", training_properties, datasetloader.train_iter,
