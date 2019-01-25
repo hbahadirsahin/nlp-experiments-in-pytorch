@@ -1,17 +1,12 @@
 # README 
 
-## Update 23-01-2019
+## Update 25-01-2019
 
-- Conditional Random Field (CRF) class is added into the project. I have not tested it yet. So, I am pretty sure it has lots of bugs =) (wait for the future updates).
-  - A new property "training_properties/task" is defined in config.json. Details are in "/config/README.md"
-  - Dataset reader code is updated to handle NER datasets. Previous version was reading the sentence and category columns of the dataset while ignoring ner column. Now, it reads NER column, assigns the column to the respective field, and builds NER vocabulary, if the "task" property is "ner".
-  - Eventually, I made some changes in main.py. I added CRF into the model creation method, but it is for testing. I don't have any plans to keep it there. 
-  - NER-counterparts of the category-related actions are added to main.py.
-- Again, CRF is not tested! In near future, I will spend some time on doing basic tests to idenfity bugs, missings and improvement possibilities.  
-- First, but not last, batch of bugfixes have been pushed.
-  - All problematic things related to DatasetLoader have been fixed (Check this [commit](https://github.com/hbahadirsahin/nlp-experiments-in-pytorch/commit/1b66f424b59048245b3f046295590388d49cddca) for details).
-- Second bugfix update of the day. Note that I continue to push such small bugfixes to be able to revert back easily.
-  - CRF initialization related bugs have been fixed (Check this [commit](https://github.com/hbahadirsahin/nlp-experiments-in-pytorch/commit/68b1f62a3eaae27215ab869a01b767b0db9eb6e4) for details).
+- I am mastering PyTorch while developing this repository. While I was following the LSTM/GRU tutorials in PyTorch's website, it was using two optimizers for encoder and decoder. That's why I separated my training flow. But, I learned that it can be done by single forward() and single optimizer, eventually. Hence, I added the forward() method to "ConvDeconvCNN" object and its trainer will be initialized as "single_model_trainer". 
+  - I may remove "multiple_model_trainer" and its respective evaluator, but I am not sure about it for now.
+- CRF's forward() method is updated, and a boolean "reduce" parameter is added. If it is true, then the "negative loglikelihood" return will be averaged. 
+- Due to difference between, classification and NER training flows, I am implementing a new trainer/evaluator. Also, I will implement performance metric calculators for NER (like precision, recall and F1 score).
+  - My initial plan is to push new trainer/evaluator in a week.
   
 # Table Of Contents
 
@@ -190,6 +185,19 @@ Note 2 (**Update: 22-01-2019**): Most of the English-language experiments are ex
 In this title, I will save the previous updates for me and the visitors to keep track.
 
 ### January 2019
+
+#### 23-01-2019
+
+- Conditional Random Field (CRF) class is added into the project. I have not tested it yet. So, I am pretty sure it has lots of bugs =) (wait for the future updates).
+  - A new property "training_properties/task" is defined in config.json. Details are in "/config/README.md"
+  - Dataset reader code is updated to handle NER datasets. Previous version was reading the sentence and category columns of the dataset while ignoring ner column. Now, it reads NER column, assigns the column to the respective field, and builds NER vocabulary, if the "task" property is "ner".
+  - Eventually, I made some changes in main.py. I added CRF into the model creation method, but it is for testing. I don't have any plans to keep it there. 
+  - NER-counterparts of the category-related actions are added to main.py.
+- Again, CRF is not tested! In near future, I will spend some time on doing basic tests to idenfity bugs, missings and improvement possibilities.  
+- First, but not last, batch of bugfixes have been pushed.
+  - All problematic things related to DatasetLoader have been fixed (Check this [commit](https://github.com/hbahadirsahin/nlp-experiments-in-pytorch/commit/1b66f424b59048245b3f046295590388d49cddca) for details).
+- Second bugfix update of the day. Note that I continue to push such small bugfixes to be able to revert back easily.
+  - CRF initialization related bugs have been fixed (Check this [commit](https://github.com/hbahadirsahin/nlp-experiments-in-pytorch/commit/68b1f62a3eaae27215ab869a01b767b0db9eb6e4) for details).
 
 #### 21-01-2019
 
