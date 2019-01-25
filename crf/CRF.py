@@ -69,10 +69,11 @@ class ConditionalRandomField(nn.Module):
         score += self.transition[self.end_id, last_tag]
         return score
 
-    def forward(self, input, tags, mask):
+    def forward(self, input, tags, mask, reduce=True):
         forward_score = self._forward(input, mask)
         gold_score = self._score(input, tags, mask)
-        return forward_score - gold_score
+        nll = forward_score - gold_score
+        return nll if not reduce else torch.mean(nll)
 
     def _viterbi_decode(self, x, mask):
         batch_size, seq_length = x.size()

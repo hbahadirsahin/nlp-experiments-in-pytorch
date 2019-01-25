@@ -120,7 +120,7 @@
   "training_properties": {
     "learner": "crf",
     "task": "ner",
-    "optimizer": "Noam",
+    "optimizer": "Padam",
     "learning_rate": 0.05,
     "scheduler_type": "cos",
     "amsgrad": true,

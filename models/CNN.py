@@ -511,7 +511,7 @@ class VDCNN(nn.Module):
         return x, kl_loss
 
 
-class ConvDeconvCNN():
+class ConvDeconvCNN(nn.Module):
     def __init__(self, args):
         super(ConvDeconvCNN, self).__init__()
 
@@ -539,3 +539,6 @@ class ConvDeconvCNN():
         self.encoder = ConvolutionEncoder(args, self.embedding)
         self.decoder = DeconvolutionDecoder(args, self.embedding)
         self.classifier = FullyConnectedClassifier(args)
+
+    def forward(self, x):
+        return self.encoder(self.decoder(self.classifier(x)))

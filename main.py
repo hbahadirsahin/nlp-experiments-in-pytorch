@@ -53,7 +53,7 @@ def initialize_model_and_trainer(model_properties, training_properties, datasetl
         encoderCNN = convDeconveCNN.encoder.to(device)
         decoderCNN = convDeconveCNN.decoder.to(device)
         classifier = convDeconveCNN.classifier.to(device)
-        trainer = Trainer.trainer_factory("multiple_model_trainer", training_properties, datasetloader.train_iter,
+        trainer = Trainer.trainer_factory("single_model_trainer", training_properties, datasetloader.train_iter,
                                           datasetloader.val_iter, datasetloader.test_iter, device)
         model = [encoderCNN, decoderCNN, classifier]
     elif training_properties["learner"] == "transformer_google":
@@ -62,7 +62,8 @@ def initialize_model_and_trainer(model_properties, training_properties, datasetl
                                           datasetloader.val_iter, datasetloader.test_iter, device)
     elif training_properties["learner"] == "crf":
         model = ConditionalRandomField(model_properties).to(device)
-        trainer = None
+        trainer = Trainer.trainer_factory("single_model_ner_trainer", training_properties, datasetloader.train_iter,
+                                          datasetloader.val_iter, datasetloader.test_iter, device)
     else:
         raise ValueError("Model is not defined! Available learner values are : 'text_cnn', 'char_cnn', 'vdcnn', 'gru', "
                          "'lstm', 'conv_deconv_cnn' and 'transformer_google'")
