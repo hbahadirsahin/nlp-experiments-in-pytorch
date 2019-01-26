@@ -289,6 +289,7 @@ Below repositories really helped me to write a decent and working code:
 - https://github.com/dreamgonfly/deep-text-classification-pytorch/
 - https://pytorch.org/tutorials/beginner/nlp/advanced_tutorial.html
 - https://github.com/allenai/allennlp/blob/master/allennlp/modules/conditional_random_field.py
+- https://github.com/threelittlemonkeys/lstm-crf-pytorch/
 - https://github.com/ymym3412/textcnn-conv-deconv-pytorch/blob/master/model.py
 - http://nlp.seas.harvard.edu/2018/04/03/attention.html
 - https://github.com/huggingface/pytorch-openai-transformer-lm
