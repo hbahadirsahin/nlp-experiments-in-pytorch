@@ -162,8 +162,8 @@ Note 2 (**Update: 22-01-2019**): Most of the English-language experiments are ex
 
 ### Test Results for TextCNN
 
-| Experiment | Language | # Of Categories | Pre-trained Embedding | OOV Embedding | Embedding Training | Top-1 Test Accuracy | Top-5 Test Accuracy |   
-|------------||:--------:|:-----------------------------:|-----------------------|---------------|--------------------|:-------------------:|:-------------------:|
+|#| Language | # Of Categories | Pre-trained Embedding | OOV Embedding | Embedding Training | Top-1 Test Accuracy | Top-5 Test Accuracy |   
+|-|:--------:|:-----------------------------:|-----------------------|---------------|--------------------|:-------------------:|:-------------------:|
 |1|Turkish|25| Fasttext | zeros | static	| 49.4565 | 76.2760 |
 |2|Turkish|25| Fasttext | zeros | nonstatic	| 62.6054 | 86.3384 |
 |3|Turkish|25| Fasttext | Fasttext | static	|  49.6810  | 75.2684 |
