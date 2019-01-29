@@ -1,13 +1,13 @@
 # README 
 
-## Update 25-01-2019
+## Update 29-01-2019
 
-- I am mastering PyTorch while developing this repository. While I was following the LSTM/GRU tutorials in PyTorch's website, it was using two optimizers for encoder and decoder. That's why I separated my training flow. But, I learned that it can be done by single forward() and single optimizer, eventually. Hence, I added the forward() method to "ConvDeconvCNN" object and its trainer will be initialized as "single_model_trainer". 
-  - I may remove "multiple_model_trainer" and its respective evaluator, but I am not sure about it for now.
-- CRF's forward() method is updated, and a boolean "reduce" parameter is added. If it is true, then the "negative loglikelihood" return will be averaged. 
-- Due to difference between, classification and NER training flows, I am implementing a new trainer/evaluator. Also, I will implement performance metric calculators for NER (like precision, recall and F1 score).
-  - My initial plan is to push new trainer/evaluator in a week.
-- This weekend (starting tonight), I will finalize the last 3 experiments on Google Cloud. 
+- No bugfix/update commit.
+  - I said I will commit more smaller updates, but I failed to follow it =) 
+  - Still trying to develop/fix NER training process. 
+  - Found minor bugs in several places in the project.
+  - Hopefully, a big update will come till the end of this week.
+- Experiment result update.
   
 # Table Of Contents
 
@@ -162,30 +162,41 @@ Note 2 (**Update: 22-01-2019**): Most of the English-language experiments are ex
 
 ### Test Results for TextCNN
 
-| Language | # Of Categories | Pre-trained Embedding | OOV Embedding | Embedding Training | Top-1 Test Accuracy | Top-5 Test Accuracy |   
-|----------|:-----------------------------:|-----------------------|---------------|--------------------|:-------------------:|:-------------------:|
-|Turkish|25| Fasttext | zeros | static	| 49.4565 | 76.2760 |
-|Turkish|25| Fasttext | zeros | nonstatic	| 62.6054 | 86.3384 |
-|Turkish|25| Fasttext | Fasttext | static	|  49.6810  | 75.2684 |
-|Turkish|25| Fasttext | Fasttext | nonstatic	| 63.9391  | 87.9597 |
-|Turkish|49| Fasttext | zeros | static	| 43.5519  | 68.4336 |
-|Turkish|49| Fasttext | zeros | nonstatic	| 56.0081  | 79.8634 |
-|Turkish|49| Fasttext | Fasttext | static	| 43.8025  | 68.8641 |
-|Turkish|49| Fasttext | Fasttext | nonstatic	| 60.4009  | 82.7879 |
-|English|25| Fasttext | zeros | static	| 56.2290 | 83.2425 |
-|English|25| Fasttext | zeros | nonstatic	| 64.2642 | 89.2115 |
-|English|25| Fasttext | Fasttext | static	| 56.5313 | 83.9873 |
-|English|25| Fasttext | Fasttext | nonstatic	| 65.9558 | 91.1536 |
-|English|49| Fasttext | zeros | static	| NaN (TBA)  | NaN (TBA) |
-|English|49| Fasttext | zeros | nonstatic	| NaN (TBA)  | NaN (TBA) |
-|English|49| Fasttext | Fasttext | static	| NaN (TBA)  | NaN (TBA) |
-|English|49| Fasttext | Fasttext | nonstatic	| 55.3833  | 80.4958 |
+| Experiment | Language | # Of Categories | Pre-trained Embedding | OOV Embedding | Embedding Training | Top-1 Test Accuracy | Top-5 Test Accuracy |   
+|------------||:--------:|:-----------------------------:|-----------------------|---------------|--------------------|:-------------------:|:-------------------:|
+|1|Turkish|25| Fasttext | zeros | static	| 49.4565 | 76.2760 |
+|2|Turkish|25| Fasttext | zeros | nonstatic	| 62.6054 | 86.3384 |
+|3|Turkish|25| Fasttext | Fasttext | static	|  49.6810  | 75.2684 |
+|4|Turkish|25| Fasttext | Fasttext | nonstatic	| 63.9391  | 87.9597 |
+|5|Turkish|49| Fasttext | zeros | static	| 43.5519  | 68.4336 |
+|6|Turkish|49| Fasttext | zeros | nonstatic	| 56.0081  | 79.8634 |
+|7|Turkish|49| Fasttext | Fasttext | static	| 43.8025  | 68.8641 |
+|8|Turkish|49| Fasttext | Fasttext | nonstatic	| 60.4009  | 82.7879 |
+|9|English|25| Fasttext | zeros | static	| 56.2290 | 83.2425 |
+|10|English|25| Fasttext | zeros | nonstatic	| 64.2642 | 89.2115 |
+|11|English|25| Fasttext | Fasttext | static	| 56.5313 | 83.9873 |
+|12|English|25| Fasttext | Fasttext | nonstatic	| 65.9558 | 91.1536 |
+|13|English|49| Fasttext | zeros | static	| NaN (TBA)  | NaN (TBA) |
+|14|English|49| Fasttext | zeros | nonstatic	| 59.2086*  | 84.8054 |
+|15|English|49| Fasttext | Fasttext | static	| NaN (TBA)  | NaN (TBA) |
+|16|English|49| Fasttext | Fasttext | nonstatic	| 55.3833*  | 80.4958 |
+
+* Note that the experiment 14 resulted with a better score than 16, unlike other similar setups. The main reason is, I changed the "learning_rate" of the optimizer to a smaller value for the experiment 16 (well, for the sake of the experiment =)), and it appears that smaller learning rate made the learning process a bit slower (in terms of number of epochs). If I can find a chance to run this experiment again in Google Cloud (a.k.a. have enough credit to run it one more time), I will update the learning rate properly. 
 
 ## Previous Updates
 
 In this title, I will save the previous updates for me and the visitors to keep track.
 
 ### January 2019
+
+#### 25-01-2019
+
+- I am mastering PyTorch while developing this repository. While I was following the LSTM/GRU tutorials in PyTorch's website, it was using two optimizers for encoder and decoder. That's why I separated my training flow. But, I learned that it can be done by single forward() and single optimizer, eventually. Hence, I added the forward() method to "ConvDeconvCNN" object and its trainer will be initialized as "single_model_trainer". 
+  - I may remove "multiple_model_trainer" and its respective evaluator, but I am not sure about it for now.
+- CRF's forward() method is updated, and a boolean "reduce" parameter is added. If it is true, then the "negative loglikelihood" return will be averaged. 
+- Due to difference between, classification and NER training flows, I am implementing a new trainer/evaluator. Also, I will implement performance metric calculators for NER (like precision, recall and F1 score).
+  - My initial plan is to push new trainer/evaluator in a week.
+- This weekend (starting tonight), I will finalize the last 3 experiments on Google Cloud. 
 
 #### 23-01-2019
 
