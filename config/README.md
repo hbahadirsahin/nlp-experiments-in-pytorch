@@ -34,7 +34,7 @@ There are 14 properties under this `training_properties` which determines the le
 parameters and printing/saving/evaluating related stuff:
 
 - `learner`: String parameter to choose which learning algorithm to use. It can be "text_cnn", "gru", "lstm", "char_cnn",
-"vdcnn", "conv_deconv_cnn" and "transformer_google" (Last Update: 15-01-2019) 
+"vdcnn", "conv_deconv_cnn", "transformer_google" and "lstmcrf" (Last Update: 31-01-2019) 
 - `task`: String parameter to choose which task the learner will be trained on. It can be "classification" or "ner".
 - `optimizer`: String parameter to choose which optimizer to use. It can be "Adam", "SGD", "OpenAIAdam", "Noam", and "Padam".
 - `learning_rate`: Self-explanatory. Takes float value.

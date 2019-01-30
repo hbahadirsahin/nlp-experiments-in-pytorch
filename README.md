@@ -1,14 +1,25 @@
 # README 
 
-## Update 29-01-2019
+## Update 31-01-2019
 
-- No bugfix/update commit.
-  - I said I will commit more smaller updates, but I failed to follow it =) 
-  - Still trying to develop/fix NER training process. 
-  - Found minor bugs in several places in the project.
-  - Hopefully, a big update will come till the end of this week.
-- Experiment result update.
-  
+- Huge NER task and bugfix update is pushed tonight.
+- I have not implemented performance metrics for NER, yet. 
+- Before details, I only tested whether training and evaluating flows are working (and they are). But, I do not guarantee NER models will provide good result for now. Hopefully, I will make necessary checks regarding to performance in upcoming days. 
+- Updates:
+  - LSTM.py is updated. I created an "LSTMBase" object to prevent myself from c/p'ing same constructor initializations. Similar changes will be applied to other models, soon.
+  - LSTMCRF is added into LSTM.py. Change "config.json/training_properties/learner" to "lstmcrf" to use it. Other "modelnameCRF" objects will be added for the rest of the models in future.
+  - "single_model_ner_trainer.py" and "single_model_ner_evaluator.py" are created for NER tasks.
+  - Trainer end Evaluator factories are updated w.r.t. newly added flows.
+  - CRF.py is updated w.r.t. runtime exceptions =)
+  - DatasetLoader is updated to add "<start>" and "<end>" tags as init and end_of_sentence tokens. 
+  - DatasetLoader is updated to fill its fields w.r.t. "task" selected. 
+  - DatasetLoader is updated to build its vocabulary from whole dataset (it was built by using training set only, but it has major problematic effects on NER training). My reference is an issue and its responses in AllenNLP's github =)
+  - Updates in "requirement.txt". Note that DO NOT USE GENSIM==3.7.0 since it has a major bug related to loading FastText models! 
+- Bugfixes:
+  - I had to make another fix in "torchtext" code. Please check updated "changes in the torchtext.txt" file. I don't know why but if a sentence has a quotation mark that isn't closed, torchtext assumes everything between the first and second quotation marks is a single data point (I found out that there were sentences with +1000 words in my NER tests). By c/p'ing the latest change to the respective method, you can fix this bug.
+  - If selected training task is "NER", I forbid the usage of stop word elimination in preprocessing (sentence and tag lengths do not match otherwise).
+  - Bugfix in LSTM and GRU initialization.
+ 
 # Table Of Contents
 
 - [Introduction](#introduction)
@@ -103,7 +114,9 @@ the Local Reparameterization Trick](https://arxiv.org/pdf/1506.02557.pdf)~~
   - [ ] Encoder-Decoder GRU
   - [ ] Encoder-Decoder LSTM
   - [ ] Hybrid stuff (Like CNN+LSTM/GRU)
-- [ ] CRF layer to be able to do NER experiments.
+- [x] ~~CRF layer to be able to do NER experiments~~.
+  - [ ] Add new models that will use CRF as their last layer (such as LSTMCRF, GRUCRF, CNNCRF, etc.)
+  - [ ] Develop NER-related performance metrics and update training/evaluation flows to use these metrics.
 - [ ] For Turkish, I plan to add morphological disambiguation (https://github.com/erayyildiz/Neural-Morphological-Disambiguation-for-Turkish). 
 - [ ] Different language models.
   - [ ] ELMO (pretrained Turkish/English embeddings)
@@ -119,6 +132,7 @@ I had to make some changes in the torchtext backend codes to be able to do sever
 - I don't know why, torchtext does not split a dataset into 3 subsets (train/val/test) even if there is a function for it. I changed it to fix that issue. Hopefully, one day torchtext will fix it offically =)
 - To be able to work with Turkish Fasttext embeddings, I added its respective alias.
 - To be able to apply Fasttext's CharNGram to OOV words to generate OOV embeddings, a minor change has been made to Vector object.
+- To be able to read any dataset without any problem, a minor change has been made to torchtext's utils.py.
 
 ### Configuration JSON Format
 
@@ -188,6 +202,15 @@ Note 2 (**Update: 22-01-2019**): Most of the English-language experiments are ex
 In this title, I will save the previous updates for me and the visitors to keep track.
 
 ### January 2019
+
+####  29-01-2019
+
+- No bugfix/update commit.
+  - I said I will commit more smaller updates, but I failed to follow it =) 
+  - Still trying to develop/fix NER training process. 
+  - Found minor bugs in several places in the project.
+  - Hopefully, a big update will come till the end of this week.
+- Experiment result update.
 
 #### 25-01-2019
 
