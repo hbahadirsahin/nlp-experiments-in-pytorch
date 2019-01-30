@@ -176,7 +176,7 @@ Note 2 (**Update: 22-01-2019**): Most of the English-language experiments are ex
 |10|English|25| Fasttext | zeros | nonstatic	| 64.2642 | 89.2115 |
 |11|English|25| Fasttext | Fasttext | static	| 56.5313 | 83.9873 |
 |12|English|25| Fasttext | Fasttext | nonstatic	| 65.9558 | 91.1536 |
-|13|English|49| Fasttext | zeros | static	| NaN (TBA)  | NaN (TBA) |
+|13|English|49| Fasttext | zeros | static	| 51.3862 | 78.7806 |
 |14|English|49| Fasttext | zeros | nonstatic	| 59.2086*  | 84.8054 |
 |15|English|49| Fasttext | Fasttext | static	| NaN (TBA)  | NaN (TBA) |
 |16|English|49| Fasttext | Fasttext | nonstatic	| 55.3833*  | 80.4958 |
