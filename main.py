@@ -56,6 +56,7 @@ def initialize_model_and_trainer(model_properties, training_properties, datasetl
         trainer = Trainer.trainer_factory("single_model_trainer", training_properties, datasetloader.train_iter,
                                           datasetloader.val_iter, datasetloader.test_iter, device)
     elif training_properties["learner"] == "lstmcrf":
+        assert training_properties["task"] == "ner"
         model = LSTMCRF(model_properties).to(device)
         trainer = Trainer.trainer_factory("single_model_ner_trainer", training_properties, datasetloader.train_iter,
                                           datasetloader.val_iter, datasetloader.test_iter, device)
