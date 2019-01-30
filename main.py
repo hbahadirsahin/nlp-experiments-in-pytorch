@@ -8,14 +8,13 @@ import os
 
 import torch
 
-from crf.CRF import ConditionalRandomField
 from datahelper.dataset_reader import DatasetLoader
 from datahelper.embedding_helper import OOVEmbeddingCreator
 from datahelper.preprocessor import Preprocessor
 from evaluation.evaluator import Evaluator
 from models.CNN import TextCnn, CharCNN, VDCNN, ConvDeconvCNN
 from models.GRU import GRU
-from models.LSTM import LSTM
+from models.LSTM import LSTM, LSTMCRF
 from models.Transformer import TransformerGoogle
 from training.trainer import Trainer
 from utils.utils import save_vocabulary
@@ -56,8 +55,8 @@ def initialize_model_and_trainer(model_properties, training_properties, datasetl
         model = TransformerGoogle(model_properties).model.to(device)
         trainer = Trainer.trainer_factory("single_model_trainer", training_properties, datasetloader.train_iter,
                                           datasetloader.val_iter, datasetloader.test_iter, device)
-    elif training_properties["learner"] == "crf":
-        model = ConditionalRandomField(model_properties).to(device)
+    elif training_properties["learner"] == "lstmcrf":
+        model = LSTMCRF(model_properties).to(device)
         trainer = Trainer.trainer_factory("single_model_ner_trainer", training_properties, datasetloader.train_iter,
                                           datasetloader.val_iter, datasetloader.test_iter, device)
     else:
@@ -126,6 +125,9 @@ if __name__ == '__main__':
         level = "char"
         is_char_level = True
 
+    if training_task == "ner":
+        stop_word_path = None
+
     logger.info("Initialize Preprocessor")
     preprocessor = Preprocessor(stop_word_path,
                                 is_remove_digit=True,
@@ -176,7 +178,6 @@ if __name__ == '__main__':
             model_properties["common_model_properties"]["num_tags"] = len(ner_vocab)
             model_properties["common_model_properties"]["start_id"] = ner_vocab.stoi["<start>"]
             model_properties["common_model_properties"]["end_id"] = ner_vocab.stoi["<end>"]
-            model_properties["common_model_properties"]["crf_padding_id"] = ner_vocab.stoi["<pad>"]
 
         model_properties["common_model_properties"]["vocab"] = sentence_vocab
         model_properties["common_model_properties"]["padding_id"] = sentence_vocab.stoi["<pad>"]

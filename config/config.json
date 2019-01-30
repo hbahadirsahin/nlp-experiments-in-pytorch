@@ -8,8 +8,8 @@
     "pretrained_embedding_path": "./data/fasttext/wiki.tr",
     "checkpoint_path": "",
     "oov_embedding_type": "zeros",
-    "fixed_length": 50,
-    "min_freq": 5
+    "fixed_length": 0,
+    "min_freq": 0
   },
   "model_properties": {
     "common_model_properties": {
@@ -118,7 +118,7 @@
     }
   },
   "training_properties": {
-    "learner": "crf",
+    "learner": "lstmcrf",
     "task": "ner",
     "optimizer": "Padam",
     "learning_rate": 0.05,

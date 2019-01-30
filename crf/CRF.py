@@ -13,10 +13,13 @@ class ConditionalRandomField(nn.Module):
         self.tag_size = self.args_common["num_tags"]
         self.start_id = self.args_common["start_id"]
         self.end_id = self.args_common["end_id"]
-        self.pad_id = self.args_common["crf_padding_id"]
+        self.pad_id = self.args_common["padding_id"]
+
+        # Device
+        self.device = self.args_common["device"]
 
         # Matrix of transition parameters. Entry i,j is the score of transitioning *to* i *from* j
-        self.transition = nn.Parameter(torch.Tensor(self.tag_size, self.tag_size))
+        self.transition = nn.Parameter(torch.Tensor(self.tag_size, self.tag_size)).to(self.device)
 
         self.transition.data[self.start_id, :] = -10000.  # no transition to SOS
         self.transition.data[:, self.end_id] = -10000.  # no transition from EOS except to PAD
@@ -29,10 +32,10 @@ class ConditionalRandomField(nn.Module):
 
     def _forward(self, x, mask):
         # initialize forward variables in log space
-        batch_size, seq_length = x.size()
+        batch_size, seq_length, tag_size = x.size()
 
         # Size of init_alphas = [Batch_size, Tag_size]
-        alpha = torch.full((batch_size, self.tag_size), -10000.)
+        alpha = torch.full((batch_size, self.tag_size), -10000.).to(self.device)
         alpha[:, self.start_id] = 0.
 
         # Size of transition_scores = [1, Tag_size, Tag_size]
@@ -52,17 +55,17 @@ class ConditionalRandomField(nn.Module):
         return log_sum_exp(alpha + self.transition[self.end_id])
 
     def _score(self, x, tags, mask):
-        batch_size, seq_length = x.size()
+        batch_size, seq_length, tag_size = x.size()
 
-        score = torch.zeros(batch_size)
+        score = torch.zeros(batch_size).to(self.device)
 
         x = x.unsqueeze(3)
         trans = self.transition.unsqueeze(2)
 
-        for t in range(seq_length):  # recursion through the sequence
+        for t in range(seq_length - 1):  # recursion through the sequence
             mask_broadcast = mask[:, t]
-            emition_scores = torch.cat([x[t, y[t + 1]] for x, y in zip(x, y)])
-            transition_scores = torch.cat([trans[y[t + 1], y[t]] for y in y])
+            emition_scores = torch.cat([x[t, tag[t + 1]] for x, tag in zip(x, tags)])
+            transition_scores = torch.cat([trans[tag[t + 1], tag[t]] for tag in tags])
             score += (emition_scores + transition_scores) * mask_broadcast
 
         last_tag = tags.gather(1, mask.sum(1).long().unsqueeze(1)).squeeze(1)
@@ -76,20 +79,20 @@ class ConditionalRandomField(nn.Module):
         return nll if not reduce else torch.mean(nll)
 
     def _viterbi_decode(self, x, mask):
-        batch_size, seq_length = x.size()
+        batch_size, seq_length, tag_size = x.size()
 
-        backpointers = torch.Tensor()
+        backpointers = torch.LongTensor().to(self.device)
         # Initialize the viterbi variables in log space
-        path_score = torch.full((batch_size, self.tag_size), -10000.)
+        path_score = torch.full((batch_size, self.tag_size), -10000.).to(self.device)
         path_score[:, self.start_id] = 0.
 
         for next_tag in range(seq_length):
             mask_broadcast = mask[:, next_tag].unsqueeze(1)
-            path_score_broadcast = path_score + self.transition
-            path_score_broadcast, backpointers_broadcast = torch.max(path_score_broadcast, 2)
+            path_score_broadcast = path_score.unsqueeze(1) + self.transition
+            path_score_broadcast, backpointer_broadcast = torch.max(path_score_broadcast, 2)
             path_score_broadcast += x[:, next_tag]
             path_score = path_score_broadcast * mask_broadcast + path_score * (1 - mask_broadcast)
-            backpointers = torch.cat((backpointers, backpointers_broadcast.unsqueeze(1)), 1)
+            backpointers = torch.cat((backpointers, backpointer_broadcast.unsqueeze(1)), 1)
 
         path_score += self.transition[self.end_id]
         best_path_scores, best_tag_ids = torch.max(path_score, 1)
@@ -107,3 +110,5 @@ class ConditionalRandomField(nn.Module):
             best_paths[batch].reverse()
 
         return best_path_scores, best_paths
+
+

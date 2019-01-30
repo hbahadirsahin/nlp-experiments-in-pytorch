@@ -3,7 +3,7 @@ import logging.config
 import torch
 from gensim.models import FastText
 
-logging.config.fileConfig(fname='./config/config.logger', disable_existing_loggers=False)
+logging.config.fileConfig(fname="D:/PyTorchNLP/config/config.logger", disable_existing_loggers=False)
 logger = logging.getLogger("Embedding Helper")
 
 class OOVEmbeddingCreator(object):

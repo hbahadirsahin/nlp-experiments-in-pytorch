@@ -17,8 +17,8 @@ class GRU(nn.Module):
         self.args_common = args["common_model_properties"]
         self.args_specific = args["gru"]
 
-        self.hidden_dim = self.args_common["hidden_dim"]
-        self.num_layers = self.args_common["num_layers"]
+        self.hidden_dim = self.args_specific["hidden_dim"]
+        self.num_layers = self.args_specific["num_layers"]
         self.batch_size = self.args_common["batch_size"]
 
         self.vocab = self.args_common["vocab"]
@@ -68,11 +68,11 @@ class GRU(nn.Module):
         else:
             self.h2o = nn.Linear(self.hidden_dim, self.num_class)
 
-    def init_hidden(self):
+    def init_hidden(self, batch_size):
         if self.bidirectional is True:
-            return Variable(torch.zeros((1, self.batch_size, self.hidden_dim * 2)))
+            return Variable(torch.zeros((1, batch_size, self.hidden_dim * 2))).to(self.device)
         else:
-            return Variable(torch.zeros((1, self.batch_size, self.hidden_dim)))
+            return Variable(torch.zeros((1, batch_size, self.hidden_dim))).to(self.device)
 
     def initialize_embeddings(self):
         logger.info("> Embeddings")

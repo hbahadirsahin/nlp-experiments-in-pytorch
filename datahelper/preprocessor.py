@@ -5,8 +5,10 @@ all_letters = string.ascii_letters + ".,;"
 
 
 class Preprocessor(object):
-    def __init__(self, stop_word_path, is_remove_digit=True, is_remove_punctuations=True, is_char_level=False):
-        self.stop_words = self.load_stop_words(stop_word_path)
+    def __init__(self, stop_word_path=None, is_remove_digit=True, is_remove_punctuations=True, is_char_level=False):
+        self.stop_word_path = stop_word_path
+        if stop_word_path is not None:
+            self.stop_words = self.load_stop_words(stop_word_path)
         self.is_remove_digit = is_remove_digit
         self.is_remove_punctuations = is_remove_punctuations
         self.is_char_level = is_char_level
@@ -21,6 +23,8 @@ class Preprocessor(object):
 
     @staticmethod
     def remove_punctuations(sentence):
+        sentence = sentence.replace('"', '')
+        sentence = sentence.replace("'", "")
         return "".join([ch for ch in sentence if ch not in string.punctuation])
 
     @staticmethod
@@ -80,7 +84,8 @@ class Preprocessor(object):
         if self.is_remove_punctuations:
             x = self.remove_punctuations(x)
 
-        x = self.remove_stop_words(x)
+        if self.stop_word_path is not None:
+            x = self.remove_stop_words(x)
 
         if self.is_remove_digit:
             x = self.remove_digits(x)

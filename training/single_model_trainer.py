@@ -9,6 +9,7 @@ import torch.optim as optim
 from custom_optimizer import OpenAIAdam, NoamOptimizer, Padam
 from evaluation.evaluator import Evaluator
 from models.GRU import GRU
+from models.LSTM import LSTMBase
 from utils.utils import time_since, calculate_accuracy, calculate_topk_accuracy, save_best_model
 
 logging.config.fileConfig(fname='./config/config.logger', disable_existing_loggers=False)
@@ -17,6 +18,7 @@ logger = logging.getLogger("Trainer")
 
 class SingleModelTrainer(object):
     def __init__(self, training_properties, train_iter, dev_iter, test_iter, device):
+        self.task = training_properties["task"]
         self.optimizer_type = training_properties["optimizer"]
         self.learning_rate = training_properties["learning_rate"]
         self.weight_decay = training_properties["weight_decay"]
@@ -159,21 +161,17 @@ class SingleModelTrainer(object):
         step = 1
         model.train()
 
-        loss = None
-        total_loss = None
-        accuracy = None
-        accuracy_topk = None
-
         for batch in self.train_iter:
             if self.optimizer_type == "Noam":
                 optimizer.optimizer.zero_grad()
             else:
                 optimizer.zero_grad()
-            if isinstance(model, GRU):
-                model.hidden = model.init_hidden()
 
             batch_x = batch.sentence.to(self.device)
             batch_y = batch.category_labels.to(self.device, non_blocking=True)
+
+            if isinstance(model, GRU) or isinstance(model, LSTMBase):
+                model.hidden = model.init_hidden(batch_x.size(1))
 
             try:
                 predictions, kl_loss = model(batch_x)

@@ -10,8 +10,9 @@ from embedding_helper import OOVEmbeddingCreator
 
 SEED = 1234
 
-logging.config.fileConfig(fname='./config/config.logger', disable_existing_loggers=False)
+logging.config.fileConfig(fname='D:/PyTorchNLP/config/config.logger', disable_existing_loggers=False)
 logger = logging.getLogger("Dataset Loader")
+
 
 class DatasetLoader(object):
     def __init__(self, data_path, vector, task, fix_length=0, min_freq=0, level="word", unk_init=None,
@@ -39,8 +40,8 @@ class DatasetLoader(object):
 
         self.min_freq = min_freq
         self.fix_length = fix_length
-        if min_freq <= 0:
-            self.min_freq = 1
+        if min_freq < 0:
+            self.min_freq = 0
         if fix_length <= 0:
             self.fix_length = None
 
@@ -60,15 +61,15 @@ class DatasetLoader(object):
 
     def create_fields(self, seq_input=True, seq_ner=True, seq_cat=False):
         if self.level == "word":
-            sentence_field = data.Field(sequential=seq_input, preprocessing=self.preprocessor, pad_first=True,
-                                        fix_length=self.fix_length)
+            sentence_field = data.Field(sequential=seq_input, preprocessing=self.preprocessor, fix_length=self.fix_length,
+                                        init_token="<start>", eos_token="<end>")
         elif self.level == "char":
             sentence_field = data.Field(sequential=seq_input, tokenize=self.evil_workaround_tokenizer, fix_length=1014)
             # sentence_field = data.NestedField(nested_field)
         else:
             raise KeyError("Sentence_field is undefined!")
 
-        ner_label_field = data.Field(sequential=seq_ner, init_token="<start>", eos_token="<end>", unk_token=None)
+        ner_label_field = data.Field(sequential=seq_ner, init_token="<start>", eos_token="<end>")
         category_label_field = data.LabelField(sequential=seq_cat)
         return sentence_field, ner_label_field, category_label_field
 
@@ -95,7 +96,7 @@ class DatasetLoader(object):
         train, val, test = self.create_splits(dataset, split_ratio)
         logger.info("Splitting done!")
         logger.info("Creating vocabulary")
-        self.create_vocabs(train, sf, clf, nlf)
+        self.create_vocabs(dataset, sf, clf, nlf)
         logger.info("Vocabulary created!")
         logger.info("Creating iterators")
         self.create_iterator(train, val, test, batch_size)
@@ -127,7 +128,9 @@ class DatasetLoader(object):
                                                                                     batch_sizes=(
                                                                                         batch_size, batch_size,
                                                                                         batch_size),
-                                                                                    sort_key=lambda x: len(x.sentence),
+                                                                                    sort=True,
+                                                                                    sort_key=lambda x: -len(x.sentence),
+                                                                                    sort_within_batch=False,
                                                                                     repeat=False)
 
 
@@ -135,8 +138,12 @@ if __name__ == '__main__':
     stop_word_path = "D:/Anaconda3/nltk_data/corpora/stopwords/turkish"
     data_path = "D:/PyTorchNLP/data/turkish_test.DUMP"
     vector_cache = "D:/PyTorchNLP/data/fasttext"
-    level = "char"
-    is_char_level = True
+    level = "word"
+    is_char_level = False
+    task = "ner"
+
+    if task == "ner":
+        stop_word_path = None
 
     preprocessor = Preprocessor(stop_word_path,
                                 is_remove_digit=False,
@@ -148,23 +155,30 @@ if __name__ == '__main__':
 
     dataset_helper = DatasetLoader(data_path=data_path,
                                    vector="fasttext.tr.300d",
-                                   level=level,
                                    preprocessor=preprocessor.preprocess,
+                                   level=level,
                                    vector_cache=vector_cache,
-                                   unk_init=unkembedding.create_oov_embedding)
+                                   unk_init=unkembedding.create_oov_embedding,
+                                   min_freq=0,
+                                   fix_length=0,
+                                   task=task
+                                   )
 
     print("Reading dataset")
-    train, val, test = dataset_helper.read_dataset(batch_size=1)
+    train, val, test = dataset_helper.read_dataset(batch_size=32)
     print(len(train), "-", len(val), "-", len(test))
     sentence_vocab = dataset_helper.sentence_vocab
     category_vocab = dataset_helper.category_vocab
+    ner_vocab = dataset_helper.ner_vocab
 
     print("Vocab:", len(sentence_vocab))
-    print("Vocab:", len(category_vocab))
+    # print("Vocab:", len(category_vocab))
     print("Most freq:", sentence_vocab.freqs.most_common(20))
-    print("Most freq:", category_vocab.freqs.most_common(20))
+    # print("Most freq:", category_vocab.freqs.most_common(20))
     print("Itos:", sentence_vocab.itos[:50])
-    print("Stoi:", category_vocab.stoi)
+    print("Itos:", ner_vocab.itos)
+    print("Stoi:", ner_vocab.stoi)
+    # print("Stoi:", category_vocab.stoi)
 
     train_iter = dataset_helper.train_iter
     val_iter = dataset_helper.val_iter
@@ -174,17 +188,30 @@ if __name__ == '__main__':
     print("Val iter size:", len(val_iter))
     print("Test iter size:", len(test_iter))
 
-    for idx, batch in enumerate(train_iter):
+    for idx, batch in enumerate(val_iter):
         batch_x = batch.sentence
-        print(batch_x.size())
-        print(batch_x)
+        # batch_category = batch.category_labels
+        batch_ner = batch.ner_labels
+        batch_x = batch_x.permute(1, 0)
+        batch_ner = batch_ner.permute(1, 0)
+        print(idx, ":", batch_x.size())
+        print(idx, ":", batch_ner.size())
+        # print(batch_x)
+        # print(batch_category)
+        # print(batch_ner)
         # batch_x = torch.reshape(batch_x, (batch_x.size(0), batch_x.size(1)*batch_x.size(2)))
-        if dataset_helper.level == "word":
-            s = [sentence_vocab.itos[idx] for idx in batch_x]
-        else:
-            # s = [sentence_vocab.itos[char] for sentence in batch_x for word in sentence for char in word]
-            s = [sentence_vocab.itos[idx] for idx in batch_x]
+        for idx2, x in enumerate(batch_x):
+            if dataset_helper.level == "word":
+                s = [sentence_vocab.itos[i] for i in x]
+                n = [ner_vocab.itos[i] for i in batch_ner[idx2]]
+            else:
+                # s = [sentence_vocab.itos[char] for sentence in batch_x for word in sentence for char in word]
+                s = [sentence_vocab.itos[idx] for idx in x]
 
-        print(idx, "-", s)
-        print("")
-        break
+            print(idx2, "(", len(x), ")-", x)
+            print(idx2, "(", len(s), ")-", s)
+            print(idx2, "(", len(batch_ner[idx2]), ")-", batch_ner[idx2])
+            print(idx2, "(", len(n), ")-", n)
+            print("")
+
+

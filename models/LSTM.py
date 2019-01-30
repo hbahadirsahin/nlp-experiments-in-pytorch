@@ -6,19 +6,20 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 
 from dropout_models.dropout import Dropout
+from crf.CRF import ConditionalRandomField
 
 logging.config.fileConfig(fname='./config/config.logger', disable_existing_loggers=False)
 logger = logging.getLogger("LSTM")
 
 
-class LSTM(nn.Module):
+class LSTMBase(nn.Module):
     def __init__(self, args):
-        super(LSTM, self).__init__()
+        super(LSTMBase, self).__init__()
         self.args_common = args["common_model_properties"]
         self.args_specific = args["lstm"]
 
-        self.hidden_dim = self.args_common["hidden_dim"]
-        self.num_layers = self.args_common["num_layers"]
+        self.hidden_dim = self.args_specific["hidden_dim"]
+        self.num_layers = self.args_specific["num_layers"]
         self.batch_size = self.args_common["batch_size"]
 
         self.vocab = self.args_common["vocab"]
@@ -29,7 +30,6 @@ class LSTM(nn.Module):
         # Input/Output dimensions
         self.embed_num = self.args_common["vocab_size"]
         self.embed_dim = self.args_common["embed_dim"]
-        self.num_class = self.args_common["num_class"]
 
         # Embedding parameters
         self.padding_id = self.args_common["padding_id"]
@@ -59,22 +59,18 @@ class LSTM(nn.Module):
                             dropout=self.keep_prob,
                             num_layers=self.num_layers,
                             bidirectional=self.bidirectional,
-                            bias=self.rnn_bias)
+                            bias=self.rnn_bias,
+                            batch_first=True)
 
-        self.hidden = self.init_hidden()
+        self.hidden = self.init_hidden(self.batch_size)
 
+    def init_hidden(self, batch_size):
         if self.bidirectional is True:
-            self.h2o = nn.Linear(self.hidden_dim * 2, self.num_class)
+            return (Variable(torch.zeros(1, batch_size, self.hidden_dim * 2).to(self.device)),
+                    Variable(torch.zeros(1, batch_size, self.hidden_dim * 2).to(self.device)))
         else:
-            self.h2o = nn.Linear(self.hidden_dim, self.num_class)
-
-    def init_hidden(self):
-        if self.bidirectional is True:
-            return (Variable(torch.zeros(1, self.batch_size, self.hidden_dim * 2)),
-                    Variable(torch.zeros(1, self.batch_size, self.hidden_dim * 2)))
-        else:
-            return (Variable(torch.zeros(1, self.batch_size, self.hidden_dim)),
-                    Variable(torch.zeros(1, self.batch_size, self.hidden_dim)))
+            return (Variable(torch.zeros(1, batch_size, self.hidden_dim).to(self.device)),
+                    Variable(torch.zeros(1, batch_size, self.hidden_dim).to(self.device)))
 
     def initialize_embeddings(self):
         logger.info("> Embeddings")
@@ -109,6 +105,18 @@ class LSTM(nn.Module):
             logger.info("> Dropout - Bernoulli (You provide undefined dropout type!)")
             return Dropout(keep_prob=self.keep_prob, dimension=None, dropout_type="bernoulli").dropout
 
+
+class LSTM(LSTMBase):
+    def __init__(self, args):
+        super(LSTM, self).__init__(args)
+
+        self.num_class = self.args_common["num_class"]
+
+        if self.bidirectional is True:
+            self.h2o = nn.Linear(self.hidden_dim * 2, self.num_class)
+        else:
+            self.h2o = nn.Linear(self.hidden_dim, self.num_class)
+
     def forward(self, batch):
         kl_loss = torch.Tensor([0.0])
 
@@ -118,6 +126,7 @@ class LSTM(nn.Module):
 
         if "cuda" in str(self.device):
             x = x.cuda()
+
         out, self.hidden = self.lstm(x, self.hidden)
         out = torch.transpose(out, 0, 1)
         out = torch.transpose(out, 1, 2)
@@ -128,3 +137,58 @@ class LSTM(nn.Module):
         out = self.h2o(out)
         out = F.log_softmax(out, dim=1)
         return out, kl_loss
+
+
+class LSTMCRF(LSTMBase):
+    def __init__(self, args):
+        super(LSTMCRF, self).__init__(args)
+
+        self.num_tags = self.args_common["num_tags"]
+
+        if self.bidirectional is True:
+            self.h2o = nn.Linear(self.hidden_dim * 2, self.num_tags)
+        else:
+            self.h2o = nn.Linear(self.hidden_dim, self.num_tags)
+
+        self.crf = ConditionalRandomField(args).to(self.device)
+
+    def forward(self, batch_x, batch_y):
+        kl_loss = torch.Tensor([0.0])
+
+        x = batch_x.permute(1, 0)
+        y = batch_y.permute(1, 0)
+
+        mask = x.data.gt(1).float()
+        input_lengths = mask.sum(1).int()
+
+        x = self.embed(x)
+        if "cuda" in str(self.device):
+            x = x.cuda()
+
+        x = nn.utils.rnn.pack_padded_sequence(x, input_lengths, batch_first=True)
+        h, _ = self.lstm(x, self.hidden)
+        h, _ = nn.utils.rnn.pad_packed_sequence(h, batch_first=True)
+        h = self.h2o(h)
+        h *= mask.unsqueeze(2)
+
+        out = self.crf(h, y, mask)
+
+        return out, kl_loss
+
+    def decode(self, batch_x):
+        x = batch_x.permute(1, 0)
+
+        mask = x.data.gt(1).float()
+        input_lengths = mask.sum(1).int()
+
+        x = self.embed(x)
+        if "cuda" in str(self.device):
+            x = x.cuda()
+
+        x = nn.utils.rnn.pack_padded_sequence(x, input_lengths, batch_first=True)
+        h, _ = self.lstm(x, self.hidden)
+        h, _ = nn.utils.rnn.pad_packed_sequence(h, batch_first=True)
+        h = self.h2o(h)
+        h *= mask.unsqueeze(2)
+
+        return self.crf._viterbi_decode(h, mask)
