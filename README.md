@@ -192,7 +192,7 @@ Note 2 (**Update: 22-01-2019**): Most of the English-language experiments are ex
 |12|English|25| Fasttext | Fasttext | nonstatic	| 65.9558 | 91.1536 |
 |13|English|49| Fasttext | zeros | static	| 51.3862 | 78.7806 |
 |14|English|49| Fasttext | zeros | nonstatic	| 59.2086*  | 84.8054 |
-|15|English|49| Fasttext | Fasttext | static	| NaN (TBA)  | NaN (TBA) |
+|15|English|49| Fasttext | Fasttext | static	| 51.7878 | 79.9472 |
 |16|English|49| Fasttext | Fasttext | nonstatic	| 55.3833*  | 80.4958 |
 
 * Note that the experiment 14 resulted with a better score than 16, unlike other similar setups. The main reason is, I changed the "learning_rate" of the optimizer to a smaller value for the experiment 16 (well, for the sake of the experiment =)), and it appears that smaller learning rate made the learning process a bit slower (in terms of number of epochs). If I can find a chance to run this experiment again in Google Cloud (a.k.a. have enough credit to run it one more time), I will update the learning rate properly. 
