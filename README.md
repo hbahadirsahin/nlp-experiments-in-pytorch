@@ -3,7 +3,7 @@
 ## Update 04-02-2019
  
 - Code development for NER evaluation (F1 scores for tag based, bio+tag based) still continues. I slowed down it a little bit due to personal life issues.
-- Decided to simplify README.md and use fill Wiki of this repository.
+- Decided to simplify README.md and use [Wiki](https://github.com/hbahadirsahin/nlp-experiments-in-pytorch/wiki) of this repository.
   - All entries related to the updates in January 2019 are moved to [related Wiki page](https://github.com/hbahadirsahin/nlp-experiments-in-pytorch/wiki/Previous-Updates-(January-2019)). 
   - I will save my experiment results in Wiki, too.
   - While trying to figure out how to use README and Wiki more efficiently, I will figure better things out hopefully =)
