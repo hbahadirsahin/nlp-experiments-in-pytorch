@@ -10,7 +10,8 @@ from custom_optimizer import OpenAIAdam, NoamOptimizer, Padam
 from evaluation.evaluator import Evaluator
 from models.GRU import GRU
 from models.LSTM import LSTMBase
-from utils.utils import time_since, calculate_accuracy, calculate_topk_accuracy, save_best_model
+from utils.utils import time_since, save_best_model
+from scorer.accuracy_scorer import AccuracyScorer
 
 logging.config.fileConfig(fname='./config/config.logger', disable_existing_loggers=False)
 logger = logging.getLogger("Trainer")
@@ -41,6 +42,7 @@ class SingleModelTrainer(object):
 
         self.device = device
 
+        self.scorer = AccuracyScorer(self.topk)
         self.dev_evaluator, self.test_evaluator = Evaluator().evaluator_factory("single_model_evaluator", self.device)
 
     def init_optimizer(self, model):
@@ -109,7 +111,7 @@ class SingleModelTrainer(object):
                                                                                                 input=self.dev_iter,
                                                                                                 criterion=criterion,
                                                                                                 save_path=self.save_path,
-                                                                                                topk=self.topk)
+                                                                                                scorer=self.self.scorer)
                 if best_vali_acc < vali_accuracy:
                     best_vali_loss = vali_loss
                     best_vali_acc = vali_accuracy
@@ -149,7 +151,7 @@ class SingleModelTrainer(object):
                                                                                          input=self.test_iter,
                                                                                          criterion=criterion,
                                                                                          save_path=self.save_path,
-                                                                                         topk=self.topk)
+                                                                                         scorer=self.scorer)
 
         self.print_test(test_loss, test_accuracy, test_accuracy_topk)
 
@@ -177,8 +179,8 @@ class SingleModelTrainer(object):
                 predictions, kl_loss = model(batch_x)
 
                 loss = criterion(predictions, batch_y)
-                accuracy = calculate_accuracy(predictions, batch_y)
-                accuracy_topk = calculate_topk_accuracy(predictions, batch_y, topk=self.topk)
+                accuracy = self.scorer.calculate_accuracy(predictions, batch_y)
+                accuracy_topk = self.scorer.calculate_topk_accuracy(predictions, batch_y)
 
                 total_loss = loss + kl_loss / 10
 

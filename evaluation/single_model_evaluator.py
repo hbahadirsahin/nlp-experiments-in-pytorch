@@ -2,7 +2,7 @@ import logging.config
 
 import torch
 
-from utils.utils import calculate_accuracy, calculate_topk_accuracy, load_best_model
+from utils.utils import load_best_model
 
 logging.config.fileConfig(fname='./config/config.logger', disable_existing_loggers=False)
 logger = logging.getLogger("Evaluator")
@@ -12,7 +12,7 @@ class SingleModelEvaluator(object):
         self.device = device
         self.is_vali = is_vali
 
-    def evaluate_iter(self, model, input, criterion, save_path, topk):
+    def evaluate_iter(self, model, input, criterion, save_path, scorer):
         total_loss = 0
         total_acc = 0
         total_acc_topk = 0
@@ -32,8 +32,8 @@ class SingleModelEvaluator(object):
                 predictions, _ = model(batch_x)
 
                 loss = criterion(predictions, batch_y)
-                accuracy = calculate_accuracy(predictions, batch_y)
-                accuracy_topk = calculate_topk_accuracy(predictions, batch_y, topk=topk)
+                accuracy = scorer.calculate_accuracy(predictions, batch_y)
+                accuracy_topk = scorer.calculate_topk_accuracy(predictions, batch_y)
 
                 total_loss += loss.item()
                 total_acc += accuracy

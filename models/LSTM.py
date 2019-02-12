@@ -191,4 +191,4 @@ class LSTMCRF(LSTMBase):
         h = self.h2o(h)
         h *= mask.unsqueeze(2)
 
-        return self.crf._viterbi_decode(h, mask)
+        return self.crf.viterbi_decode(h, mask)

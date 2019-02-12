@@ -11,7 +11,8 @@ from evaluation.evaluator import Evaluator
 from models.GRU import GRU
 from models.LSTM import LSTMBase
 from training.single_model_trainer import SingleModelTrainer
-from utils.utils import time_since, calculate_accuracy, calculate_topk_accuracy, save_best_model
+from utils.utils import time_since, save_best_model
+from scorer.ner_scorer import NerScorer
 
 logging.config.fileConfig(fname='./config/config.logger', disable_existing_loggers=False)
 logger = logging.getLogger("Trainer")
@@ -21,6 +22,7 @@ class SingleModelNerTrainer(SingleModelTrainer):
     def __init__(self, training_properties, train_iter, dev_iter, test_iter, device):
         super(SingleModelNerTrainer, self).__init__(training_properties, train_iter, dev_iter, test_iter, device)
 
+        self.scorer = NerScorer()
         self.dev_evaluator, self.test_evaluator = Evaluator().evaluator_factory("single_model_ner_evaluator",
                                                                                 self.device)
 
@@ -30,20 +32,19 @@ class SingleModelNerTrainer(SingleModelTrainer):
         start = time.time()
         old_path = None
         best_vali_f1 = -1
-        best_vali_loss = -1
+        best_vali_token_acc = -1
         start_epoch = 1
 
         if checkpoint is not None:
-            model.load_state_dict(checkpoint["model_state_dict"])
+            model.load(checkpoint["model"])
             if self.optimizer_type == "Noam":
                 optimizer.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
             else:
                 optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
             start_epoch = checkpoint["epoch"] + 1
             best_vali_f1 = checkpoint["best_vali_f1"]
-            best_vali_loss = checkpoint["best_vali_loss"]
+            best_vali_token_acc = checkpoint["best_vali_token_acc"]
 
-        # Memory problems of PyTorch is giving me headaches...
         del checkpoint
         torch.cuda.empty_cache()
 
@@ -56,15 +57,16 @@ class SingleModelNerTrainer(SingleModelTrainer):
             self.print_epoch(start, e, total_loss, train_f1)
 
             if e % self.eval_every == 0:
-                vali_loss, vali_f1 = self.dev_evaluator.evaluate_iter(model=model,
-                                                                      input=self.dev_iter,
-                                                                      save_path=self.save_path)
+                vali_f1, vali_token_acc = self.dev_evaluator.evaluate_iter(model=model,
+                                                                           input=self.dev_iter,
+                                                                           save_path=self.save_path,
+                                                                           scorer=self.scorer)
                 if best_vali_f1 < vali_f1:
-                    best_vali_loss = vali_loss
+                    best_vali_token_acc = vali_token_acc
                     best_vali_f1 = vali_f1
-                    save_best_model(vali_f1, self.save_path)
+                    save_best_model(model, self.save_path)
 
-                self.print_validation(vali_loss, best_vali_loss, vali_f1, best_vali_f1)
+                self.print_validation(vali_token_acc, best_vali_token_acc, vali_f1, best_vali_f1)
 
             if e % self.save_every == 0:
                 filename = "saved_model_step{}.pt".format(e)
@@ -75,25 +77,26 @@ class SingleModelNerTrainer(SingleModelTrainer):
                     torch.save({
                         "epoch": e,
                         "best_vali_f1": best_vali_f1,
-                        "best_vali_loss": best_vali_loss,
-                        'model_state_dict': model.state_dict(),
+                        "best_vali_token_acc": best_vali_token_acc,
+                        'model': model,
                         'optimizer_state_dict': optimizer.optimizer.state_dict(),
                     }, out_path)
                 else:
                     torch.save({
                         "epoch": e,
                         "best_vali_f1": best_vali_f1,
-                        "best_vali_loss": best_vali_loss,
-                        'model_state_dict': model.state_dict(),
+                        "best_vali_token_acc": best_vali_token_acc,
+                        'model': model,
                         'optimizer_state_dict': optimizer.state_dict(),
                     }, out_path)
                 old_path = out_path
 
-        test_loss, test_f1 = self.test_evaluator.evaluate_iter(model=model,
-                                                               input=self.test_iter,
-                                                               save_path=self.save_path)
+        test_f1, test_token_acc = self.test_evaluator.evaluate_iter(model=model,
+                                                                    input=self.test_iter,
+                                                                    save_path=self.save_path,
+                                                                    scorer=self.scorer)
 
-        self.print_test(test_loss, test_f1)
+        self.print_test(test_token_acc, test_f1)
 
     def train(self, model, optimizer, scheduler):
         epoch_loss = 0
@@ -153,10 +156,10 @@ class SingleModelNerTrainer(SingleModelTrainer):
     def print_step(self, step, loss, f1_score):
         logger.info("Batch {}/{} - "
                     "Batch Loss: {:.4f} - "
-                    "Batch Accuracy Top-{} {:.4f}".format(step,
-                                                          len(self.train_iter),
-                                                          loss,
-                                                          f1_score))
+                    "Batch F1: {:.4f}".format(step,
+                                              len(self.train_iter),
+                                              loss,
+                                              f1_score))
 
     def print_epoch(self, start, e, total_loss, train_f1):
         logger.info("{} - "
@@ -168,14 +171,15 @@ class SingleModelNerTrainer(SingleModelTrainer):
                                               total_loss,
                                               train_f1))
 
-    def print_validation(self, vali_loss, best_vali_loss, vali_f1, best_vali_f1):
-        logger.info("Validation Loss: {:.4f} (Best: {:.4f}) - "
-                    "Validation F1: {:.4f} (Best: {:.4f}) - ".format(vali_loss,
-                                                                     best_vali_loss,
-                                                                     vali_f1,
-                                                                     best_vali_f1))
+    def print_validation(self, vali_f1, best_vali_f1, vali_token_acc, best_vali_token_acc):
+        logger.info("Validation F1: {:.4f} (Best: {:.4f}) - "
+                    "Validation Token Level Accuracy: {:.4f} (Best: {:.4f}) - ".format(vali_token_acc,
+                                                                                       best_vali_token_acc,
+                                                                                       vali_f1,
+                                                                                       best_vali_f1))
 
-    def print_test(self, test_loss, test_f1):
-        logger.info("Test Loss: {:.4f} - "
-                    "Test F1: {:.4f} - ".format(test_loss,
-                                                test_f1))
+    def print_test(self, test_token_acc, test_f1):
+        logger.info("Test F1: {:.4f} - "
+                    "Test Token Level Accuracy: {:.4f} - ".format(test_f1,
+                                                                  test_token_acc))
+

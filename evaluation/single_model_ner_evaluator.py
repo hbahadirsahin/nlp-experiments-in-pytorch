@@ -4,7 +4,7 @@ import torch
 
 from models.GRU import GRU
 from models.LSTM import LSTMBase
-from utils.utils import calculate_accuracy, calculate_topk_accuracy, load_best_model
+from utils.utils import load_best_model
 
 logging.config.fileConfig(fname='./config/config.logger', disable_existing_loggers=False)
 logger = logging.getLogger("Evaluator")
@@ -15,9 +15,10 @@ class SingleModelNerEvaluator(object):
         self.device = device
         self.is_vali = is_vali
 
-    def evaluate_iter(self, model, input, save_path):
+    def evaluate_iter(self, model, input, save_path, scorer):
         total_loss = 0
         total_f1 = 0
+        total_token_acc = 0
 
         if not self.is_vali:
             logger.info("Test mode!")
@@ -36,12 +37,13 @@ class SingleModelNerEvaluator(object):
 
                 pred_scores, predictions = model.decode(batch_x)
 
-                # total_loss += loss
-                print(predictions)
+                token_level_accuracy = scorer.token_level_accuracy(predictions, batch_y)
+
+                total_token_acc += token_level_accuracy
 
                 torch.cuda.empty_cache()
 
-            current_loss = total_loss / len(input)
             current_f1 = total_f1 / len(input)
+            current_token_acc = total_token_acc / len(input)
 
-            return current_loss, current_f1
+            return current_f1, current_token_acc

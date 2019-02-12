@@ -69,7 +69,7 @@ class DatasetLoader(object):
         else:
             raise KeyError("Sentence_field is undefined!")
 
-        ner_label_field = data.Field(sequential=seq_ner, init_token="<start>", eos_token="<end>")
+        ner_label_field = data.Field(sequential=seq_ner, init_token="<start>", eos_token="<end>", unk_token=None)
         category_label_field = data.LabelField(sequential=seq_cat)
         return sentence_field, ner_label_field, category_label_field
 

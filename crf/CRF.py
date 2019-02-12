@@ -78,7 +78,7 @@ class ConditionalRandomField(nn.Module):
         nll = forward_score - gold_score
         return nll if not reduce else torch.mean(nll)
 
-    def _viterbi_decode(self, x, mask):
+    def viterbi_decode(self, x, mask):
         batch_size, seq_length, tag_size = x.size()
 
         backpointers = torch.LongTensor().to(self.device)
