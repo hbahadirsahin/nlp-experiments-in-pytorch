@@ -1,24 +1,13 @@
 # README 
 
-## Update 31-01-2019
-
-- Huge NER task and bugfix update is pushed tonight.
-- I have not implemented performance metrics for NER, yet. 
-- Before details, I only tested whether training and evaluating flows are working (and they are). But, I do not guarantee NER models will provide good result for now. Hopefully, I will make necessary checks regarding to performance in upcoming days. 
-- Updates:
-  - LSTM.py is updated. I created an "LSTMBase" object to prevent myself from c/p'ing same constructor initializations. Similar changes will be applied to other models, soon.
-  - LSTMCRF is added into LSTM.py. Change "config.json/training_properties/learner" to "lstmcrf" to use it. Other "modelnameCRF" objects will be added for the rest of the models in future.
-  - "single_model_ner_trainer.py" and "single_model_ner_evaluator.py" are created for NER tasks.
-  - Trainer end Evaluator factories are updated w.r.t. newly added flows.
-  - CRF.py is updated w.r.t. runtime exceptions =)
-  - DatasetLoader is updated to add "<start>" and "<end>" tags as init and end_of_sentence tokens. 
-  - DatasetLoader is updated to fill its fields w.r.t. "task" selected. 
-  - DatasetLoader is updated to build its vocabulary from whole dataset (it was built by using training set only, but it has major problematic effects on NER training). My reference is an issue and its responses in AllenNLP's github =)
-  - Updates in "requirement.txt". Note that DO NOT USE GENSIM==3.7.0 since it has a major bug related to loading FastText models! 
-- Bugfixes:
-  - I had to make another fix in "torchtext" code. Please check updated "changes in the torchtext.txt" file. I don't know why but if a sentence has a quotation mark that isn't closed, torchtext assumes everything between the first and second quotation marks is a single data point (I found out that there were sentences with +1000 words in my NER tests). By c/p'ing the latest change to the respective method, you can fix this bug.
-  - If selected training task is "NER", I forbid the usage of stop word elimination in preprocessing (sentence and tag lengths do not match otherwise).
-  - Bugfix in LSTM and GRU initialization.
+## Update 04-02-2019
+ 
+- Code development for NER evaluation (F1 scores for tag based, bio+tag based) still continues. I slowed down it a little bit due to personal life issues.
+- Decided to simplify README.md and use [Wiki](https://github.com/hbahadirsahin/nlp-experiments-in-pytorch/wiki) of this repository.
+  - All entries related to the updates in January 2019 are moved to [related Wiki page](https://github.com/hbahadirsahin/nlp-experiments-in-pytorch/wiki/Previous-Updates-(January-2019)). 
+  - I will save my experiment results in Wiki, too.
+  - While trying to figure out how to use README and Wiki more efficiently, I will figure better things out hopefully =)
+- As you may noticed, TextCNN experiments are finished. I will continue with LSTM/GRU experiments (first, I have to figure out a good parameter set =)).
  
 # Table Of Contents
 
@@ -35,7 +24,8 @@
 - [Results](#results)
   - [Test Results for TextCNN](#test-results-for-textcnn)
 - [Previous Updates](#previous-updates)
-  - [January 2019](#january-2019)
+  - [January 2019 - Wiki Link](https://github.com/hbahadirsahin/nlp-experiments-in-pytorch/wiki/Previous-Updates-(January-2019))
+  - [February 2019](#february-2019)
 - [References for Code Development](#references-for-code-development)
 
 ## Introduction
@@ -192,7 +182,7 @@ Note 2 (**Update: 22-01-2019**): Most of the English-language experiments are ex
 |12|English|25| Fasttext | Fasttext | nonstatic	| 65.9558 | 91.1536 |
 |13|English|49| Fasttext | zeros | static	| 51.3862 | 78.7806 |
 |14|English|49| Fasttext | zeros | nonstatic	| 59.2086*  | 84.8054 |
-|15|English|49| Fasttext | Fasttext | static	| NaN (TBA)  | NaN (TBA) |
+|15|English|49| Fasttext | Fasttext | static	| 51.7878 | 79.9472 |
 |16|English|49| Fasttext | Fasttext | nonstatic	| 55.3833*  | 80.4958 |
 
 * Note that the experiment 14 resulted with a better score than 16, unlike other similar setups. The main reason is, I changed the "learning_rate" of the optimizer to a smaller value for the experiment 16 (well, for the sake of the experiment =)), and it appears that smaller learning rate made the learning process a bit slower (in terms of number of epochs). If I can find a chance to run this experiment again in Google Cloud (a.k.a. have enough credit to run it one more time), I will update the learning rate properly. 
@@ -201,116 +191,7 @@ Note 2 (**Update: 22-01-2019**): Most of the English-language experiments are ex
 
 In this title, I will save the previous updates for me and the visitors to keep track.
 
-### January 2019
-
-####  29-01-2019
-
-- No bugfix/update commit.
-  - I said I will commit more smaller updates, but I failed to follow it =) 
-  - Still trying to develop/fix NER training process. 
-  - Found minor bugs in several places in the project.
-  - Hopefully, a big update will come till the end of this week.
-- Experiment result update.
-
-#### 25-01-2019
-
-- I am mastering PyTorch while developing this repository. While I was following the LSTM/GRU tutorials in PyTorch's website, it was using two optimizers for encoder and decoder. That's why I separated my training flow. But, I learned that it can be done by single forward() and single optimizer, eventually. Hence, I added the forward() method to "ConvDeconvCNN" object and its trainer will be initialized as "single_model_trainer". 
-  - I may remove "multiple_model_trainer" and its respective evaluator, but I am not sure about it for now.
-- CRF's forward() method is updated, and a boolean "reduce" parameter is added. If it is true, then the "negative loglikelihood" return will be averaged. 
-- Due to difference between, classification and NER training flows, I am implementing a new trainer/evaluator. Also, I will implement performance metric calculators for NER (like precision, recall and F1 score).
-  - My initial plan is to push new trainer/evaluator in a week.
-- This weekend (starting tonight), I will finalize the last 3 experiments on Google Cloud. 
-
-#### 23-01-2019
-
-- Conditional Random Field (CRF) class is added into the project. I have not tested it yet. So, I am pretty sure it has lots of bugs =) (wait for the future updates).
-  - A new property "training_properties/task" is defined in config.json. Details are in "/config/README.md"
-  - Dataset reader code is updated to handle NER datasets. Previous version was reading the sentence and category columns of the dataset while ignoring ner column. Now, it reads NER column, assigns the column to the respective field, and builds NER vocabulary, if the "task" property is "ner".
-  - Eventually, I made some changes in main.py. I added CRF into the model creation method, but it is for testing. I don't have any plans to keep it there. 
-  - NER-counterparts of the category-related actions are added to main.py.
-- Again, CRF is not tested! In near future, I will spend some time on doing basic tests to idenfity bugs, missings and improvement possibilities.  
-- First, but not last, batch of bugfixes have been pushed.
-  - All problematic things related to DatasetLoader have been fixed (Check this [commit](https://github.com/hbahadirsahin/nlp-experiments-in-pytorch/commit/1b66f424b59048245b3f046295590388d49cddca) for details).
-- Second bugfix update of the day. Note that I continue to push such small bugfixes to be able to revert back easily.
-  - CRF initialization related bugs have been fixed (Check this [commit](https://github.com/hbahadirsahin/nlp-experiments-in-pytorch/commit/68b1f62a3eaae27215ab869a01b767b0db9eb6e4) for details).
-
-#### 21-01-2019
-
-- All print-oriented logs are converted to logging library-based loggers.
-- `/config/config.logger` file is added as a logger configuration file.
-- README.md changes
-  - Table of contents added.
-  - Format changes (title revisions, section replacements, etc.).
-
-#### 20-01-2019
-
-- Thanks to Tesla V100, I got the latest experiment results in 20 hours (yay!). 
-- I find out that "Padam" optimizer works flawless w.r.t. usual Adam. It is more robust through each step and have not encountered any weird, numerical problems (which I've seen a lot while using Adam). So, if you are reading this and forking/copy-pasting this library to train your own models, I strongly suggest you to use Padam as your optimizer.
-- I do not have any development/fix updates. 
-  - However, I am working on CRF and plug-in/out CRF-Layer codes (Did I mention I hate CRF?).
-  - Also, replacing "print()" oriented logs with "logging" library.
-
-#### 19-01-2019
-
-- Finally, I got another test score (it took 1 month to finish 20 epoch in a workstation-strong CPU =)). 
-- Currently, I have no development and/or fix update. 
-- Instead, I am trying to find a solution for my resource bottleneck. In last 3 days, I was struggling to understand Google Cloud and its compute engine for my mental goodness. After 3 painful, soul-crashing days (GPU quota problem, GPU quota ticket problem, ssh problem, python problem, library problem, pip problem, fucking no module "xyz" is found problem), I could start a training in a machine with Tesla V100 (every poor human being's dream card).
-  - Hopefully, by opening lots of new google accounts (to leverage initial $300 credit, until my unique credit cards diminish), I will be able to get several test results faster.  
-
-#### 16-01-2019
-
-- I added two new properties to `config.json/dataset_properties` (min_freq and fixed_length) to reduce memory consumption. You are still able to use dynamic input size and assign every seen word in your vocabulary if you have enough memory. Check `config/README.md` for detailed information.
-- Sadly, I encountered the worst problem in PyTorch related to CUDA OOM error, which is model reloading increases the memory consumption =/ In short, I could start a training process (English dataset/non-static/zeroes oov/text_cnn) and it iterated for 2 epochs without any problem (stable memory consumption with 1.5GB of free GPU memory). Then, I saved the model to continue the process later. However, after I loaded the model, the code directly raised CUDA OOM error. I tried to apply things that I've read in PyTorch's forums; however, those so called fixes did not help me. Things that I've found and tried:
-  - I tried to delete the checkpoint reference after model loading (https://discuss.pytorch.org/t/gpu-memory-usage-increases-by-90-after-torch-load/9213)
-  - I tried to catch OOM error and free some memory after it (https://discuss.pytorch.org/t/how-to-clean-gpu-memory-after-a-runtimeerror/28781/2?u=ptrblck)
-- In conclusion, if you have a spare computer that can do your training until the end, I am %100 sure that this repository does not have memory leak. As long as your input and model sizes are reasonable, it will train. However, if you do not have such a luxury, I can't do anything about it. But if you have any suggestions, I'd be really happy to listen/apply =) 
-
-#### 15-01-2019
-
-- I created a README for the config.json. It can be found in newly created config folder.
-- Last night, I did some research, basic math (to calculate model size) and experiments about possible memory leaks to prevent CUDA OOM errors. Basically, I could not find any memory leak in normal memory and GPU memory. In conclusion, my model (for English) is too big to train in my own GPU. 
-  - Eventually, I did not want to play with model parameters to reduce the size, but I decided to reduce it by dataset level.
-  - I have not fixed any sentence length and used all words in my vocabularies (min_freq=1). In Turkish experiments, since the dataset is not big, I did not face any problems, its a total different story in English. 
-  - I am currently testing the fixed_length and min_freq parameters to control my model size. Until now, tests are going well. Depending on the results, I will put this two parameters into the config.json.
-
-#### 14-01-2019
-
-- After I find out vocabulary caching has bugs and could not fix it, I removed vocabulary caching functionality from code (both save/load parts). 
-  - Even though saving is not a problem, to be able to load a Vocab object, one needs to do too much workaround. I wasted my 6 hours to make it work, but no chance (Vocab objects can be loaded by pickle, but all dataset iterators also want to hold a Vocab object inside which can be done by using `build_vocab()` method in normal dataset reading process. If one loads external, cached vocabularies, you jump this step and can't feed these iterators with vocab objects, a.k.a. can't train due to missing Vocab objects in iterator).
-  - I will wait for torchtext to provide native support to vocabulary saving/loading.
-- I will spend some time on monitoring and optimizing my models/training flows for GPU memory optimization. In my laptop, I am bounded with 3GB GPU memory, and I cannot train big models (I have to say that I did not face such problems in Tensorflow for same model/dataset/parameter sets)
-
-#### 13-01-2019
-
-- Final fixes are applied in transformer model, and it is trainable.
-- However, depending on the parameters and model size, it can produce CUDA OOM (out of memory) error pretty easily.
-  - Related to the memory error, somehow PyTorch seems can't handle CUDA memory as good as Tensorflow. I will do some research about it to optimize GPU memory in the following days (using `torch.cuda.empty_cache()` for this purpose in training steps isn't enough).
-- There are some minor updates in training process (both in single and multiple trainers).
-  - Since NoamOptimizer does not inherit the PyTorch optimization, I put checkers into the trainers for this optimizer whenever ".zero_grad()", ".step()", ".save()" and ".load()" functions are called for the optimization object.
-- A new optimizer is added into custom_optimizer: "Padam". The reference paper is [Closing the Generalization Gap of Adaptive Gradient Methods in Training Deep Neural Networks](https://arxiv.org/pdf/1806.06763.pdf).
-  - Yesterday, I was reading reddit/ML about Adam-related problems and saw this paper. I have not tested it, in terms of optimality/training-test results, but I will give it a shot.
-
-#### 12-01-2019
-
-- I started to work on transformer_google model. Obviously, it cannot be trained by its current version.
-- I have fixed several major bugs. 
-  - Classifier block's keep_prob parameter was missing. Hence, it is added to config.json as well as the model flow.
-  - Nobody told me that in MultiHeadedAttention, model dimension should be divisible by the number of heads (attention layers). This lack of knowledge costed me 2 hours, but it is fixed (and will be checked inside the model).
-- Tests are going on (not unit tests obviously)
-- README.MD changes.
-- MIT Licence is added.
-
-#### 11-01-2019
-
-I stopped being a lazy guy and changed the current code execution stuff:
-
-- All hard-coded, property holding dictionaries inside main.py are removed.
-- Instead, a "config.json" file is created and the main code will ask this file's path (as argument) from you to run the project, properly. 
-- Detailed description of this file will be added into this readme (but until I write it, you can always open the file. Believe me, it is not too complicated =)). 
-- With respect to new kind of property handling, I changed every related variable/argument initialization in the main and model files. 
-- ~~A complete README.MD overhaul is coming on its way~~. (Done!)
-- Still, I have not tested Transformer code. Don't be mad at me if you c/p it and can't get results for your homework(s) =)
-- Tests are really really slow in CPU workstation and I still play games in my daily-life computer instead of running experiments.
+## February 2019
 
 ## References for Code Development
 
