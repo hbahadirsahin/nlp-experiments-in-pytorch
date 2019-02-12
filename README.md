@@ -2,7 +2,7 @@
 
 ## Update 12-02-2019
  
-- Since I separated classification and NER task trainers/evaluators, I decided to create "scorer" folder to prevent bloating "utils.py" with metric calculation functions.
+- Since I separated classification and NER trainers/evaluators, I decided to create "scorer" folder to prevent bloating "utils.py" with metric calculation functions.
  - "scorer/" will contain current and future metric calculation methods (not giving too much details, since you can always check it =)).
 - I encountered some bugs in NER training and evaluation processes due to save/load functionalities. Hopefully, I fully fixed them. but if anyone out there reading this and using this repository, if you find any bugs, just let me know.
 - Made some minor changes in namings and indexing (not much crucial stuff, details can be found in git commit message).
