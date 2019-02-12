@@ -1,13 +1,12 @@
 # README 
 
-## Update 04-02-2019
+## Update 12-02-2019
  
-- Code development for NER evaluation (F1 scores for tag based, bio+tag based) still continues. I slowed down it a little bit due to personal life issues.
-- Decided to simplify README.md and use [Wiki](https://github.com/hbahadirsahin/nlp-experiments-in-pytorch/wiki) of this repository.
-  - All entries related to the updates in January 2019 are moved to [related Wiki page](https://github.com/hbahadirsahin/nlp-experiments-in-pytorch/wiki/Previous-Updates-(January-2019)). 
-  - I will save my experiment results in Wiki, too.
-  - While trying to figure out how to use README and Wiki more efficiently, I will figure better things out hopefully =)
-- As you may noticed, TextCNN experiments are finished. I will continue with LSTM/GRU experiments (first, I have to figure out a good parameter set =)).
+- Since I separated classification and NER task trainers/evaluators, I decided to create "scorer" folder to prevent bloating the "utils.py" with metric calculation functions.
+ - "scorer/" will contain current and future metric calculation methods (not giving too much details, since you can always check it =)).
+- I encountered some bugs in NER training and evaluation processes due to save/load functionalities. Hopefully, I fully fixed them. but if anyone out there reading this and using this repository, if you find any bugs, just let me know.
+- Made some minor changes in namings and indexing (not much crucial stuff, details can be found in git commit message).
+- Personal life issues still continues, hence slow development-slow experiment mode still continues.
  
 # Table Of Contents
 
@@ -192,6 +191,15 @@ Note 2 (**Update: 22-01-2019**): Most of the English-language experiments are ex
 In this title, I will save the previous updates for me and the visitors to keep track.
 
 ## February 2019
+
+### 04-02-2019
+
+- Code development for NER evaluation (F1 scores for tag based, bio+tag based) still continues. I slowed down it a little bit due to personal life issues.
+- Decided to simplify README.md and use [Wiki](https://github.com/hbahadirsahin/nlp-experiments-in-pytorch/wiki) of this repository.
+  - All entries related to the updates in January 2019 are moved to [related Wiki page](https://github.com/hbahadirsahin/nlp-experiments-in-pytorch/wiki/Previous-Updates-(January-2019)). 
+  - I will save my experiment results in Wiki, too.
+  - While trying to figure out how to use README and Wiki more efficiently, I will figure better things out hopefully =)
+- As you may noticed, TextCNN experiments are finished. I will continue with LSTM/GRU experiments (first, I have to figure out a good parameter set =)).
 
 ## References for Code Development
 
