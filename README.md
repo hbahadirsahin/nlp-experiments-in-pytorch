@@ -61,6 +61,8 @@ I try to keep every part of the project clean and easy to follow. Even though th
 - `./model/xyz.py` contains network objects.
 - `./model/Util_xyz.py` contains custom-defined objects that are used in `xyz`.
 - `./optimizer/custom_optimizer.py` contains custom-defined optimizer objects.
+- `./scorer/accuracy_scorer.py` contains classification accuracy metric calculations.
+- `./scorer/ner_scorer.py` contains NER-task related metric calculations.
 - `./training/trainer.py` is a class that returns the necessary trainer for the user's selected learning model
 - `./training/xyz_trainer.py` methods are the trainer functions for specified models.
 - `./utils/utils.py` contains both utility and common methods that are being used in several places in the project.
