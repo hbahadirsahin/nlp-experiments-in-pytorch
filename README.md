@@ -3,9 +3,9 @@
 ## Update 21-02-2019
  
 - Precision, recall and F1 metrics are added into "ner_scorer.py". 
- - Since these metrics must be calculated for full set (not batch-based), I changed the evaluator flow a little bit.
- - Evaluator reports mean precision, recall and F1 scores over all tags/named-entities. 
- - Detailed, tag-based, scores can be also reported by activating boolean detailed_ner_log (default value is true).
+  - Since these metrics must be calculated for full set (not batch-based), I changed the evaluator flow a little bit.
+  - Evaluator reports mean precision, recall and F1 scores over all tags/named-entities. 
+  - Detailed, tag-based, scores can be also reported by activating boolean detailed_ner_log (default value is true).
 - In LSTM, I encountered a minor bug while using "bidirectional=true". Hopefully, it is fixed (at least training/evaluating was working on a small set).
 - I tried a larger set to see whether my code is working but I got a "cuda illegal memory access" error. I think it is because OOM issues, but I am not sure for now. 
 - An "allowed_transition" stuff will be added in near future (like allennlp/conditional_random_field.py).
