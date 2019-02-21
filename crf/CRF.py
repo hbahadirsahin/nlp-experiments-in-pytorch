@@ -21,10 +21,10 @@ class ConditionalRandomField(nn.Module):
         # Matrix of transition parameters. Entry i,j is the score of transitioning *to* i *from* j
         self.transition = nn.Parameter(torch.Tensor(self.tag_size, self.tag_size)).to(self.device)
 
-        self.transition.data[self.start_id, :] = -10000.  # no transition to SOS
-        self.transition.data[:, self.end_id] = -10000.  # no transition from EOS except to PAD
-        self.transition.data[:, self.pad_id] = -10000.  # no transition from PAD except to PAD
-        self.transition.data[self.pad_id, :] = -10000.  # no transition to PAD except from EOS
+        self.transition.data[self.start_id, :] = -10000.  # no transition to start
+        self.transition.data[:, self.end_id] = -10000.  # no transition from end except to pad
+        self.transition.data[:, self.pad_id] = -10000.  # no transition from pad except to pad
+        self.transition.data[self.pad_id, :] = -10000.  # no transition to pad except from end
         self.transition.data[self.pad_id, self.end_id] = 0.
         self.transition.data[self.pad_id, self.pad_id] = 0.
 

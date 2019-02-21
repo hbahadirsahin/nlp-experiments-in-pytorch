@@ -4,25 +4,23 @@ import time
 
 import torch
 import torch.nn as nn
-import torch.optim as optim
 
-from custom_optimizer import OpenAIAdam, NoamOptimizer, Padam
 from evaluation.evaluator import Evaluator
 from models.GRU import GRU
 from models.LSTM import LSTMBase
+from scorer.ner_scorer import NerScorer
 from training.single_model_trainer import SingleModelTrainer
 from utils.utils import time_since, save_best_model
-from scorer.ner_scorer import NerScorer
 
 logging.config.fileConfig(fname='./config/config.logger', disable_existing_loggers=False)
 logger = logging.getLogger("Trainer")
 
 
 class SingleModelNerTrainer(SingleModelTrainer):
-    def __init__(self, training_properties, train_iter, dev_iter, test_iter, device):
-        super(SingleModelNerTrainer, self).__init__(training_properties, train_iter, dev_iter, test_iter, device)
+    def __init__(self, training_properties, datasetloader, device):
+        super(SingleModelNerTrainer, self).__init__(training_properties, datasetloader, device)
 
-        self.scorer = NerScorer()
+        self.scorer = NerScorer(datasetloader.ner_vocab)
         self.dev_evaluator, self.test_evaluator = Evaluator().evaluator_factory("single_model_ner_evaluator",
                                                                                 self.device)
 
@@ -57,10 +55,10 @@ class SingleModelNerTrainer(SingleModelTrainer):
             self.print_epoch(start, e, total_loss, train_f1)
 
             if e % self.eval_every == 0:
-                vali_f1, vali_token_acc = self.dev_evaluator.evaluate_iter(model=model,
-                                                                           input=self.dev_iter,
-                                                                           save_path=self.save_path,
-                                                                           scorer=self.scorer)
+                vali_f1, vali_precision, vali_recall, vali_token_acc = self.dev_evaluator.evaluate_iter(model=model,
+                                                                                                        input=self.dev_iter,
+                                                                                                        save_path=self.save_path,
+                                                                                                        scorer=self.scorer)
                 if best_vali_f1 < vali_f1:
                     best_vali_token_acc = vali_token_acc
                     best_vali_f1 = vali_f1
@@ -91,10 +89,10 @@ class SingleModelNerTrainer(SingleModelTrainer):
                     }, out_path)
                 old_path = out_path
 
-        test_f1, test_token_acc = self.test_evaluator.evaluate_iter(model=model,
-                                                                    input=self.test_iter,
-                                                                    save_path=self.save_path,
-                                                                    scorer=self.scorer)
+        test_f1, test_precision, test_recall, test_token_acc = self.test_evaluator.evaluate_iter(model=model,
+                                                                                                 input=self.test_iter,
+                                                                                                 save_path=self.save_path,
+                                                                                                 scorer=self.scorer)
 
         self.print_test(test_token_acc, test_f1)
 
@@ -182,4 +180,3 @@ class SingleModelNerTrainer(SingleModelTrainer):
         logger.info("Test F1: {:.4f} - "
                     "Test Token Level Accuracy: {:.4f} - ".format(test_f1,
                                                                   test_token_acc))
-

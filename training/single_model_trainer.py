@@ -18,7 +18,7 @@ logger = logging.getLogger("Trainer")
 
 
 class SingleModelTrainer(object):
-    def __init__(self, training_properties, train_iter, dev_iter, test_iter, device):
+    def __init__(self, training_properties, datasetloader, device):
         self.task = training_properties["task"]
         self.optimizer_type = training_properties["optimizer"]
         self.learning_rate = training_properties["learning_rate"]
@@ -36,9 +36,9 @@ class SingleModelTrainer(object):
         self.amsgrad = training_properties["amsgrad"]
         self.partial_adam = training_properties["partial_adam"]
 
-        self.train_iter = train_iter
-        self.dev_iter = dev_iter
-        self.test_iter = test_iter
+        self.train_iter = datasetloader.train_iter
+        self.dev_iter = datasetloader.val_iter
+        self.test_iter = datasetloader.test_iter
 
         self.device = device
 

@@ -29,6 +29,7 @@ def load_best_model(path, filename="saved_best_model.pt"):
     model = torch.load(out_path)
     return model
 
+
 def as_minutes(s):
     m = math.floor(s / 60)
     s -= m * 60

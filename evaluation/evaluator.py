@@ -17,6 +17,7 @@ class Evaluator(object):
             test_evaluator = SingleModelEvaluator(device, is_vali=False)
             return dev_evaluator, test_evaluator
         elif type == "single_model_ner_evaluator":
+            logger.info("Evaluator type is %s", type)
             dev_evaluator = SingleModelNerEvaluator(device, is_vali=True)
             test_evaluator = SingleModelNerEvaluator(device, is_vali=False)
             return dev_evaluator, test_evaluator

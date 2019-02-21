@@ -9,12 +9,12 @@ logger = logging.getLogger("Trainer")
 
 class Trainer(object):
     @staticmethod
-    def trainer_factory(type, training_properties, train_iter, dev_iter, test_iter, device):
+    def trainer_factory(type, training_properties, datasetloader, device):
         if type == "single_model_trainer":
             logger.info("Trainer type is %s", type)
-            return SingleModelTrainer(training_properties, train_iter, dev_iter, test_iter, device)
+            return SingleModelTrainer(training_properties, datasetloader, device)
         elif type == "single_model_ner_trainer":
             logger.info("Trainer type is %s", type)
-            return SingleModelNerTrainer(training_properties, train_iter, dev_iter, test_iter, device)
+            return SingleModelNerTrainer(training_properties, datasetloader, device)
         else:
             ValueError("Unrecognized trainer type")

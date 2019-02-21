@@ -98,9 +98,9 @@
     "lstm": {
       "dropout_type": "bernoulli",
       "keep_prob": 0.5,
-      "hidden_dim": 300,
-      "num_layers": 1,
-      "bidirectional": false,
+      "hidden_dim": 100,
+      "num_layers": 2,
+      "bidirectional": true,
       "bias": true
     },
     "transformer_google": {
@@ -127,8 +127,8 @@
     "partial_adam": 0.25,
     "weight_decay": 0,
     "momentum": 0.9,
-    "norm_ratio": 0.25,
-    "epoch": 20,
+    "norm_ratio": 5,
+    "epoch": 10,
     "print_every_batch_step": 250,
     "save_every_epoch": 1,
     "topk": [

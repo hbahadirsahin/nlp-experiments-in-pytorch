@@ -15,9 +15,11 @@ class SingleModelNerEvaluator(object):
         self.device = device
         self.is_vali = is_vali
 
-    def evaluate_iter(self, model, input, save_path, scorer):
+    def evaluate_iter(self, model, input, save_path, scorer, detailed_ner_log=True):
         total_loss = 0
-        total_f1 = 0
+        macro_f1 = 0
+        macro_precision = 0
+        macro_recall = 0
         total_token_acc = 0
 
         if not self.is_vali:
@@ -26,6 +28,9 @@ class SingleModelNerEvaluator(object):
         else:
             logger.info("Validation mode!")
         model.eval()
+
+        full_ground_truth_list = list()
+        full_prediction_list = list()
 
         with torch.no_grad():
             for batch in input:
@@ -37,13 +42,26 @@ class SingleModelNerEvaluator(object):
 
                 pred_scores, predictions = model.decode(batch_x)
 
-                token_level_accuracy = scorer.token_level_accuracy(predictions, batch_y)
+                batch_y = batch_y.permute(1, 0)
+
+                scorer.token_level_accuracy(predictions, batch_y)
+
+                full_ground_truth_list.extend(batch_y.tolist())
+                full_prediction_list.extend(predictions)
+
+                token_level_accuracy = scorer.token_accuracy
 
                 total_token_acc += token_level_accuracy
 
                 torch.cuda.empty_cache()
 
-            current_f1 = total_f1 / len(input)
+            scorer.f1_score(full_prediction_list, full_ground_truth_list)
+            macro_f1 = scorer.avg_macro_f1
+            macro_precision = scorer.avg_macro_precision
+            macro_recall = scorer.avg_macro_recall
             current_token_acc = total_token_acc / len(input)
 
-            return current_f1, current_token_acc
+            if detailed_ner_log:
+                scorer.print_detailed_score_log()
+
+            return macro_f1, macro_precision, macro_recall, current_token_acc

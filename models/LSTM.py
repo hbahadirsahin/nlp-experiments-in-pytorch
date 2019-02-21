@@ -66,11 +66,11 @@ class LSTMBase(nn.Module):
 
     def init_hidden(self, batch_size):
         if self.bidirectional is True:
-            return (Variable(torch.zeros(1, batch_size, self.hidden_dim * 2).to(self.device)),
-                    Variable(torch.zeros(1, batch_size, self.hidden_dim * 2).to(self.device)))
+            return (Variable(torch.zeros(self.num_layers * 2, batch_size, self.hidden_dim).to(self.device)),
+                    Variable(torch.zeros(self.num_layers * 2, batch_size, self.hidden_dim).to(self.device)))
         else:
-            return (Variable(torch.zeros(1, batch_size, self.hidden_dim).to(self.device)),
-                    Variable(torch.zeros(1, batch_size, self.hidden_dim).to(self.device)))
+            return (Variable(torch.zeros(self.num_layers, batch_size, self.hidden_dim).to(self.device)),
+                    Variable(torch.zeros(self.num_layers, batch_size, self.hidden_dim).to(self.device)))
 
     def initialize_embeddings(self):
         logger.info("> Embeddings")
