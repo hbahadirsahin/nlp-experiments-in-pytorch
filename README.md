@@ -1,17 +1,14 @@
 # README 
 
-## Update 21-02-2019
+## Update 02-03-2019
  
-- Precision, recall and F1 metrics are added into "ner_scorer.py". 
-  - Since these metrics must be calculated for full set (not batch-based), I changed the evaluator flow a little bit.
-  - Evaluator reports mean precision, recall and F1 scores over all tags/named-entities. 
-  - Detailed, tag-based, scores can be also reported by activating boolean detailed_ner_log (default value is true).
-- In LSTM, I encountered a minor bug while using "bidirectional=true". Hopefully, it is fixed (at least training/evaluating was working on a small set).
-- I tried a larger set to see whether my code is working but I got a "cuda illegal memory access" error. I think it is because OOM issues, but I am not sure for now. 
-- An "allowed_transition" stuff will be added in near future (like allennlp/conditional_random_field.py).
-- Also, I updated my libraries, hence requirements.txt is changed, too =)
-- Personal life issues still continues, hence slow development-slow experiment mode still continues.
- 
+- Recently, I read "Adaptive Gradient Methods with Dynamic Bound of Learning Rate" paper ([paper](https://openreview.net/forum?id=Bkg3g2R9FX) - [github](https://github.com/Luolc/AdaBound)) and decided to add it into my project. The presented results are promising, but I have not test this new optimizer in my own experiments (for now).
+  - Since Adabound can be installed via `pip install`, I updated the requirement.txt. 
+  - `config.json` is also updated, two new parameters are added related to Adabound.
+- Finally, personal issues are finalizing (new job, better state of mind =)). 
+  - I plan to add more models for text categorization starting with new Transformer codes (check To-Do list for details).  
+  - After two new Transformer code, I decide to add Elmo and BERT support (I won't train my own models but will use pretrained Turkish-English models).
+
 # Table Of Contents
 
 - [Introduction](#introduction)
@@ -48,6 +45,7 @@ Before diving into details, the python and library versions are as follows:
 - setuptools 40.8.0 (Hell no idea why pipreqs put this into requirements.txt)
 - spacy 2.0.16 (for interactive evaluation only)
 - gensim 3.6.0 (for fasttext embeddings, as well as OOV Embedding generation.)
+- adabound 0.0.5
 
 ## Project Skeleton
 
@@ -213,6 +211,18 @@ In this title, I will save the previous updates for me and the visitors to keep 
  - "scorer/" will contain current and future metric calculation methods (not giving too much details, since you can always check it =)).
 - I encountered some bugs in NER training and evaluation processes due to save/load functionalities. Hopefully, I fully fixed them. but if anyone out there reading this and using this repository, if you find any bugs, just let me know.
 - Made some minor changes in namings and indexing (not much crucial stuff, details can be found in git commit message).
+- Personal life issues still continues, hence slow development-slow experiment mode still continues.
+
+### Update 21-02-2019
+ 
+- Precision, recall and F1 metrics are added into "ner_scorer.py". 
+  - Since these metrics must be calculated for full set (not batch-based), I changed the evaluator flow a little bit.
+  - Evaluator reports mean precision, recall and F1 scores over all tags/named-entities. 
+  - Detailed, tag-based, scores can be also reported by activating boolean detailed_ner_log (default value is true).
+- In LSTM, I encountered a minor bug while using "bidirectional=true". Hopefully, it is fixed (at least training/evaluating was working on a small set).
+- I tried a larger set to see whether my code is working but I got a "cuda illegal memory access" error. I think it is because OOM issues, but I am not sure for now. 
+- An "allowed_transition" stuff will be added in near future (like allennlp/conditional_random_field.py).
+- Also, I updated my libraries, hence requirements.txt is changed, too =)
 - Personal life issues still continues, hence slow development-slow experiment mode still continues.
 
 ## References for Code Development
