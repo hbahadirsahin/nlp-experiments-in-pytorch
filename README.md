@@ -42,10 +42,10 @@ In this repository, I implement popular learning models and extend them with dif
 Before diving into details, the python and library versions are as follows: 
 
 - python 3.6 (works well with 3.7, too)
-- torch 1.0.0
+- torch 1.0.1
 - torchtext 0.3.1
 - numpy 1.15.4 (due to PyTorch 1.0)
-- setuptools 40.6.2 (Hell no idea why pipreqs put this into requirements.txt)
+- setuptools 40.8.0 (Hell no idea why pipreqs put this into requirements.txt)
 - spacy 2.0.16 (for interactive evaluation only)
 - gensim 3.6.0 (for fasttext embeddings, as well as OOV Embedding generation.)
 
