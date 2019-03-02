@@ -36,11 +36,13 @@ parameters and printing/saving/evaluating related stuff:
 - `learner`: String parameter to choose which learning algorithm to use. It can be "text_cnn", "gru", "lstm", "char_cnn",
 "vdcnn", "conv_deconv_cnn", "transformer_google" and "lstmcrf" (Last Update: 31-01-2019) 
 - `task`: String parameter to choose which task the learner will be trained on. It can be "classification" or "ner".
-- `optimizer`: String parameter to choose which optimizer to use. It can be "Adam", "SGD", "OpenAIAdam", "Noam", and "Padam".
+- `optimizer`: String parameter to choose which optimizer to use. It can be "Adam", "SGD", "OpenAIAdam", "Noam", "Padam" and "adabound".
 - `learning_rate`: Self-explanatory. Takes float value.
+- `final_learning_rate`: This float-valued parameter is used in Adabound optimizer which is the learning rate for SGD inside Adabound method. 
 - `scheduler_type`: String parameter to choose a scheduler for OpenAIAdam optimizer (it has no usage for others). It can
 be "cos", "constant" or "linear".
 - `amsgrad`: Boolean parameter to choose whether to use amsgrad or not in Padam optimizer.
+- `amsbound`: Boolean parameter to choose whether to use amsbound or not in Adabound optimizer.
 - `partial_adam`: Float parameter to define the "partial" parameter in Padam. It can take values between (0, 0.5]
 - `weight_decay`: Float parameter for L2 normalization term. *Note that for my test cases, any value bigger than 0,
 literally fucked my performance.*
