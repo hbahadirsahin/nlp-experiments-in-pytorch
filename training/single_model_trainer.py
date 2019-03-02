@@ -6,6 +6,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
+from adabound import adabound
+
 from custom_optimizer import OpenAIAdam, NoamOptimizer, Padam
 from evaluation.evaluator import Evaluator
 from models.GRU import GRU
@@ -36,6 +38,9 @@ class SingleModelTrainer(object):
         self.amsgrad = training_properties["amsgrad"]
         self.partial_adam = training_properties["partial_adam"]
 
+        self.final_learning_rate = training_properties["final_learning_rate"]
+        self.amsbound = training_properties["amsbound"]
+
         self.train_iter = datasetloader.train_iter
         self.dev_iter = datasetloader.val_iter
         self.test_iter = datasetloader.test_iter
@@ -62,6 +67,9 @@ class SingleModelTrainer(object):
         elif self.optimizer_type == "Padam":
             return Padam(model.parameters(), lr=self.learning_rate, amsgrad=self.amsgrad, partial=self.partial_adam,
                          weight_decay=self.weight_decay)
+        elif self.optimizer_type == "adabound":
+            return adabound(model.parameters(), lr=self.learning_rate, final_lr=self.final_learning_rate,
+                            weight_decay=self.weight_decay, amsbound=self.amsbound)
         else:
             raise ValueError("Invalid optimizer type! Choose Adam, SGD, Padam, NoamOptimizer or OpenAIAdam!")
 
