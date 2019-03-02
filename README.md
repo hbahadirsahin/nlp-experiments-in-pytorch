@@ -2,7 +2,7 @@
 
 ## Update 02-03-2019
  
-- Recently, I read "Adaptive Gradient Methods with Dynamic Bound of Learning Rate" paper ([paper](https://openreview.net/forum?id=Bkg3g2R9FX) - [github](https://github.com/Luolc/AdaBound)) and decided to add it into my project. The presented results are promising, but I have not test this new optimizer in my own experiments (for now).
+- Recently, I read "Adaptive Gradient Methods with Dynamic Bound of Learning Rate" paper ([paper](https://openreview.net/forum?id=Bkg3g2R9FX) - [github](https://github.com/Luolc/AdaBound)) and decided to add it into my project. The presented results are promising, but I have not tested this new optimizer in my own experiments (for now).
   - Since Adabound can be installed via `pip install`, I updated the requirement.txt. 
   - `config.json` is also updated, two new parameters are added related to Adabound.
 - Finally, personal issues are finalizing (new job, better state of mind =)). 
