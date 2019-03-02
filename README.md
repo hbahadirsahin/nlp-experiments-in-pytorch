@@ -25,7 +25,7 @@
   - [Test Results for TextCNN](#test-results-for-textcnn)
 - [Previous Updates](#previous-updates)
   - [January 2019 - Wiki Link](https://github.com/hbahadirsahin/nlp-experiments-in-pytorch/wiki/Previous-Updates-(January-2019))
-  - [February 2019](#february-2019)
+  - [February 2019 - Wiki Link](https://github.com/hbahadirsahin/nlp-experiments-in-pytorch/wiki/Previous-Updates-(February-2019))
 - [References for Code Development](#references-for-code-development)
 
 ## Introduction
