@@ -4,8 +4,8 @@
  
 - I know I said that I will push more updates 2 months ago, but failed to deliver it since I am a filthy lazy dude =) 
 - Hopefully, I will push some new stuff in 2-3 weeks. Next week, I have a US conference trip and I will buy myself a brand new monster laptop for both gaming and faster training times. After that I will 
- - Develop the last 2 transformer papers.
- - Develop BERT and ELMO embeddings to the flow (not the algorithms but loading/inferring the pretrained model stuff). Maybe I can include GPT-2 models from the latest OpenAI paper but I am not sure about it for now (since that model is being used mainly for text generation). 
+  - Develop the last 2 transformer papers.
+  - Develop BERT and ELMO embeddings to the flow (not the algorithms but loading/inferring the pretrained model stuff). Maybe I can include GPT-2 models from the latest OpenAI paper but I am not sure about it for now (since that model is being used mainly for text generation). 
 - Semi-relevant update: After I got several e-mails from researchers around  the world (even from European Commission =)), I decided to improve my [dataset](https://data.mendeley.com/datasets/cdcztymf4k/1). I came up with a plan which I will execute after I push the updates I mentioned above. So, if you have any ideas and/or requests for the new dataset, just let me know.
 
 # Table Of Contents
