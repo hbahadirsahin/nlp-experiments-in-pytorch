@@ -1,13 +1,12 @@
 # README 
 
-## Update 02-03-2019
+## Update 30-04-2019
  
-- Recently, I read "Adaptive Gradient Methods with Dynamic Bound of Learning Rate" paper ([paper](https://openreview.net/forum?id=Bkg3g2R9FX) - [github](https://github.com/Luolc/AdaBound)) and decided to add it into my project. The presented results are promising, but I have not tested this new optimizer in my own experiments (for now).
-  - Since Adabound can be installed via `pip install`, I updated the requirement.txt. 
-  - `config.json` is also updated, two new parameters are added related to Adabound.
-- Finally, personal issues are finalizing (new job, better state of mind =)). 
-  - I plan to add more models for text categorization starting with new Transformer codes (check To-Do list for details).  
-  - After two new Transformer code, I decide to add Elmo and BERT support (I won't train my own models but will use pretrained Turkish-English models).
+- I know I said that I will push more updates 2 months ago, but failed to deliver it since I am a filthy lazy dude =) 
+- Hopefully, I will push some new stuff in 2-3 weeks. Next week, I have a US conference trip and I will buy myself a brand new monster laptop for both gaming and faster training times. After that I will 
+ - Develop the last 2 transformer papers.
+ - Develop BERT and ELMO embeddings to the flow (not the algorithms but loading/inferring the pretrained model stuff). Maybe I can include GPT-2 models from the latest OpenAI paper but I am not sure about it for now (since that model is being used mainly for text generation). 
+- Semi-relevant update: After I got several e-mails from researchers around  the world (even from European Commission =)), I decided to improve my [dataset](https://data.mendeley.com/datasets/cdcztymf4k/1). I came up with a plan which I will execute after I push the updates I mentioned above. So, if you have any ideas and/or requests for the new dataset, just let me know.
 
 # Table Of Contents
 
@@ -195,6 +194,16 @@ Note 2 (**Update: 22-01-2019**): Most of the English-language experiments are ex
 In this title, I will save the previous updates for me and the visitors to keep track.
 
 ## March 2019
+
+### Update 02-03-2019
+ 
+- Recently, I read "Adaptive Gradient Methods with Dynamic Bound of Learning Rate" paper ([paper](https://openreview.net/forum?id=Bkg3g2R9FX) - [github](https://github.com/Luolc/AdaBound)) and decided to add it into my project. The presented results are promising, but I have not tested this new optimizer in my own experiments (for now).
+  - Since Adabound can be installed via `pip install`, I updated the requirement.txt. 
+  - `config.json` is also updated, two new parameters are added related to Adabound.
+- Finally, personal issues are finalizing (new job, better state of mind =)). 
+  - I plan to add more models for text categorization starting with new Transformer codes (check To-Do list for details).  
+  - After two new Transformer code, I decide to add Elmo and BERT support (I won't train my own models but will use pretrained Turkish-English models).
+
 
 ## References for Code Development
 
