@@ -2,7 +2,7 @@
   "dataset_properties": {
     "data_path": "./data/turkish_test.DUMP",
     "batch_size": 32,
-    "stop_word_path": "D:/Anaconda3/nltk_data/corpora/stopwords/turkish",
+    "stop_word_path": "./data/stopwords/turkish",
     "embedding_vector": "fasttext.tr.300d",
     "vector_cache": "./data/fasttext",
     "pretrained_embedding_path": "./data/fasttext/wiki.tr",
@@ -120,12 +120,12 @@
   "training_properties": {
     "learner": "lstmcrf",
     "task": "ner",
-    "optimizer": "Padam",
+    "optimizer": "SGD",
     "learning_rate": 0.05,
     "final_learning_rate": 0.1,
     "scheduler_type": "cos",
     "amsgrad": true,
-    "amsbound0": false,
+    "amsbound": false,
     "partial_adam": 0.25,
     "weight_decay": 0,
     "momentum": 0.9,

@@ -19,6 +19,8 @@ from models.Transformer import TransformerGoogle
 from training.trainer import Trainer
 from utils.utils import save_vocabulary
 
+os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
+
 logging.config.fileConfig(fname='./config/config.logger', disable_existing_loggers=False)
 logger = logging.getLogger("Main")
 

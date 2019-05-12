@@ -119,7 +119,7 @@ class SingleModelTrainer(object):
                                                                                                 input=self.dev_iter,
                                                                                                 criterion=criterion,
                                                                                                 save_path=self.save_path,
-                                                                                                scorer=self.self.scorer)
+                                                                                                scorer=self.scorer)
                 if best_vali_acc < vali_accuracy:
                     best_vali_loss = vali_loss
                     best_vali_acc = vali_accuracy
