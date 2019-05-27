@@ -118,8 +118,8 @@
     }
   },
   "training_properties": {
-    "learner": "lstmcrf",
-    "task": "ner",
+    "learner": "transformer_google",
+    "task": "classification",
     "optimizer": "SGD",
     "learning_rate": 0.05,
     "final_learning_rate": 0.1,

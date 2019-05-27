@@ -7,6 +7,7 @@ import time
 import numpy as np
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 
 def save_vocabulary(vocab, path):
@@ -75,3 +76,10 @@ def subsequent_mask(size):
     # The Annotated Transformer = https://nlp.seas.hardvard.edu/2018/04/03.attention.html
     sm = np.triu(np.ones((1, size, size)), k=1).astype("uint8")
     return torch.from_numpy(sm) == 0
+
+
+def gelu(x):
+    # Gaussian Error Linear Unit
+    # Ref: https://github.com/pytorch/pytorch/issues/20464
+    return 0.5 * x * (1 + torch.tanh(math.sqrt(math.pi / 2) * (x + 0.044715 * x ** 3)))
+

@@ -24,18 +24,6 @@ class LayerNormGoogle(nn.Module):
         return self.a_2 * (x - mean) / (std + self.epsilon) + self.b_2
 
 
-class LayerNormOpenAI(nn.Module):
-    def __init__(self, features, epsilon=1e-5):
-        self.a_2 = nn.Parameter(torch.ones(features))
-        self.b_2 = nn.Parameter(torch.zeros(features))
-        self.epsilon = epsilon
-
-    def forward(self, x):
-        mean = x.mean(-1, keepdim=True)
-        std = x.std(-1, keepdim=True)
-        return self.a_2 * (x - mean) / torch.sqrt(std + self.epsilon) + self.b_2
-
-
 class EncoderBlockGoogle(nn.Module):
     def __init__(self, layer, num_layers):
         super(EncoderBlockGoogle, self).__init__()
@@ -206,7 +194,7 @@ class PositionalEncodingGoogle(nn.Module):
         return self.dropout(input + Variable(self.pe[:, :input.size(1)], requires_grad=False))
 
 
-class TransformerGoogle():
+class TransformerGoogle:
     def __init__(self, args):
         super(TransformerGoogle, self).__init__()
 
@@ -262,6 +250,8 @@ class TransformerGoogle():
         c = copy.deepcopy
 
         # Initialize individual parts of the full model
+        # attention = torch.nn.MultiheadAttention(num_heads=self.heads, embed_dim=self.embed_dim,
+        #                                         dropout=self.keep_prob_attn)
         attention = MultiHeadedAttentionGoogle(heads=self.heads, d_model=self.embed_dim, keep_prob=self.keep_prob_attn)
 
         ff = PositionalFeedForwardGoogle(d_model=self.embed_dim, d_ff=self.num_hidden_pos_ff,
