@@ -1,13 +1,14 @@
 # README 
 
-## Update 30-04-2019
+## Update 28-05-2019
  
-- I know I said that I will push more updates 2 months ago, but failed to deliver it since I am a filthy lazy dude =) 
-- Hopefully, I will push some new stuff in 2-3 weeks. Next week, I have a US conference trip and I will buy myself a brand new monster laptop for both gaming and faster training times. After that I will 
-  - Develop the last 2 transformer papers.
-  - Develop BERT and ELMO embeddings to the flow (not the algorithms but loading/inferring the pretrained model stuff). Maybe I can include GPT-2 models from the latest OpenAI paper but I am not sure about it for now (since that model is being used mainly for text generation). 
-- Semi-relevant update: After I got several e-mails from researchers around  the world (even from European Commission =)), I decided to improve my [dataset](https://data.mendeley.com/datasets/cdcztymf4k/1). I came up with a plan which I will execute after I push the updates I mentioned above. So, if you have any ideas and/or requests for the new dataset, just let me know.
-
+- I've started to work on *Improving Language Understanding by Generative Pre-Training* version of Transformer architecture.
+  - The project will contain only languange model and classifier heads, and I will also add NER head. Rest of the original heads in the paper can be found in huggingface's github =)
+  - And yes, I know huggingface has a PyTorch implementation which I wrote to my [References](#references-for-code-development) ages ago. Obviously, I won't c/p the already implemented code since it does not fit to my architectural flow as well as its PyTorch version is pretty old.
+  - The end product would be provide same results (if you be a good human being and pray to the randomization gods), however, the implementation will differ due to my architectural concerns and capabilities of the latest PyTorch.
+- I've also updated my library versions (using PyTorch 1.1 now) but I forgot updating requirement.txt (It will be updated in next commit).
+  - As a side note, in the last version of PyTorch, MultiHeadedAttention is developed under "torch.nn". For testing and comparison purposes, I tried to use it; however, I could not make it work in my TransformerGoogle code (you can find the commented-out line in model file). Return value of this new method does not fit the rest of the methods in the model (it is solvable but I won't waste time for it).
+ 
 # Table Of Contents
 
 - [Introduction](#introduction)
@@ -192,6 +193,16 @@ Note 2 (**Update: 22-01-2019**): Most of the English-language experiments are ex
 ## Previous Updates
 
 In this title, I will save the previous updates for me and the visitors to keep track.
+
+## April 2019
+
+### Update 30-04-2019
+ 
+- I know I said that I will push more updates 2 months ago, but failed to deliver it since I am a filthy lazy dude =) 
+- Hopefully, I will push some new stuff in 2-3 weeks. Next week, I have a US conference trip and I will buy myself a brand new monster laptop for both gaming and faster training times. After that I will 
+  - Develop the last 2 transformer papers.
+  - Develop BERT and ELMO embeddings to the flow (not the algorithms but loading/inferring the pretrained model stuff). Maybe I can include GPT-2 models from the latest OpenAI paper but I am not sure about it for now (since that model is being used mainly for text generation). 
+- Semi-relevant update: After I got several e-mails from researchers around  the world (even from European Commission =)), I decided to improve my [dataset](https://data.mendeley.com/datasets/cdcztymf4k/1). I came up with a plan which I will execute after I push the updates I mentioned above. So, if you have any ideas and/or requests for the new dataset, just let me know.
 
 ## March 2019
 
