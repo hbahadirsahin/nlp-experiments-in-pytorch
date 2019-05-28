@@ -1,13 +1,16 @@
 # README 
 
-## Update 28-05-2019
+## Update 29-05-2019
  
-- I've started to work on *Improving Language Understanding by Generative Pre-Training* version of Transformer architecture.
-  - The project will contain only languange model and classifier heads, and I will also add NER head. Rest of the original heads in the paper can be found in huggingface's github =)
-  - And yes, I know huggingface has a PyTorch implementation which I wrote to my [References](#references-for-code-development) ages ago. Obviously, I won't c/p the already implemented code since it does not fit to my architectural flow as well as its PyTorch version is pretty old.
-  - The end product would be provide same results (if you be a good human being and pray to the randomization gods), however, the implementation will differ due to my architectural concerns and capabilities of the latest PyTorch.
-- I've also updated my library versions (using PyTorch 1.1 now) but I forgot updating requirement.txt (It will be updated in next commit).
-  - As a side note, in the last version of PyTorch, MultiHeadedAttention is developed under "torch.nn". For testing and comparison purposes, I tried to use it; however, I could not make it work in my TransformerGoogle code (you can find the commented-out line in model file). Return value of this new method does not fit the rest of the methods in the model (it is solvable but I won't waste time for it).
+- Yay another push, another update!
+- As I said in my previous update yesterday, I continue to develop a specific OpenAI version of the Transformer.
+  - In today's update, I added the LanguageModelHead definition w.r.t. original Tensorflow implementation + huggingface's PyTorch implementation.
+  - In addition, I added "Block" layer which contains (1) an attention operation followed by (2) a layer normalization followed by (3) an MLP and finally followed by (4) a layer normalization.
+  - In overall, the implementation is again similar to the reference codes; however, I added an extention to the "Block" and "Attention" part. 
+    - OpenAI version uses Conv1D for its attention calculations while the "All you need is attention" version uses Linear layer (Nope Conv1D does not equal to a Linear layer: [Source](https://stackoverflow.com/questions/55576314/conv1d-with-kernel-size-1-interpretation))
+    - Since I want to use built-in nn.MultiHeadAttention function, just for fun, I put a conditional into the "Block" definition. If you trigger it, you will use the attention with linear. Otherwise, your model will call OpenAI version.
+- Lastly, the new model is still under construction. I am highly confident that it has many bugs even now =)
+
  
 # Table Of Contents
 
@@ -193,6 +196,17 @@ Note 2 (**Update: 22-01-2019**): Most of the English-language experiments are ex
 ## Previous Updates
 
 In this title, I will save the previous updates for me and the visitors to keep track.
+
+## May 2019
+
+### Update 28-05-2019
+ 
+- I've started to work on *Improving Language Understanding by Generative Pre-Training* version of Transformer architecture.
+  - The project will contain only languange model and classifier heads, and I will also add NER head. Rest of the original heads in the paper can be found in huggingface's github =)
+  - And yes, I know huggingface has a PyTorch implementation which I wrote to my [References](#references-for-code-development) ages ago. Obviously, I won't c/p the already implemented code since it does not fit to my architectural flow as well as its PyTorch version is pretty old.
+  - The end product would be provide same results (if you be a good human being and pray to the randomization gods), however, the implementation will differ due to my architectural concerns and capabilities of the latest PyTorch.
+- I've also updated my library versions (using PyTorch 1.1 now) but I forgot updating requirement.txt (It will be updated in next commit).
+  - As a side note, in the last version of PyTorch, MultiHeadedAttention is developed under "torch.nn". For testing and comparison purposes, I tried to use it; however, I could not make it work in my TransformerGoogle code (you can find the commented-out line in model file). Return value of this new method does not fit the rest of the methods in the model (it is solvable but I won't waste time for it).
 
 ## April 2019
 
